@@ -36,6 +36,8 @@
     "vite-plugin-solid": "^2.7.0"
   },
   "dependencies": {
+    "@kobalte/core": "^0.10.0",
+    "@kobalte/tailwindcss": "^0.7.0",
     "electron-squirrel-startup": "^1.0.0",
     "solid-js": "^1.7.11"
   }
