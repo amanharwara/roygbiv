@@ -1,5 +1,7 @@
 # roygbiv
 
+## TODO: Add license before making public
+
 ## Development
 
 ```
