@@ -11,7 +11,7 @@ const App: Component = () => {
   const onDrop = (file: File) => setFile(() => file);
 
   return (
-    <div class="w-full h-full p-4">
+    <div class="h-full w-full p-4">
       <Show
         when={file()}
         fallback={
