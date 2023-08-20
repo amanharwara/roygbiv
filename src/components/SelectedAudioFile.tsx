@@ -31,7 +31,7 @@ function PlaybackProgressBar({
 }) {
   return (
     <Slider
-      className="flex w-full items-center gap-4"
+      className="grid w-full grid-cols-[0.25fr_1fr_0.25fr] items-center justify-items-center gap-4 text-sm"
       maxValue={duration}
       value={current}
       onChange={onChange}
@@ -40,7 +40,7 @@ function PlaybackProgressBar({
       <SliderOutput>
         {({ state }) => <>{getFormattedDuration(state.getThumbValue(0))}</>}
       </SliderOutput>
-      <SliderTrack className="group relative h-3 flex-shrink-0 flex-grow rounded before:absolute before:top-1/2 before:h-1 before:w-full before:-translate-y-1/2 before:rounded before:bg-gray-600">
+      <SliderTrack className="group relative h-3 w-full rounded before:absolute before:top-1/2 before:h-1 before:w-full before:-translate-y-1/2 before:rounded before:bg-gray-600">
         {({ state }) => (
           <>
             <div
@@ -109,9 +109,9 @@ function SelectedAudioFile({ file }: { file: File }) {
   return (
     <div className="flex h-full w-full flex-col">
       <div className="min-h-0 flex-grow" />
-      <div className="flex items-center gap-4 border-t border-gray-500 px-6 py-5">
+      <div className="grid grid-cols-3 items-center gap-4 border-t border-gray-500 px-6 py-5">
         <div className="flex-shrink-0">{file.name}</div>
-        <div className="mx-auto flex w-[40%] max-w-[722px] flex-col items-center gap-1">
+        <div className="flex w-full max-w-[722px] flex-col items-center gap-1">
           <div className="flex items-center gap-4">
             <Button
               className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-gray-700"
