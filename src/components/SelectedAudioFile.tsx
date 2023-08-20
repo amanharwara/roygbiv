@@ -11,6 +11,7 @@ import {
 } from "react-aria-components";
 import PlayIcon from "../icons/PlayIcon";
 import PauseIcon from "../icons/PauseIcon";
+import RewindIcon from "../icons/RewindIcon";
 dayjs.extend(dayjsObjectSupport);
 
 const getFormattedDuration = (duration: number) => {
@@ -111,9 +112,18 @@ function SelectedAudioFile({ file }: { file: File }) {
       <div className="flex items-center gap-4 border-t border-gray-500 px-6 py-5">
         <div className="flex-shrink-0">{file.name}</div>
         <div className="mx-auto flex w-[40%] max-w-[722px] flex-col items-center gap-1">
-          <div>
+          <div className="flex items-center gap-4">
             <Button
-              className="flex items-center justify-center rounded-full bg-white p-1"
+              className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-gray-700"
+              onPress={() => {
+                if (!audio) return;
+                audio.currentTime -= 5;
+              }}
+            >
+              <RewindIcon className="h-4 w-4 text-white" />
+            </Button>
+            <Button
+              className="flex h-7 w-7 items-center justify-center rounded-full bg-white"
               onPress={() => {
                 if (!audio) return;
                 if (audio.paused) {
@@ -128,6 +138,15 @@ function SelectedAudioFile({ file }: { file: File }) {
               ) : (
                 <PlayIcon className="h-5 w-5 text-black" />
               )}
+            </Button>
+            <Button
+              className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-gray-700"
+              onPress={() => {
+                if (!audio) return;
+                audio.currentTime += 5;
+              }}
+            >
+              <RewindIcon className="h-4 w-4 rotate-180 text-white" />
             </Button>
           </div>
           <PlaybackProgressBar
