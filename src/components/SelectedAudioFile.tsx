@@ -31,7 +31,7 @@ function PlaybackProgressBar({
 }) {
   return (
     <Slider
-      className="grid w-full grid-cols-[0.25fr_1fr_0.25fr] items-center justify-items-center gap-4 text-sm"
+      className="grid w-full grid-cols-[0.25fr_1fr_0.25fr] items-center justify-items-center gap-1 text-sm"
       maxValue={duration}
       value={current}
       onChange={onChange}
