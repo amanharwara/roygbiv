@@ -68,8 +68,53 @@ function PlaybackProgressBar({
   );
 }
 
+function PlaybackControls({
+  isPlaying,
+  audio,
+}: {
+  isPlaying: boolean;
+  audio: HTMLAudioElement;
+}) {
+  return (
+    <div className="flex items-center gap-4">
+      <Button
+        className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-gray-700"
+        onPress={() => {
+          audio.currentTime -= 5;
+        }}
+      >
+        <RewindIcon className="h-4 w-4 text-white" />
+      </Button>
+      <Button
+        className="flex h-7 w-7 items-center justify-center rounded-full bg-white"
+        onPress={() => {
+          if (audio.paused) {
+            audio.play();
+          } else {
+            audio.pause();
+          }
+        }}
+      >
+        {isPlaying ? (
+          <PauseIcon className="h-5 w-5 text-black" />
+        ) : (
+          <PlayIcon className="h-5 w-5 text-black" />
+        )}
+      </Button>
+      <Button
+        className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-gray-700"
+        onPress={() => {
+          audio.currentTime += 5;
+        }}
+      >
+        <RewindIcon className="h-4 w-4 rotate-180 text-white" />
+      </Button>
+    </div>
+  );
+}
+
 function SelectedAudioFile({ file }: { file: File }) {
-  const [playing, setPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [duration, setDuration] = useState<number>();
 
@@ -89,10 +134,10 @@ function SelectedAudioFile({ file }: { file: File }) {
       setElapsed(audio.currentTime);
     });
     audio.addEventListener("pause", () => {
-      setPlaying(false);
+      setIsPlaying(false);
     });
     audio.addEventListener("play", () => {
-      setPlaying(true);
+      setIsPlaying(true);
     });
     return audio;
   }, [audioSrc]);
@@ -111,50 +156,16 @@ function SelectedAudioFile({ file }: { file: File }) {
       <div className="min-h-0 flex-grow" />
       <div className="grid grid-cols-3 items-center gap-4 border-t border-gray-500 px-6 py-5">
         <div className="flex-shrink-0">{file.name}</div>
-        <div className="flex w-full max-w-[722px] flex-col items-center gap-1">
-          <div className="flex items-center gap-4">
-            <Button
-              className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-gray-700"
-              onPress={() => {
-                if (!audio) return;
-                audio.currentTime -= 5;
-              }}
-            >
-              <RewindIcon className="h-4 w-4 text-white" />
-            </Button>
-            <Button
-              className="flex h-7 w-7 items-center justify-center rounded-full bg-white"
-              onPress={() => {
-                if (!audio) return;
-                if (audio.paused) {
-                  audio.play();
-                } else {
-                  audio.pause();
-                }
-              }}
-            >
-              {playing ? (
-                <PauseIcon className="h-5 w-5 text-black" />
-              ) : (
-                <PlayIcon className="h-5 w-5 text-black" />
-              )}
-            </Button>
-            <Button
-              className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-gray-700"
-              onPress={() => {
-                if (!audio) return;
-                audio.currentTime += 5;
-              }}
-            >
-              <RewindIcon className="h-4 w-4 rotate-180 text-white" />
-            </Button>
+        {audio && (
+          <div className="flex w-full max-w-[722px] flex-col items-center gap-1">
+            <PlaybackControls isPlaying={isPlaying} audio={audio} />
+            <PlaybackProgressBar
+              duration={duration}
+              current={elapsed}
+              onChange={setCurrent}
+            />
           </div>
-          <PlaybackProgressBar
-            duration={duration}
-            current={elapsed}
-            onChange={setCurrent}
-          />
-        </div>
+        )}
         <div className="flex-shrink-0" />
       </div>
     </div>
