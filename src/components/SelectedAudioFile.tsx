@@ -1,4 +1,4 @@
-import { CSSProperties, useCallback, useMemo, useState } from "react";
+import { CSSProperties, useCallback, useMemo, useRef, useState } from "react";
 import dayjs from "dayjs";
 import dayjsObjectSupport from "dayjs/plugin/objectSupport";
 import {
@@ -12,7 +12,15 @@ import {
 import PlayIcon from "../icons/PlayIcon";
 import PauseIcon from "../icons/PauseIcon";
 import RewindIcon from "../icons/RewindIcon";
+import { Canvas, ThreeElements, useFrame } from "@react-three/fiber";
 dayjs.extend(dayjsObjectSupport);
+
+const audioContext = new AudioContext();
+
+const analyserNode = audioContext.createAnalyser();
+analyserNode.fftSize = 64;
+const bufferLength = analyserNode.frequencyBinCount;
+const dataArray = new Float32Array(bufferLength);
 
 const getFormattedDuration = (duration: number) => {
   return dayjs({
@@ -113,6 +121,43 @@ function PlaybackControls({
   );
 }
 
+function randomBetween(min: number, max: number) {
+  return Math.random() * (max - min) + min;
+}
+
+function Box({
+  audio,
+  ...meshProps
+}: ThreeElements["mesh"] & {
+  audio: HTMLAudioElement;
+}) {
+  const ref = useRef<THREE.Mesh>(null!);
+  const [hovered, hover] = useState(false);
+  const [clicked, click] = useState(false);
+  useFrame((state, delta) => {
+    if (audio.paused) return;
+    analyserNode.getFloatFrequencyData(dataArray);
+    ref.current.rotation.x = audio.currentTime * 0.01;
+    ref.current.rotation.y += delta;
+    const val = Math.abs(dataArray[Math.floor(randomBetween(0, bufferLength))]);
+    ref.current.scale.x = Math.min((val * 0.25) / 10, 2);
+    ref.current.scale.y = Math.min((val * 0.25) / 10, 2);
+  });
+  return (
+    <mesh
+      {...meshProps}
+      ref={ref}
+      scale={clicked ? 1.5 : 1}
+      onClick={() => click(!clicked)}
+      onPointerOver={() => hover(true)}
+      onPointerOut={() => hover(false)}
+    >
+      <boxGeometry args={[1, 1, 1]} />
+      <meshStandardMaterial color={hovered ? "hotpink" : "orange"} />
+    </mesh>
+  );
+}
+
 function SelectedAudioFile({ file }: { file: File }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [elapsed, setElapsed] = useState(0);
@@ -139,6 +184,9 @@ function SelectedAudioFile({ file }: { file: File }) {
     audio.addEventListener("play", () => {
       setIsPlaying(true);
     });
+    const audioSource = audioContext.createMediaElementSource(audio);
+    audioSource.connect(analyserNode);
+    audioSource.connect(audioContext.destination);
     return audio;
   }, [audioSrc]);
 
@@ -153,19 +201,24 @@ function SelectedAudioFile({ file }: { file: File }) {
 
   return (
     <div className="flex h-full w-full flex-col">
-      <div className="min-h-0 flex-grow" />
+      <div className="min-h-0 flex-grow p-8">
+        <Canvas>
+          <ambientLight />
+          <pointLight position={[10, 10, 10]} />
+          <Box audio={audio} position={[-1.2, 0, 0]} />
+          <Box audio={audio} position={[1.2, 0, 0]} />
+        </Canvas>
+      </div>
       <div className="grid grid-cols-3 items-center gap-4 border-t border-gray-500 px-6 py-5">
         <div className="flex-shrink-0">{file.name}</div>
-        {audio && (
-          <div className="flex w-full max-w-[722px] flex-col items-center gap-1">
-            <PlaybackControls isPlaying={isPlaying} audio={audio} />
-            <PlaybackProgressBar
-              duration={duration}
-              current={elapsed}
-              onChange={setCurrent}
-            />
-          </div>
-        )}
+        <div className="flex w-full max-w-[722px] flex-col items-center gap-1">
+          <PlaybackControls isPlaying={isPlaying} audio={audio} />
+          <PlaybackProgressBar
+            duration={duration}
+            current={elapsed}
+            onChange={setCurrent}
+          />
+        </div>
         <div className="flex-shrink-0" />
       </div>
     </div>
