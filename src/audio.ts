@@ -31,5 +31,7 @@ defaultStore.sub(audioFileAtom, () => {
   const file = defaultStore.get(audioFileAtom);
   if (file) {
     audio.src = URL.createObjectURL(file);
+  } else {
+    audio.src = "";
   }
 });
