@@ -1,6 +1,6 @@
 import AudioFileDropZone from "./components/AudioFileDropZone";
 import { useAtom } from "jotai";
-import { audioFileAtom } from "./audio";
+import { audioFileAtom } from "./stores/audio";
 import {
   Button,
   DialogTrigger,

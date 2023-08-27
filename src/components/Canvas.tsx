@@ -1,6 +1,6 @@
-import { Canvas } from "@react-three/fiber";
-import { atom, useAtomValue, useAtom } from "jotai";
-import { useCallback } from "react";
+import { Canvas, useLoader, useThree } from "@react-three/fiber";
+import { useAtomValue, useAtom, useSetAtom } from "jotai";
+import { useCallback, useRef } from "react";
 import {
   ModalOverlay,
   Modal,
@@ -9,15 +9,31 @@ import {
   Label,
   Input,
   Button,
+  FileTrigger,
 } from "react-aria-components";
+import { canvasSizeAtom, canvasImageAtom } from "../stores/canvas";
+import { TextureLoader } from "three";
 
-const canvasSizeAtom = atom({
-  width: 1280,
-  height: 720,
-});
+function Image({ src }: { src: string }) {
+  // return (
+  //   <mesh position={[0, 0, 0]}>
+  //     <planeGeometry args={[10, 10 * 0.75]} />
+  //     <meshStandardMaterial map={useLoader(TextureLoader, src)} />
+  //   </mesh>
+  // );
+  return (
+    <sprite
+      position={[0, 0, 0]}
+      scale={[10, 10 * 0.75, 1]}
+      material-map={useLoader(TextureLoader, src)}
+    />
+  );
+}
 
 export function SizedCanvas() {
   const { width, height } = useAtomValue(canvasSizeAtom);
+  const imageUrl = useAtomValue(canvasImageAtom);
+  console.log(imageUrl);
 
   return (
     <div
@@ -29,7 +45,14 @@ export function SizedCanvas() {
     >
       <Canvas>
         <ambientLight />
-        <pointLight position={[10, 10, 10]} />
+        {/* <rectAreaLight
+          width={10}
+          height={10}
+          color="white"
+          intensity={1}
+          position={[0, 0, 0]}
+        /> */}
+        {imageUrl && <Image src={imageUrl} />}
       </Canvas>
     </div>
   );
@@ -37,6 +60,7 @@ export function SizedCanvas() {
 
 export function CanvasSettingsModal() {
   const [{ width, height }, setSize] = useAtom(canvasSizeAtom);
+  const setImage = useSetAtom(canvasImageAtom);
 
   const saveSettings = useCallback(
     (event: React.FormEvent<HTMLFormElement>, close: () => void) => {
@@ -90,6 +114,21 @@ export function CanvasSettingsModal() {
                   <Label>Height:</Label>
                   <Input className="rounded border border-transparent bg-gray-700 px-2 py-1.5 text-sm outline-none group-focus-within:border-slate-950" />
                 </NumberField>
+                <FileTrigger
+                  onChange={(fileList) => {
+                    if (!fileList) return;
+                    const files = Array.from(fileList);
+                    if (!files.length) return;
+                    const file = files[0];
+                    if (!file) return;
+                    const url = URL.createObjectURL(file);
+                    setImage(url);
+                  }}
+                >
+                  <Button className="rounded bg-gray-700 px-2 py-1.5 text-sm hover:bg-gray-900">
+                    Select a file
+                  </Button>
+                </FileTrigger>
                 <Button
                   className="rounded bg-gray-700 px-2 py-1.5 text-sm hover:bg-gray-900"
                   type="submit"

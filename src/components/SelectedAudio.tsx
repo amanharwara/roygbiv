@@ -5,7 +5,7 @@ import {
   audioElapsedAtom,
   audioFileAtom,
   isAudioPlayingAtom,
-} from "../audio";
+} from "../stores/audio";
 import PlaybackControls from "./AudioPlaybackControls";
 import PlaybackProgressBar from "./AudioPlaybackProgressBar";
 import { useCallback } from "react";
