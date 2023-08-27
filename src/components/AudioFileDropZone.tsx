@@ -26,7 +26,7 @@ function AudioFileDropZone({
         }}
         className={({ isDropTarget }) =>
           clsx(
-            "flex h-full w-full flex-col items-center justify-center gap-4 rounded border-dashed border-gray-600",
+            "flex h-full w-full flex-col items-center justify-center gap-4 rounded border-dashed border-gray-600 p-8",
             isDropTarget ? "border-4" : "border-2",
           )
         }
