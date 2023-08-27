@@ -18,6 +18,7 @@ function AudioFileDropZone({
         }}
         onDrop={async (event) => {
           const item = event.items[0];
+          if (!item) return;
           if (item.kind !== "file") return;
           if (!item.type.startsWith("audio")) return;
           const file = await item.getFile();
@@ -25,7 +26,7 @@ function AudioFileDropZone({
         }}
         className={({ isDropTarget }) =>
           clsx(
-            "flex h-full w-full flex-col items-center justify-center gap-4 rounded border-dashed",
+            "flex h-full w-full flex-col items-center justify-center gap-4 rounded border-dashed border-gray-600",
             isDropTarget ? "border-4" : "border-2",
           )
         }
@@ -36,10 +37,13 @@ function AudioFileDropZone({
         <FileTrigger
           acceptedFileTypes={["audio/*"]}
           onChange={(files) => {
-            setAudioFile(files[0]);
+            if (!files) return;
+            const file = files[0];
+            if (!file) return;
+            setAudioFile(file);
           }}
         >
-          <Button className="rounded border border-white px-2 py-1 hover:bg-white hover:text-black">
+          <Button className="rounded border border-gray-600 px-2 py-1 hover:bg-white hover:text-black">
             Click here to select file
           </Button>
         </FileTrigger>
