@@ -1,6 +1,6 @@
-import { atom } from "jotai";
+import { PrimitiveAtom, atom } from "jotai";
 
-type ImageLayer = {
+export type ImageLayer = {
   image: HTMLImageElement;
   x: number;
   y: number;
@@ -9,9 +9,11 @@ type ImageLayer = {
   opacity: number;
 };
 
-type Layer = ImageLayer;
+export type Layer = ImageLayer;
 
-export const layersAtom = atom<Layer[]>([]);
+export const selectedLayerAtom = atom<PrimitiveAtom<Layer> | null>(null);
+
+export const layersAtom = atom<PrimitiveAtom<Layer>[]>([]);
 
 export const createImageLayer = (image: HTMLImageElement) => {
   return atom<ImageLayer>({

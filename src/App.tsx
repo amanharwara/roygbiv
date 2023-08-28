@@ -1,5 +1,5 @@
 import AudioFileDropZone from "./components/AudioFileDropZone";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtom } from "jotai";
 import { audioFileAtom } from "./stores/audio";
 import {
   Button,
@@ -13,14 +13,37 @@ import {
 import SettingsIcon from "./icons/SettingsIcon";
 import { CanvasSettingsModal, SizedCanvas } from "./components/Canvas";
 import { SelectedAudio } from "./components/SelectedAudio";
-import { layersAtom } from "./stores/layers";
+import {
+  createImageLayer,
+  layersAtom,
+  selectedLayerAtom,
+} from "./stores/layers";
 import AddIcon from "./icons/AddIcon";
 import DeleteIcon from "./icons/DeleteIcon";
 import StyledTooltip from "./components/StyledTooltip";
 import ImageIcon from "./icons/ImageIcon";
+import { useCallback } from "react";
+import { readFileAsImage } from "./utils/readFile";
 
 function Layers() {
-  const layers = useAtomValue(layersAtom);
+  const [selectedLayer, setSelectedLayer] = useAtom(selectedLayerAtom);
+  const [layers, setLayers] = useAtom(layersAtom);
+
+  const addAndSelectImageLayer = useCallback(async () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (file) {
+        const image = await readFileAsImage(file);
+        const layer = createImageLayer(image);
+        setLayers((layers) => [...layers, layer]);
+        setSelectedLayer(layer);
+      }
+    };
+    input.click();
+  }, [setLayers, setSelectedLayer]);
 
   return (
     <div className="flex min-h-0 flex-grow flex-col">
@@ -31,7 +54,7 @@ function Layers() {
       <div className="flex items-center gap-2 border-t border-gray-600 px-2 py-1.5">
         <MenuTrigger>
           <TooltipTrigger delay={150} closeDelay={0}>
-            <Button className="flex items-center justify-center rounded p-1 hover:bg-gray-600 data-[pressed]:bg-gray-700">
+            <Button className="flex items-center justify-center rounded p-1 hover:bg-gray-600 data-[pressed]:bg-neutral-800">
               <AddIcon className="h-4 w-4" />
             </Button>
             <StyledTooltip offset={4}>Add a new layer</StyledTooltip>
@@ -44,6 +67,11 @@ function Layers() {
               autoFocus="first"
               shouldFocusWrap
               className="max-h-[inherit] min-w-[10rem] select-none overflow-auto p-1 outline-none"
+              onAction={(key) => {
+                if (key === "add-image") {
+                  addAndSelectImageLayer();
+                }
+              }}
             >
               <Item
                 className="flex items-center gap-2 rounded px-2.5 py-1.5 text-sm outline-none hover:bg-neutral-900 data-[focused]:bg-neutral-900"

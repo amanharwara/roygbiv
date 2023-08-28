@@ -1,5 +1,5 @@
 import { Canvas, useLoader } from "@react-three/fiber";
-import { useAtomValue, useAtom } from "jotai";
+import { useAtomValue, useAtom, PrimitiveAtom } from "jotai";
 import { useCallback } from "react";
 import {
   Dialog,
@@ -9,12 +9,24 @@ import {
   Button,
   Popover,
 } from "react-aria-components";
-import { canvasSizeAtom, canvasImageAtom } from "../stores/canvas";
+import { canvasSizeAtom } from "../stores/canvas";
 import { TextureLoader } from "three";
+import { ImageLayer, layersAtom } from "../stores/layers";
 
-function Image({ image }: { image: HTMLImageElement }) {
+function ImageLayerMesh({
+  layerAtom,
+}: {
+  layerAtom: PrimitiveAtom<ImageLayer>;
+}) {
+  const layer = useAtomValue(layerAtom);
+  const { image, width, height } = layer;
+
   return (
-    <mesh scale={[1, 1, 1]} up={[0, 1, 0]} frustumCulled={false}>
+    <mesh
+      scale={[width / image.naturalWidth, height / image.naturalHeight, 1]}
+      up={[0, 1, 0]}
+      frustumCulled={false}
+    >
       <planeGeometry
         attach="geometry"
         args={[image.naturalWidth, image.naturalHeight]}
@@ -32,7 +44,7 @@ function Image({ image }: { image: HTMLImageElement }) {
 
 export function SizedCanvas() {
   const { width, height } = useAtomValue(canvasSizeAtom);
-  const image = useAtomValue(canvasImageAtom);
+  const layers = useAtomValue(layersAtom);
 
   return (
     <div
@@ -42,7 +54,11 @@ export function SizedCanvas() {
         height,
       }}
     >
-      <Canvas orthographic>{image.src && <Image image={image} />}</Canvas>
+      <Canvas orthographic>
+        {layers.map((layer) => (
+          <ImageLayerMesh key={layer.toString()} layerAtom={layer} />
+        ))}
+      </Canvas>
     </div>
   );
 }
