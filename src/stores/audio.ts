@@ -10,9 +10,8 @@ const defaultStore = getDefaultStore();
 export const audio = new Audio();
 export const isAudioPlayingAtom = atom(false);
 export const audioDurationAtom = atom(0);
-export const audioElapsedAtom = atom(0, (_, set, time: number) => {
-  set(audioElapsedAtom, time);
-});
+export const audioElapsedAtom = atom(0);
+export const audioVolumeAtom = atom(1);
 audio.addEventListener("loadedmetadata", () => {
   defaultStore.set(audioDurationAtom, audio.duration);
 });
@@ -24,6 +23,9 @@ audio.addEventListener("play", () => {
 });
 audio.addEventListener("pause", () => {
   defaultStore.set(isAudioPlayingAtom, false);
+});
+audio.addEventListener("volumechange", () => {
+  defaultStore.set(audioVolumeAtom, audio.volume);
 });
 
 export const audioFileAtom = atom<File | null>(null);
