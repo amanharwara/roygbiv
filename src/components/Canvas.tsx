@@ -1,6 +1,6 @@
-import { Canvas, useLoader, useThree } from "@react-three/fiber";
+import { Canvas, useLoader } from "@react-three/fiber";
 import { useAtomValue, useAtom, useSetAtom } from "jotai";
-import { useCallback, useRef } from "react";
+import { useCallback } from "react";
 import {
   ModalOverlay,
   Modal,
@@ -13,27 +13,29 @@ import {
 } from "react-aria-components";
 import { canvasSizeAtom, canvasImageAtom } from "../stores/canvas";
 import { TextureLoader } from "three";
+import { readFileAsImage } from "../utils/readFile";
 
-function Image({ src }: { src: string }) {
-  // return (
-  //   <mesh position={[0, 0, 0]}>
-  //     <planeGeometry args={[10, 10 * 0.75]} />
-  //     <meshStandardMaterial map={useLoader(TextureLoader, src)} />
-  //   </mesh>
-  // );
+function Image({ image }: { image: HTMLImageElement }) {
   return (
-    <sprite
-      position={[0, 0, 0]}
-      scale={[10, 10 * 0.75, 1]}
-      material-map={useLoader(TextureLoader, src)}
-    />
+    <mesh scale={[1, 1, 1]} up={[0, 1, 0]} frustumCulled={false}>
+      <planeGeometry
+        attach="geometry"
+        args={[image.naturalWidth, image.naturalHeight]}
+      />
+      <meshBasicMaterial
+        attach="material"
+        map={useLoader(TextureLoader, image.src)}
+        depthTest={false}
+        depthWrite={false}
+        transparent
+      />
+    </mesh>
   );
 }
 
 export function SizedCanvas() {
   const { width, height } = useAtomValue(canvasSizeAtom);
-  const imageUrl = useAtomValue(canvasImageAtom);
-  console.log(imageUrl);
+  const image = useAtomValue(canvasImageAtom);
 
   return (
     <div
@@ -43,17 +45,7 @@ export function SizedCanvas() {
         height,
       }}
     >
-      <Canvas>
-        <ambientLight />
-        {/* <rectAreaLight
-          width={10}
-          height={10}
-          color="white"
-          intensity={1}
-          position={[0, 0, 0]}
-        /> */}
-        {imageUrl && <Image src={imageUrl} />}
-      </Canvas>
+      <Canvas orthographic>{image.src && <Image image={image} />}</Canvas>
     </div>
   );
 }
@@ -78,7 +70,7 @@ export function CanvasSettingsModal() {
 
   return (
     <ModalOverlay
-      className="data-[entering]:animate-fade-in data-[exiting]:animate-fade-out fixed inset-0 flex items-center justify-center bg-black/50"
+      className="fixed inset-0 flex items-center justify-center bg-black/50 data-[entering]:animate-fade-in data-[exiting]:animate-fade-out"
       isDismissable
     >
       <Modal className="max-w-[50vw] rounded bg-gray-800 p-6" isDismissable>
@@ -115,14 +107,13 @@ export function CanvasSettingsModal() {
                   <Input className="rounded border border-transparent bg-gray-700 px-2 py-1.5 text-sm outline-none group-focus-within:border-slate-950" />
                 </NumberField>
                 <FileTrigger
-                  onChange={(fileList) => {
+                  onChange={async (fileList) => {
                     if (!fileList) return;
                     const files = Array.from(fileList);
                     if (!files.length) return;
                     const file = files[0];
                     if (!file) return;
-                    const url = URL.createObjectURL(file);
-                    setImage(url);
+                    setImage(await readFileAsImage(file));
                   }}
                 >
                   <Button className="rounded bg-gray-700 px-2 py-1.5 text-sm hover:bg-gray-900">
