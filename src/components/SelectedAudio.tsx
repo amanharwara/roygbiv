@@ -10,10 +10,11 @@ import {
 import PlaybackControls from "./AudioPlaybackControls";
 import PlaybackProgressBar from "./AudioPlaybackProgressBar";
 import { useCallback, useRef } from "react";
-import { Button } from "react-aria-components";
+import { Button, Label, Slider } from "react-aria-components";
 import DeleteIcon from "../icons/DeleteIcon";
 import VolumeIcon from "../icons/VolumeIcon";
 import VolumeOffIcon from "../icons/VolumeOffIcon";
+import StyledSliderTrack from "./StyledSliderTrack";
 
 export function SelectedAudio({ file }: { file: File }) {
   const setAudioFile = useSetAtom(audioFileAtom);
@@ -59,17 +60,29 @@ export function SelectedAudio({ file }: { file: File }) {
           onChange={setElapsed}
         />
       </div>
-      <div className="justify-self-end">
+      <div className="flex items-center gap-3 justify-self-end">
         <Button
-          className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-gray-700"
+          className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-700"
           onPress={toggleMute}
         >
           {isMuted ? (
-            <VolumeOffIcon className="h-5 w-5 text-white" />
+            <VolumeOffIcon className="h-6 w-6 text-white" />
           ) : (
-            <VolumeIcon className="h-5 w-5 text-white" />
+            <VolumeIcon className="h-6 w-6 text-white" />
           )}
         </Button>
+        <Slider
+          className="min-w-[100px]"
+          value={volume}
+          step={0.01}
+          maxValue={1}
+          onChange={(value) => {
+            audio.volume = value;
+          }}
+        >
+          <Label className="sr-only">Change volume</Label>
+          <StyledSliderTrack />
+        </Slider>
       </div>
     </div>
   );
