@@ -7,6 +7,7 @@ export type ImageLayer = {
   width: number;
   height: number;
   opacity: number;
+  name: string;
 };
 
 export type Layer = ImageLayer;
@@ -15,7 +16,7 @@ export const selectedLayerAtom = atom<PrimitiveAtom<Layer> | null>(null);
 
 export const layersAtom = atom<PrimitiveAtom<Layer>[]>([]);
 
-export const createImageLayer = (image: HTMLImageElement) => {
+export const createImageLayer = (image: HTMLImageElement, name: string) => {
   return atom<ImageLayer>({
     image,
     x: 0,
@@ -23,5 +24,6 @@ export const createImageLayer = (image: HTMLImageElement) => {
     width: image.naturalWidth,
     height: image.naturalHeight,
     opacity: 1,
+    name,
   });
 };

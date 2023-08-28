@@ -1,10 +1,11 @@
 import AudioFileDropZone from "./components/AudioFileDropZone";
-import { useAtom } from "jotai";
+import { Atom, useAtom, useAtomValue } from "jotai";
 import { audioFileAtom } from "./stores/audio";
 import {
   Button,
   DialogTrigger,
   Item,
+  ListBox,
   Menu,
   MenuTrigger,
   Popover,
@@ -14,6 +15,7 @@ import SettingsIcon from "./icons/SettingsIcon";
 import { CanvasSettingsModal, SizedCanvas } from "./components/Canvas";
 import { SelectedAudio } from "./components/SelectedAudio";
 import {
+  ImageLayer,
   createImageLayer,
   layersAtom,
   selectedLayerAtom,
@@ -25,8 +27,22 @@ import ImageIcon from "./icons/ImageIcon";
 import { useCallback } from "react";
 import { readFileAsImage } from "./utils/readFile";
 
+function LayerListItem({ layerAtom }: { layerAtom: Atom<ImageLayer> }) {
+  const layer = useAtomValue(layerAtom);
+
+  return (
+    <Item
+      className="px-3 py-1.5 text-sm aria-selected:bg-gray-700 aria-selected:font-semibold"
+      id={layerAtom.toString()}
+    >
+      {layer.name}
+    </Item>
+  );
+}
+
 function Layers() {
   const [selectedLayer, setSelectedLayer] = useAtom(selectedLayerAtom);
+  const selectedLayerKey = selectedLayer?.toString();
   const [layers, setLayers] = useAtom(layersAtom);
 
   const addAndSelectImageLayer = useCallback(async () => {
@@ -37,7 +53,7 @@ function Layers() {
       const file = input.files?.[0];
       if (file) {
         const image = await readFileAsImage(file);
-        const layer = createImageLayer(image);
+        const layer = createImageLayer(image, file.name);
         setLayers((layers) => [...layers, layer]);
         setSelectedLayer(layer);
       }
@@ -50,7 +66,29 @@ function Layers() {
       <div className="border-y border-gray-600 px-3 py-2 text-sm font-semibold">
         Layers
       </div>
-      <div className="min-h-0 flex-grow"></div>
+      <div className="min-h-0 flex-grow">
+        <ListBox
+          aria-label="Layers"
+          items={layers}
+          selectedKeys={selectedLayerKey ? [selectedLayerKey] : []}
+          selectionMode="single"
+          selectionBehavior="replace"
+          onSelectionChange={(keys) => {
+            if (keys !== "all") {
+              keys.forEach((key) => {
+                const layer = layers.find((layer) => layer.toString() === key);
+                if (layer) {
+                  setSelectedLayer(layer);
+                }
+              });
+            }
+          }}
+        >
+          {layers.map((layer) => (
+            <LayerListItem key={layer.toString()} layerAtom={layer} />
+          ))}
+        </ListBox>
+      </div>
       <div className="flex items-center gap-2 border-t border-gray-600 px-2 py-1.5">
         <MenuTrigger>
           <TooltipTrigger delay={150} closeDelay={0}>
