@@ -1,15 +1,70 @@
 import AudioFileDropZone from "./components/AudioFileDropZone";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { audioFileAtom } from "./stores/audio";
 import {
   Button,
   DialogTrigger,
-  Tooltip,
+  Item,
+  Menu,
+  MenuTrigger,
+  Popover,
   TooltipTrigger,
 } from "react-aria-components";
 import SettingsIcon from "./icons/SettingsIcon";
 import { CanvasSettingsModal, SizedCanvas } from "./components/Canvas";
 import { SelectedAudio } from "./components/SelectedAudio";
+import { layersAtom } from "./stores/layers";
+import AddIcon from "./icons/AddIcon";
+import DeleteIcon from "./icons/DeleteIcon";
+import StyledTooltip from "./components/StyledTooltip";
+import ImageIcon from "./icons/ImageIcon";
+
+function Layers() {
+  const layers = useAtomValue(layersAtom);
+
+  return (
+    <div className="flex min-h-0 flex-grow flex-col">
+      <div className="border-y border-gray-600 px-3 py-2 text-sm font-semibold">
+        Layers
+      </div>
+      <div className="min-h-0 flex-grow"></div>
+      <div className="flex items-center gap-2 border-t border-gray-600 px-2 py-1.5">
+        <MenuTrigger>
+          <TooltipTrigger delay={150} closeDelay={0}>
+            <Button className="flex items-center justify-center rounded p-1 hover:bg-gray-600 data-[pressed]:bg-gray-700">
+              <AddIcon className="h-4 w-4" />
+            </Button>
+            <StyledTooltip offset={4}>Add a new layer</StyledTooltip>
+          </TooltipTrigger>
+          <Popover
+            offset={2}
+            className="rounded border border-neutral-700 bg-neutral-800 data-[entering]:animate-fade-in data-[exiting]:animate-fade-out "
+          >
+            <Menu
+              autoFocus="first"
+              shouldFocusWrap
+              className="max-h-[inherit] min-w-[10rem] select-none overflow-auto p-1 outline-none"
+            >
+              <Item
+                className="flex items-center gap-2 rounded px-2.5 py-1.5 text-sm outline-none hover:bg-neutral-900 data-[focused]:bg-neutral-900"
+                id="add-image"
+              >
+                <ImageIcon className="h-4 w-4" />
+                Add image
+              </Item>
+            </Menu>
+          </Popover>
+        </MenuTrigger>
+        <TooltipTrigger delay={150} closeDelay={0}>
+          <Button className="flex items-center justify-center rounded p-1 hover:bg-gray-600">
+            <DeleteIcon className="h-4 w-4" />
+          </Button>
+          <StyledTooltip offset={4}>Delete selected layer</StyledTooltip>
+        </TooltipTrigger>
+      </div>
+    </div>
+  );
+}
 
 export default function App() {
   const [audioFile, setAudioFile] = useAtom(audioFileAtom);
@@ -26,12 +81,7 @@ export default function App() {
               <Button className="absolute right-6 top-6 rounded bg-gray-700 p-1.5 hover:bg-gray-800">
                 <SettingsIcon className="h-4 w-4" />
               </Button>
-              <Tooltip
-                offset={4}
-                className="data-[entering]:animate-fade-in data-[exiting]:animate-fade-out rounded bg-gray-700 px-2.5 py-1.5 text-sm transition-opacity duration-75"
-              >
-                Change canvas settings
-              </Tooltip>
+              <StyledTooltip offset={4}>Change canvas settings</StyledTooltip>
             </TooltipTrigger>
             <CanvasSettingsModal />
           </DialogTrigger>
@@ -44,7 +94,10 @@ export default function App() {
           )}
         </div>
       </div>
-      <div className="h-full border-l border-gray-600 [grid-column:2]"></div>
+      <div className="flex h-full flex-col border-l border-gray-600 [grid-column:2]">
+        <div className="min-h-0 flex-grow" />
+        <Layers />
+      </div>
     </div>
   );
 }
