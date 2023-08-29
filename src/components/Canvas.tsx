@@ -1,17 +1,11 @@
 import { Canvas, useLoader } from "@react-three/fiber";
 import { useAtomValue, useAtom, PrimitiveAtom } from "jotai";
 import { useCallback } from "react";
-import {
-  Dialog,
-  NumberField,
-  Label,
-  Input,
-  Button,
-  Popover,
-} from "react-aria-components";
+import { Dialog, Button, Popover } from "react-aria-components";
 import { canvasSizeAtom } from "../stores/canvas";
 import { TextureLoader } from "three";
 import { ImageLayer, layersAtom } from "../stores/layers";
+import NumberField from "./NumberField";
 
 function ImageLayerMesh({
   layerAtom,
@@ -82,6 +76,7 @@ export function CanvasSettingsModal() {
 
   return (
     <Popover
+      isOpen
       placement="bottom end"
       className="rounded border border-neutral-700 bg-neutral-800 p-3 data-[entering]:animate-fade-in data-[exiting]:animate-fade-out "
     >
@@ -101,22 +96,18 @@ export function CanvasSettingsModal() {
           >
             <div className="flex flex-col gap-3">
               <NumberField
+                label="Width:"
                 className="group flex flex-col gap-1"
                 defaultValue={width}
                 name="width"
                 autoFocus
-              >
-                <Label>Width:</Label>
-                <Input className="rounded border border-transparent bg-neutral-700 px-2 py-1.5 text-sm outline-none group-focus-within:border-neutral-500" />
-              </NumberField>
+              />
               <NumberField
+                label="Height:"
                 className="group flex flex-col gap-1"
                 defaultValue={height}
                 name="height"
-              >
-                <Label>Height:</Label>
-                <Input className="rounded border border-transparent bg-neutral-700 px-2 py-1.5 text-sm outline-none group-focus-within:border-neutral-500" />
-              </NumberField>
+              />
               <Button
                 className="mt-2 rounded border border-neutral-600 bg-neutral-700 px-2 py-1.5 text-sm hover:bg-neutral-600"
                 type="submit"
