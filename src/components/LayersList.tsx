@@ -8,6 +8,7 @@ import {
   Popover,
   Item,
   Menu,
+  useDragAndDrop,
 } from "react-aria-components";
 import AddIcon from "../icons/AddIcon";
 import DeleteIcon from "../icons/DeleteIcon";
@@ -30,8 +31,9 @@ function LayerListItem({
 
   return (
     <Item
-      className="flex items-center gap-2 px-3 py-1.5 text-sm outline-none aria-selected:bg-neutral-700 aria-selected:font-medium"
+      className="flex items-center gap-2 bg-neutral-900 px-3 py-1.5 text-sm outline-none aria-selected:bg-neutral-700 aria-selected:font-medium data-[dragging]:opacity-75"
       id={layerAtom.toString()}
+      textValue={layer.name}
     >
       {layer.type === "image" && <ImageIcon className="h-4 w-4" />}
       {layer.name}
@@ -83,6 +85,36 @@ function LayersList() {
     }
   }, [selectedLayer, setLayers, setSelectedLayer]);
 
+  const { dragAndDropHooks } = useDragAndDrop({
+    getItems: () => layers.map((layer) => ({ "text/plain": layer.toString() })),
+    onReorder(e) {
+      const draggedKey = [...e.keys][0];
+      const targetKey = e.target.key;
+      const targetIndex = layers.findIndex(
+        (layer) => layer.toString() === targetKey,
+      );
+      const sourceIndex = layers.findIndex(
+        (layer) => layer.toString() === draggedKey,
+      );
+      if (targetIndex === -1 || sourceIndex === -1) {
+        return;
+      }
+      if (e.target.dropPosition === "before") {
+        const newLayers = [...layers];
+        newLayers.splice(targetIndex, 0, newLayers.splice(sourceIndex, 1)[0]!);
+        setLayers(newLayers);
+      } else if (e.target.dropPosition === "after") {
+        const newLayers = [...layers];
+        newLayers.splice(
+          targetIndex + 1,
+          0,
+          newLayers.splice(sourceIndex, 1)[0]!,
+        );
+        setLayers(newLayers);
+      }
+    },
+  });
+
   return (
     <div className="flex flex-shrink-0 select-none flex-col">
       <div className="border-y border-neutral-600 px-3 py-2 text-sm font-semibold">
@@ -105,6 +137,7 @@ function LayersList() {
               });
             }
           }}
+          dragAndDropHooks={dragAndDropHooks}
         >
           {layers.map((layer) => (
             <LayerListItem key={layer.toString()} layerAtom={layer} />

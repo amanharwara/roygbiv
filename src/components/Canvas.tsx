@@ -54,8 +54,8 @@ export function SizedCanvas() {
       }}
     >
       <Canvas orthographic>
-        {layers.map((layer) => (
-          <ImageLayerMesh key={layer.toString()} layerAtom={layer} />
+        {layers.map((layer, index) => (
+          <ImageLayerMesh key={index} layerAtom={layer} />
         ))}
       </Canvas>
     </div>
