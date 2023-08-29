@@ -25,14 +25,14 @@ const NumberField = ({ label, className, ...props }: Props) => {
           <Label>{label}</Label>
           <Group className="flex w-fit rounded">
             <Button
-              className="rounded rounded-ee-none rounded-se-none border border-neutral-500 bg-neutral-700 px-2.5 hover:bg-neutral-600"
+              className="rounded rounded-ee-none rounded-se-none border border-neutral-600 bg-neutral-700 px-2.5 hover:bg-neutral-600"
               slot="decrement"
             >
               -
             </Button>
-            <Input className="border border-neutral-500 bg-neutral-700 px-2 py-1.5 text-sm outline-none group-focus-within:border-neutral-300" />
+            <Input className="z-[1] -mx-px border border-neutral-600 bg-neutral-700 px-2 py-1.5 text-sm outline-none group-focus-within:border-neutral-300" />
             <Button
-              className="rounded rounded-es-none rounded-ss-none border border-neutral-500 bg-neutral-700 px-2.5 hover:bg-neutral-600"
+              className="rounded rounded-es-none rounded-ss-none border border-neutral-600 bg-neutral-700 px-2.5 hover:bg-neutral-600"
               slot="increment"
             >
               +
@@ -43,7 +43,7 @@ const NumberField = ({ label, className, ...props }: Props) => {
                   state.setNumberValue(props.defaultValue);
                 }
               }}
-              className="ml-1.5 rounded border border-neutral-500 bg-neutral-700 px-2 hover:bg-neutral-600"
+              className="ml-1.5 rounded border border-neutral-600 bg-neutral-700 px-2 hover:bg-neutral-600"
             >
               <ResetIcon className="h-3.5 w-3.5" />
             </button>
