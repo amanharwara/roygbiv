@@ -47,7 +47,7 @@ function LayerListItem({
 
 function SelectedLayer({ atom }: { atom: PrimitiveAtom<ImageLayer> }) {
   const [layer, setLayer] = useAtom(atom);
-  const { name, image, width, height } = layer;
+  const { name, image, width, height, opacity } = layer;
 
   return (
     <>
@@ -88,6 +88,25 @@ function SelectedLayer({ atom }: { atom: PrimitiveAtom<ImageLayer> }) {
                 ...layer,
                 height,
               }));
+            }}
+          />
+        </div>
+        <div className="px-3 text-sm">
+          <NumberField
+            label="Opacity:"
+            defaultValue={1}
+            value={opacity}
+            name="opacity"
+            groupClassName="w-full"
+            onChange={(opacity) => {
+              setLayer((layer) => ({
+                ...layer,
+                opacity,
+              }));
+            }}
+            step={0.05}
+            formatOptions={{
+              style: "percent",
             }}
           />
         </div>

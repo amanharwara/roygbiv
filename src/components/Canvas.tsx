@@ -13,7 +13,7 @@ function ImageLayerMesh({
   layerAtom: PrimitiveAtom<ImageLayer>;
 }) {
   const layer = useAtomValue(layerAtom);
-  const { image, width, height } = layer;
+  const { image, width, height, opacity } = layer;
 
   return (
     <mesh
@@ -31,6 +31,7 @@ function ImageLayerMesh({
         depthTest={false}
         depthWrite={false}
         transparent
+        opacity={opacity}
       />
     </mesh>
   );
