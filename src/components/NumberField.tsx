@@ -40,6 +40,7 @@ const NumberField = ({ label, className, groupClassName, ...props }: Props) => {
               +
             </Button>
             <button
+              type="button"
               onClick={() => {
                 if (props.defaultValue != undefined) {
                   state.setNumberValue(props.defaultValue);
