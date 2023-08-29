@@ -27,6 +27,17 @@ audio.addEventListener("pause", () => {
 audio.addEventListener("volumechange", () => {
   defaultStore.set(audioVolumeAtom, audio.volume);
 });
+document.addEventListener("keydown", (e) => {
+  if (document.activeElement && document.activeElement.tagName !== "BODY")
+    return;
+  if (e.key === " ") {
+    if (audio.paused) {
+      audio.play();
+    } else {
+      audio.pause();
+    }
+  }
+});
 
 export const audioFileAtom = atom<File | null>(null);
 defaultStore.sub(audioFileAtom, () => {
