@@ -1,5 +1,5 @@
 import AudioFileDropZone from "./components/AudioFileDropZone";
-import { Atom, useAtom, useAtomValue } from "jotai";
+import { PrimitiveAtom, useAtom, useAtomValue } from "jotai";
 import { audioFileAtom } from "./stores/audio";
 import {
   Button,
@@ -27,7 +27,11 @@ import ImageIcon from "./icons/ImageIcon";
 import { useCallback } from "react";
 import { readFileAsImage } from "./utils/readFile";
 
-function LayerListItem({ layerAtom }: { layerAtom: Atom<ImageLayer> }) {
+function LayerListItem({
+  layerAtom,
+}: {
+  layerAtom: PrimitiveAtom<ImageLayer>;
+}) {
   const layer = useAtomValue(layerAtom);
 
   return (
@@ -40,20 +44,24 @@ function LayerListItem({ layerAtom }: { layerAtom: Atom<ImageLayer> }) {
   );
 }
 
-function SelectedLayer() {
-  // const _selectedLayerAtom = useAtomValue(selectedLayerAtom);
-  // const selectedLayer = useAtomValue(_selectedLayerAtom);
-
-  // if (!selectedLayerAtom) {
-  //   return null;
-  // }
+function SelectedLayer({ atom }: { atom: PrimitiveAtom<ImageLayer> }) {
+  const layer = useAtomValue(atom);
+  const { name, image } = layer;
 
   return (
-    <div className="min-h-0 flex-grow">
-      {/* <div className="border-b border-gray-600 px-3 py-2 text-sm font-semibold">
-        {selectedLayerAtom.name}
-      </div> */}
-    </div>
+    <>
+      <div className="border-b border-gray-600 px-3 py-2 text-sm font-semibold">
+        {name}
+      </div>
+      <div className="flex flex-col">
+        <div className="px-3 py-2 text-sm">
+          Preview:
+          <div className="mt-2 flex items-center justify-center rounded border border-gray-600 p-2">
+            <img src={image.src} alt={name} className="max-h-32 max-w-full" />
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -179,6 +187,7 @@ function Layers() {
 
 export default function App() {
   const [audioFile, setAudioFile] = useAtom(audioFileAtom);
+  const _selectedLayerAtom = useAtomValue(selectedLayerAtom);
 
   return (
     <div className="grid h-full grid-cols-[5fr,1fr] overflow-hidden">
@@ -206,7 +215,9 @@ export default function App() {
         </div>
       </div>
       <div className="flex h-full flex-col border-l border-gray-600 [grid-column:2]">
-        <SelectedLayer />
+        <div className="min-h-0 flex-grow">
+          {_selectedLayerAtom && <SelectedLayer atom={_selectedLayerAtom} />}
+        </div>
         <Layers />
       </div>
     </div>
