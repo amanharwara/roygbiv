@@ -1,4 +1,4 @@
-import clsx from "../utils/clsx";
+import { twJoin } from "tailwind-merge";
 import { Button, DropZone, FileTrigger, Text } from "react-aria-components";
 
 function AudioFileDropZone({
@@ -25,7 +25,7 @@ function AudioFileDropZone({
           setAudioFile(file);
         }}
         className={({ isDropTarget }) =>
-          clsx(
+          twJoin(
             "flex h-full w-full select-none flex-col items-center justify-center gap-4 rounded border-dashed border-gray-600 p-8",
             isDropTarget ? "border-4" : "border-2",
           )

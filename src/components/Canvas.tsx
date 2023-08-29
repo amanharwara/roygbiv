@@ -77,7 +77,7 @@ export function CanvasSettingsModal() {
   return (
     <Popover
       placement="bottom end"
-      className="rounded border border-neutral-700 bg-neutral-800 p-3 data-[entering]:animate-fade-in data-[exiting]:animate-fade-out "
+      className="rounded border border-gray-700 bg-gray-800 p-3 data-[entering]:animate-fade-in data-[exiting]:animate-fade-out "
     >
       <Dialog className="outline-none">
         {({ close }) => (
@@ -96,19 +96,17 @@ export function CanvasSettingsModal() {
             <div className="flex flex-col gap-3">
               <NumberField
                 label="Width:"
-                className="group flex flex-col gap-1"
                 defaultValue={width}
                 name="width"
                 autoFocus
               />
               <NumberField
                 label="Height:"
-                className="group flex flex-col gap-1"
                 defaultValue={height}
                 name="height"
               />
               <Button
-                className="mt-2 rounded border border-neutral-600 bg-neutral-700 px-2 py-1.5 text-sm hover:bg-neutral-600"
+                className="mt-1 rounded border border-gray-600 bg-gray-700 px-2 py-1.5 text-sm hover:bg-gray-600"
                 type="submit"
               >
                 Save

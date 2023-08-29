@@ -26,6 +26,7 @@ import Tooltip from "./components/Tooltip";
 import ImageIcon from "./icons/ImageIcon";
 import { useCallback } from "react";
 import { readFileAsImage } from "./utils/readFile";
+import NumberField from "./components/NumberField";
 
 function LayerListItem({
   layerAtom,
@@ -45,20 +46,50 @@ function LayerListItem({
 }
 
 function SelectedLayer({ atom }: { atom: PrimitiveAtom<ImageLayer> }) {
-  const layer = useAtomValue(atom);
-  const { name, image } = layer;
+  const [layer, setLayer] = useAtom(atom);
+  const { name, image, width, height } = layer;
 
   return (
     <>
       <div className="border-b border-gray-600 px-3 py-2 text-sm font-semibold">
         {name}
       </div>
-      <div className="flex flex-col">
-        <div className="px-3 py-2 text-sm">
+      <div className="flex flex-col gap-4 py-3">
+        <div className="px-3 text-sm">
           Preview:
           <div className="mt-2 flex items-center justify-center rounded border border-gray-600 p-2">
             <img src={image.src} alt={name} className="max-h-32 max-w-full" />
           </div>
+        </div>
+        <div className="px-3 text-sm">
+          <NumberField
+            label="Width:"
+            defaultValue={image.naturalWidth}
+            value={width}
+            name="width"
+            groupClassName="w-full"
+            onChange={(width) => {
+              setLayer((layer) => ({
+                ...layer,
+                width,
+              }));
+            }}
+          />
+        </div>
+        <div className="px-3 text-sm">
+          <NumberField
+            label="Height:"
+            defaultValue={image.naturalHeight}
+            value={height}
+            name="height"
+            groupClassName="w-full"
+            onChange={(height) => {
+              setLayer((layer) => ({
+                ...layer,
+                height,
+              }));
+            }}
+          />
         </div>
       </div>
     </>
