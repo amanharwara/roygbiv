@@ -32,7 +32,7 @@ function LayerListItem({ layerAtom }: { layerAtom: Atom<ImageLayer> }) {
 
   return (
     <Item
-      className="px-3 py-1.5 text-sm aria-selected:bg-gray-700 aria-selected:font-semibold"
+      className="px-3 py-1.5 text-sm outline-none aria-selected:bg-gray-700 aria-selected:font-medium"
       id={layerAtom.toString()}
     >
       {layer.name}
@@ -40,8 +40,26 @@ function LayerListItem({ layerAtom }: { layerAtom: Atom<ImageLayer> }) {
   );
 }
 
+function SelectedLayer() {
+  // const _selectedLayerAtom = useAtomValue(selectedLayerAtom);
+  // const selectedLayer = useAtomValue(_selectedLayerAtom);
+
+  // if (!selectedLayerAtom) {
+  //   return null;
+  // }
+
+  return (
+    <div className="min-h-0 flex-grow">
+      {/* <div className="border-b border-gray-600 px-3 py-2 text-sm font-semibold">
+        {selectedLayerAtom.name}
+      </div> */}
+    </div>
+  );
+}
+
 function Layers() {
   const [selectedLayer, setSelectedLayer] = useAtom(selectedLayerAtom);
+  console.log(selectedLayer);
   const selectedLayerKey = selectedLayer?.toString();
   const [layers, setLayers] = useAtom(layersAtom);
 
@@ -54,15 +72,38 @@ function Layers() {
       if (file) {
         const image = await readFileAsImage(file);
         const layer = createImageLayer(image, file.name);
-        setLayers((layers) => [...layers, layer]);
+        setLayers((layers) => [layer, ...layers]);
         setSelectedLayer(layer);
       }
     };
     input.click();
   }, [setLayers, setSelectedLayer]);
 
+  const deleteSelectedLayer = useCallback(() => {
+    if (selectedLayer) {
+      setLayers((layers) => {
+        const selectedLayerIndex = layers.findIndex(
+          (layer) => layer === selectedLayer,
+        );
+        if (selectedLayerIndex === -1) {
+          return layers;
+        }
+        const newLayers = [...layers];
+        newLayers.splice(selectedLayerIndex, 1);
+        const previousLayerIndex = Math.max(selectedLayerIndex - 1, 0);
+        const previousLayer = newLayers[previousLayerIndex];
+        if (previousLayer) {
+          setSelectedLayer(previousLayer);
+        } else {
+          setSelectedLayer(null);
+        }
+        return newLayers;
+      });
+    }
+  }, [selectedLayer, setLayers, setSelectedLayer]);
+
   return (
-    <div className="flex min-h-0 flex-grow flex-col">
+    <div className="flex min-h-0 flex-grow select-none flex-col">
       <div className="border-y border-gray-600 px-3 py-2 text-sm font-semibold">
         Layers
       </div>
@@ -122,7 +163,11 @@ function Layers() {
           </Popover>
         </MenuTrigger>
         <TooltipTrigger delay={150} closeDelay={0}>
-          <Button className="flex items-center justify-center rounded p-1 hover:bg-gray-600">
+          <Button
+            onPress={deleteSelectedLayer}
+            className="flex items-center justify-center rounded p-1 hover:bg-gray-600 disabled:opacity-70"
+            isDisabled={!selectedLayer}
+          >
             <DeleteIcon className="h-4 w-4" />
           </Button>
           <StyledTooltip offset={4}>Delete selected layer</StyledTooltip>
@@ -161,7 +206,7 @@ export default function App() {
         </div>
       </div>
       <div className="flex h-full flex-col border-l border-gray-600 [grid-column:2]">
-        <div className="min-h-0 flex-grow" />
+        <SelectedLayer />
         <Layers />
       </div>
     </div>
