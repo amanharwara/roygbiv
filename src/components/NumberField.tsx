@@ -27,21 +27,21 @@ const NumberField = ({ label, className, groupClassName, ...props }: Props) => {
           <Label>{label}</Label>
           <Group className={twMerge("flex w-fit rounded", groupClassName)}>
             <Button
-              className="rounded rounded-ee-none rounded-se-none border border-gray-600 bg-gray-700 px-3 hover:bg-gray-600"
+              className="rounded rounded-ee-none rounded-se-none border border-gray-600 bg-gray-700 px-3 hover:bg-gray-600 disabled:bg-gray-700 disabled:opacity-80"
               slot="decrement"
             >
               -
             </Button>
             <Input className="z-[1] -mx-px flex-1 border border-gray-600 bg-gray-700 px-2 py-1.5 text-sm outline-none group-focus-within:border-gray-300" />
             <Button
-              className="rounded rounded-es-none rounded-ss-none border border-gray-600 bg-gray-700 px-3 hover:bg-gray-600"
+              className="rounded rounded-es-none rounded-ss-none border border-gray-600 bg-gray-700 px-3 hover:bg-gray-600 disabled:bg-gray-700 disabled:opacity-80"
               slot="increment"
             >
               +
             </Button>
             <button
               onClick={() => {
-                if (props.defaultValue) {
+                if (props.defaultValue != undefined) {
                   state.setNumberValue(props.defaultValue);
                 }
               }}

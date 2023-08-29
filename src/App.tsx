@@ -47,14 +47,14 @@ function LayerListItem({
 
 function SelectedLayer({ atom }: { atom: PrimitiveAtom<ImageLayer> }) {
   const [layer, setLayer] = useAtom(atom);
-  const { name, image, width, height, opacity } = layer;
+  const { name, image, width, height, opacity, x, y } = layer;
 
   return (
     <>
-      <div className="border-b border-gray-600 px-3 py-2 text-sm font-semibold">
+      <div className="overflow-hidden text-ellipsis whitespace-nowrap border-b border-gray-600 px-3 py-2 text-sm font-semibold">
         {name}
       </div>
-      <div className="flex flex-col gap-4 py-3">
+      <div className="flex flex-col gap-4 overflow-auto py-3">
         <div className="px-3 text-sm">
           Preview:
           <div className="mt-2 flex items-center justify-center rounded border border-gray-600 p-2">
@@ -95,6 +95,7 @@ function SelectedLayer({ atom }: { atom: PrimitiveAtom<ImageLayer> }) {
           <NumberField
             label="Opacity:"
             defaultValue={1}
+            maxValue={1}
             value={opacity}
             name="opacity"
             groupClassName="w-full"
@@ -107,6 +108,38 @@ function SelectedLayer({ atom }: { atom: PrimitiveAtom<ImageLayer> }) {
             step={0.05}
             formatOptions={{
               style: "percent",
+            }}
+          />
+        </div>
+        <div className="px-3 text-sm">
+          <NumberField
+            label="x:"
+            minValue={undefined}
+            defaultValue={0}
+            value={x}
+            name="x"
+            groupClassName="w-full"
+            onChange={(x) => {
+              setLayer((layer) => ({
+                ...layer,
+                x,
+              }));
+            }}
+          />
+        </div>
+        <div className="px-3 text-sm">
+          <NumberField
+            label="y:"
+            minValue={undefined}
+            defaultValue={0}
+            value={y}
+            name="y"
+            groupClassName="w-full"
+            onChange={(y) => {
+              setLayer((layer) => ({
+                ...layer,
+                y,
+              }));
             }}
           />
         </div>
@@ -160,11 +193,11 @@ function Layers() {
   }, [selectedLayer, setLayers, setSelectedLayer]);
 
   return (
-    <div className="flex min-h-0 flex-shrink-0 flex-grow select-none flex-col">
+    <div className="flex flex-shrink-0 select-none flex-col">
       <div className="border-y border-gray-600 px-3 py-2 text-sm font-semibold">
         Layers
       </div>
-      <div className="min-h-0 flex-grow">
+      <div className="min-h-0 flex-grow overflow-auto">
         <ListBox
           aria-label="Layers"
           items={layers}
@@ -263,8 +296,8 @@ export default function App() {
           )}
         </div>
       </div>
-      <div className="flex h-full flex-col border-l border-gray-600 [grid-column:2]">
-        <div className="flex min-h-0 flex-grow flex-col">
+      <div className="grid h-full grid-rows-[60%_40%] overflow-hidden border-l border-gray-600 [grid-column:2]">
+        <div className="flex flex-col overflow-hidden">
           {_selectedLayerAtom ? (
             <SelectedLayer atom={_selectedLayerAtom} />
           ) : (

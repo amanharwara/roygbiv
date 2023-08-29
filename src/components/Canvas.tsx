@@ -13,12 +13,16 @@ function ImageLayerMesh({
   layerAtom: PrimitiveAtom<ImageLayer>;
 }) {
   const layer = useAtomValue(layerAtom);
-  const { image, width, height, opacity } = layer;
+  const { image, width, height, opacity, x, y } = layer;
 
   return (
     <mesh
       scale={[width / image.naturalWidth, height / image.naturalHeight, 1]}
-      up={[0, 1, 0]}
+      position={[
+        x + width / 2 - image.naturalWidth / 2,
+        y + height / 2 - image.naturalHeight / 2,
+        0,
+      ]}
       frustumCulled={false}
     >
       <planeGeometry
