@@ -67,7 +67,6 @@ function SelectedLayer({ atom }: { atom: PrimitiveAtom<ImageLayer> }) {
 
 function Layers() {
   const [selectedLayer, setSelectedLayer] = useAtom(selectedLayerAtom);
-  console.log(selectedLayer);
   const selectedLayerKey = selectedLayer?.toString();
   const [layers, setLayers] = useAtom(layersAtom);
 
@@ -111,7 +110,7 @@ function Layers() {
   }, [selectedLayer, setLayers, setSelectedLayer]);
 
   return (
-    <div className="flex min-h-0 flex-grow select-none flex-col">
+    <div className="flex min-h-0 flex-shrink-0 flex-grow select-none flex-col">
       <div className="border-y border-gray-600 px-3 py-2 text-sm font-semibold">
         Layers
       </div>
@@ -215,8 +214,14 @@ export default function App() {
         </div>
       </div>
       <div className="flex h-full flex-col border-l border-gray-600 [grid-column:2]">
-        <div className="min-h-0 flex-grow">
-          {_selectedLayerAtom && <SelectedLayer atom={_selectedLayerAtom} />}
+        <div className="flex min-h-0 flex-grow flex-col">
+          {_selectedLayerAtom ? (
+            <SelectedLayer atom={_selectedLayerAtom} />
+          ) : (
+            <div className="mx-auto my-auto flex text-sm text-gray-400">
+              No layer selected
+            </div>
+          )}
         </div>
         <Layers />
       </div>
