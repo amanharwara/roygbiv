@@ -5,7 +5,6 @@ import {
   MenuTrigger,
   TooltipTrigger,
   Button,
-  Tooltip,
   Popover,
   Item,
   Menu,
@@ -20,6 +19,7 @@ import {
   ImageLayer,
 } from "../stores/layers";
 import { readFileAsImage } from "../utils/readFile";
+import Tooltip from "./Tooltip";
 
 function LayerListItem({
   layerAtom,
