@@ -22,7 +22,7 @@ import {
 } from "./stores/layers";
 import AddIcon from "./icons/AddIcon";
 import DeleteIcon from "./icons/DeleteIcon";
-import StyledTooltip from "./components/StyledTooltip";
+import Tooltip from "./components/Tooltip";
 import ImageIcon from "./icons/ImageIcon";
 import { useCallback } from "react";
 import { readFileAsImage } from "./utils/readFile";
@@ -143,7 +143,7 @@ function Layers() {
             <Button className="flex items-center justify-center rounded p-1 hover:bg-gray-600 data-[pressed]:bg-neutral-800">
               <AddIcon className="h-4 w-4" />
             </Button>
-            <StyledTooltip offset={4}>Add a new layer</StyledTooltip>
+            <Tooltip offset={4}>Add a new layer</Tooltip>
           </TooltipTrigger>
           <Popover
             offset={2}
@@ -177,7 +177,7 @@ function Layers() {
           >
             <DeleteIcon className="h-4 w-4" />
           </Button>
-          <StyledTooltip offset={4}>Delete selected layer</StyledTooltip>
+          <Tooltip offset={4}>Delete selected layer</Tooltip>
         </TooltipTrigger>
       </div>
     </div>
@@ -200,7 +200,7 @@ export default function App() {
               <Button className="absolute right-6 top-6 rounded bg-gray-700 p-1.5 hover:bg-gray-800">
                 <SettingsIcon className="h-4 w-4" />
               </Button>
-              <StyledTooltip offset={4}>Change canvas settings</StyledTooltip>
+              <Tooltip offset={4}>Change canvas settings</Tooltip>
             </TooltipTrigger>
             <CanvasSettingsModal />
           </DialogTrigger>

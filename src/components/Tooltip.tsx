@@ -1,16 +1,16 @@
-import { Tooltip, TooltipProps } from "react-aria-components";
+import { Tooltip as RacTooltip, TooltipProps } from "react-aria-components";
 
 type Props = TooltipProps;
 
-const StyledTooltip = (props: Props) => {
+const Tooltip = (props: Props) => {
   return (
-    <Tooltip
+    <RacTooltip
       className="rounded bg-gray-700 px-2.5 py-1.5 text-sm transition-opacity duration-75 data-[entering]:animate-fade-in data-[exiting]:animate-fade-out"
       {...props}
     >
       {props.children}
-    </Tooltip>
+    </RacTooltip>
   );
 };
 
-export default StyledTooltip;
+export default Tooltip;

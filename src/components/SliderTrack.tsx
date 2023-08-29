@@ -1,9 +1,12 @@
 import { CSSProperties } from "react";
-import { SliderTrack, SliderThumb } from "react-aria-components";
+import {
+  SliderTrack as RacSliderTrack,
+  SliderThumb,
+} from "react-aria-components";
 
-const StyledSliderTrack = () => {
+const SliderTrack = () => {
   return (
-    <SliderTrack className="group relative h-3 w-full rounded before:absolute before:top-1/2 before:h-1 before:w-full before:-translate-y-1/2 before:rounded before:bg-gray-600">
+    <RacSliderTrack className="group relative h-3 w-full rounded before:absolute before:top-1/2 before:h-1 before:w-full before:-translate-y-1/2 before:rounded before:bg-gray-600">
       {({ state }) => (
         <>
           <div
@@ -25,8 +28,8 @@ const StyledSliderTrack = () => {
           <SliderThumb className="top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-white opacity-0 group-hover:opacity-100 data-[focus-visible]:opacity-100" />
         </>
       )}
-    </SliderTrack>
+    </RacSliderTrack>
   );
 };
 
-export default StyledSliderTrack;
+export default SliderTrack;
