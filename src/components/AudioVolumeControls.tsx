@@ -23,7 +23,7 @@ const AudioVolumeControls = () => {
   return (
     <>
       <Button
-        className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-700"
+        className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-neutral-700"
         onPress={toggleMute}
       >
         {isMuted ? (

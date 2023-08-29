@@ -26,7 +26,7 @@ function AudioFileDropZone({
         }}
         className={({ isDropTarget }) =>
           twJoin(
-            "flex h-full w-full select-none flex-col items-center justify-center gap-4 rounded border-dashed border-gray-600 p-8",
+            "flex h-full w-full select-none flex-col items-center justify-center gap-4 rounded border-dashed border-neutral-600 p-8",
             isDropTarget ? "border-4" : "border-2",
           )
         }
@@ -43,7 +43,7 @@ function AudioFileDropZone({
             setAudioFile(file);
           }}
         >
-          <Button className="rounded border border-gray-600 px-2 py-1 hover:bg-white hover:text-black">
+          <Button className="rounded border border-neutral-600 px-2 py-1 hover:bg-white hover:text-black">
             Click here to select file
           </Button>
         </FileTrigger>

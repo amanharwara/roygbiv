@@ -27,14 +27,14 @@ const NumberField = ({ label, className, groupClassName, ...props }: Props) => {
           <Label>{label}</Label>
           <Group className={twMerge("flex w-fit rounded", groupClassName)}>
             <Button
-              className="rounded rounded-ee-none rounded-se-none border border-gray-600 bg-gray-700 px-3 hover:bg-gray-600 disabled:bg-gray-700 disabled:opacity-80"
+              className="rounded rounded-ee-none rounded-se-none border border-neutral-600 bg-neutral-700 px-3 hover:bg-neutral-600 disabled:bg-neutral-700 disabled:opacity-80"
               slot="decrement"
             >
               -
             </Button>
-            <Input className="z-[1] -mx-px flex-1 border border-gray-600 bg-gray-700 px-2 py-1.5 text-sm outline-none focus:border-slate-400" />
+            <Input className="z-[1] -mx-px flex-1 border border-neutral-600 bg-neutral-700 px-2 py-1.5 text-sm outline-none focus:border-slate-400" />
             <Button
-              className="rounded rounded-es-none rounded-ss-none border border-gray-600 bg-gray-700 px-3 hover:bg-gray-600 disabled:bg-gray-700 disabled:opacity-80"
+              className="rounded rounded-es-none rounded-ss-none border border-neutral-600 bg-neutral-700 px-3 hover:bg-neutral-600 disabled:bg-neutral-700 disabled:opacity-80"
               slot="increment"
             >
               +
@@ -45,7 +45,7 @@ const NumberField = ({ label, className, groupClassName, ...props }: Props) => {
                   state.setNumberValue(props.defaultValue);
                 }
               }}
-              className="ml-1.5 rounded border border-gray-600 bg-gray-700 px-2 outline-none hover:bg-gray-600 focus:border-slate-400"
+              className="ml-1.5 rounded border border-neutral-600 bg-neutral-700 px-2 outline-none hover:bg-neutral-600 focus:border-slate-400"
             >
               <ResetIcon className="h-3.5 w-3.5" />
             </button>

@@ -13,7 +13,7 @@ function PlaybackControls({
   return (
     <div className="flex items-center gap-4">
       <Button
-        className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-gray-700"
+        className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-neutral-700"
         onPress={() => {
           audio.currentTime -= 5;
         }}
@@ -37,7 +37,7 @@ function PlaybackControls({
         )}
       </Button>
       <Button
-        className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-gray-700"
+        className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-neutral-700"
         onPress={() => {
           audio.currentTime += 5;
         }}

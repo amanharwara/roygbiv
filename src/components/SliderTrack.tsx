@@ -6,7 +6,7 @@ import {
 
 const SliderTrack = () => {
   return (
-    <RacSliderTrack className="group relative h-3 w-full rounded before:absolute before:top-1/2 before:h-1 before:w-full before:-translate-y-1/2 before:rounded before:bg-gray-600">
+    <RacSliderTrack className="group relative h-3 w-full rounded before:absolute before:top-1/2 before:h-1 before:w-full before:-translate-y-1/2 before:rounded before:bg-neutral-600">
       {({ state }) => (
         <>
           <div

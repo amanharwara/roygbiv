@@ -37,7 +37,7 @@ function LayerListItem({
 
   return (
     <Item
-      className="px-3 py-1.5 text-sm outline-none aria-selected:bg-gray-700 aria-selected:font-medium"
+      className="px-3 py-1.5 text-sm outline-none aria-selected:bg-neutral-700 aria-selected:font-medium"
       id={layerAtom.toString()}
     >
       {layer.name}
@@ -51,13 +51,13 @@ function SelectedLayer({ atom }: { atom: PrimitiveAtom<ImageLayer> }) {
 
   return (
     <>
-      <div className="overflow-hidden text-ellipsis whitespace-nowrap border-b border-gray-600 px-3 py-2 text-sm font-semibold">
+      <div className="overflow-hidden text-ellipsis whitespace-nowrap border-b border-neutral-600 px-3 py-2 text-sm font-semibold">
         {name}
       </div>
       <div className="flex flex-col gap-4 overflow-auto py-3">
         <div className="px-3 text-sm">
           Preview:
-          <div className="mt-2 flex items-center justify-center rounded border border-gray-600 p-2">
+          <div className="mt-2 flex items-center justify-center rounded border border-neutral-600 p-2">
             <img src={image.src} alt={name} className="max-h-32 max-w-full" />
           </div>
         </div>
@@ -194,7 +194,7 @@ function Layers() {
 
   return (
     <div className="flex flex-shrink-0 select-none flex-col">
-      <div className="border-y border-gray-600 px-3 py-2 text-sm font-semibold">
+      <div className="border-y border-neutral-600 px-3 py-2 text-sm font-semibold">
         Layers
       </div>
       <div className="min-h-0 flex-grow overflow-auto">
@@ -220,10 +220,10 @@ function Layers() {
           ))}
         </ListBox>
       </div>
-      <div className="flex items-center gap-2 border-t border-gray-600 px-2 py-1.5">
+      <div className="flex items-center gap-2 border-t border-neutral-600 px-2 py-1.5">
         <MenuTrigger>
           <TooltipTrigger delay={150} closeDelay={0}>
-            <Button className="flex items-center justify-center rounded p-1 hover:bg-gray-600 data-[pressed]:bg-neutral-800">
+            <Button className="flex items-center justify-center rounded p-1 hover:bg-neutral-600 data-[pressed]:bg-neutral-800">
               <AddIcon className="h-4 w-4" />
             </Button>
             <Tooltip offset={4}>Add a new layer</Tooltip>
@@ -255,7 +255,7 @@ function Layers() {
         <TooltipTrigger delay={150} closeDelay={0}>
           <Button
             onPress={deleteSelectedLayer}
-            className="flex items-center justify-center rounded p-1 hover:bg-gray-600 disabled:opacity-70"
+            className="flex items-center justify-center rounded p-1 hover:bg-neutral-600 disabled:opacity-70"
             isDisabled={!selectedLayer}
           >
             <DeleteIcon className="h-4 w-4" />
@@ -280,7 +280,7 @@ export default function App() {
           </div>
           <DialogTrigger>
             <TooltipTrigger delay={150} closeDelay={0}>
-              <Button className="absolute right-6 top-6 rounded bg-gray-700 p-1.5 hover:bg-gray-800">
+              <Button className="absolute right-6 top-6 rounded bg-neutral-700 p-1.5 hover:bg-neutral-800">
                 <SettingsIcon className="h-4 w-4" />
               </Button>
               <Tooltip offset={4}>Change canvas settings</Tooltip>
@@ -288,7 +288,7 @@ export default function App() {
             <CanvasSettingsModal />
           </DialogTrigger>
         </div>
-        <div className="flex-shrink-0 border-t border-gray-600">
+        <div className="flex-shrink-0 border-t border-neutral-600">
           {audioFile ? (
             <SelectedAudio file={audioFile} />
           ) : (
@@ -296,12 +296,12 @@ export default function App() {
           )}
         </div>
       </div>
-      <div className="grid h-full grid-rows-[60%_40%] overflow-hidden border-l border-gray-600 [grid-column:2]">
+      <div className="grid h-full grid-rows-[60%_40%] overflow-hidden border-l border-neutral-600 [grid-column:2]">
         <div className="flex flex-col overflow-hidden">
           {_selectedLayerAtom ? (
             <SelectedLayer atom={_selectedLayerAtom} />
           ) : (
-            <div className="mx-auto my-auto flex text-sm text-gray-400">
+            <div className="mx-auto my-auto flex text-sm text-neutral-400">
               No layer selected
             </div>
           )}

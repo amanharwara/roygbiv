@@ -28,7 +28,7 @@ export function SelectedAudio({ file }: { file: File }) {
       <div className="flex flex-shrink-0 flex-col items-start gap-2">
         <div>{file.name}</div>
         <Button
-          className="flex items-center gap-1 rounded border border-gray-600 px-2 py-1.5 text-sm hover:bg-white hover:text-black"
+          className="flex items-center gap-1 rounded border border-neutral-600 px-2 py-1.5 text-sm hover:bg-white hover:text-black"
           onPress={() => {
             setAudioFile(null);
           }}
