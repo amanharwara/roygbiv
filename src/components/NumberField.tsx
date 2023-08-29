@@ -32,7 +32,7 @@ const NumberField = ({ label, className, groupClassName, ...props }: Props) => {
             >
               -
             </Button>
-            <Input className="z-[1] -mx-px flex-1 border border-gray-600 bg-gray-700 px-2 py-1.5 text-sm outline-none group-focus-within:border-gray-300" />
+            <Input className="z-[1] -mx-px flex-1 border border-gray-600 bg-gray-700 px-2 py-1.5 text-sm outline-none group-focus-within:border-slate-400" />
             <Button
               className="rounded rounded-es-none rounded-ss-none border border-gray-600 bg-gray-700 px-3 hover:bg-gray-600 disabled:bg-gray-700 disabled:opacity-80"
               slot="increment"
