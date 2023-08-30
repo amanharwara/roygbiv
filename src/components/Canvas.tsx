@@ -54,7 +54,7 @@ export function SizedCanvas() {
       }}
     >
       <Canvas orthographic>
-        {layers.map((layer, index) => (
+        {layers.toReversed().map((layer, index) => (
           <ImageLayerMesh key={index} layerAtom={layer} />
         ))}
       </Canvas>
