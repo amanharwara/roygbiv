@@ -19,7 +19,7 @@ function SelectedLayer({ atom }: { atom: PrimitiveAtom<ImageLayer> }) {
       <div className="overflow-hidden text-ellipsis whitespace-nowrap border-b border-neutral-600 px-3 py-2 text-sm font-semibold">
         {name}
       </div>
-      <div className="flex flex-col gap-4 overflow-auto py-3">
+      <div className="flex flex-col gap-4 overflow-y-auto overflow-x-hidden py-3">
         <div className="px-3 text-sm">
           Preview:
           <div className="mt-2 flex items-center justify-center rounded border border-neutral-600 p-2">

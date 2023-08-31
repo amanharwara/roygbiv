@@ -31,12 +31,14 @@ function LayerListItem({
 
   return (
     <Item
-      className="flex items-center gap-2 bg-neutral-900 px-3 py-1.5 text-sm outline-none aria-selected:bg-neutral-700 aria-selected:font-medium data-[dragging]:opacity-75"
+      className="flex w-full items-center gap-2 overflow-hidden bg-neutral-900 px-3 py-1.5 text-sm outline-none aria-selected:bg-neutral-700 aria-selected:font-medium data-[dragging]:opacity-75"
       id={layerAtom.toString()}
       textValue={layer.name}
     >
-      {layer.type === "image" && <ImageIcon className="h-4 w-4" />}
-      {layer.name}
+      {layer.type === "image" && (
+        <ImageIcon className="h-4 w-4 flex-shrink-0" />
+      )}
+      <div className="overflow-hidden text-ellipsis">{layer.name}</div>
     </Item>
   );
 }
@@ -116,12 +118,13 @@ function LayersList() {
   });
 
   return (
-    <div className="flex flex-shrink-0 select-none flex-col">
+    <div className="flex flex-shrink-0 select-none flex-col overflow-hidden">
       <div className="border-y border-neutral-600 px-3 py-2 text-sm font-semibold">
         Layers
       </div>
       <div className="min-h-0 flex-grow overflow-auto">
         <ListBox
+          className="w-full overflow-hidden"
           aria-label="Layers"
           items={layers}
           selectedKeys={selectedLayerKey ? [selectedLayerKey] : []}
