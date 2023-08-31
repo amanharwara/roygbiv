@@ -58,7 +58,8 @@ function LayersList() {
   }, []);
 
   const { dragAndDropHooks } = useDragAndDrop({
-    getItems: () => layers.map((layer) => ({ "text/plain": layer.id })),
+    getItems: (keys) =>
+      [...keys].map((key) => ({ "text/plain": key as string })),
     onReorder(e) {
       const draggedKey = [...e.keys][0];
       const targetKey = e.target.key;
@@ -79,7 +80,7 @@ function LayersList() {
       </div>
       <div className="min-h-0 flex-grow overflow-auto">
         <ListBox
-          className="w-full overflow-hidden"
+          className="w-full overflow-hidden py-px"
           aria-label="Layers"
           items={layers}
           selectedKeys={selectedLayerId ? [selectedLayerId] : []}
