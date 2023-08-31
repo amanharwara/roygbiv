@@ -13,11 +13,15 @@ function ImageLayerMesh({
   layerAtom: PrimitiveAtom<ImageLayer>;
 }) {
   const layer = useAtomValue(layerAtom);
-  const { image, width, height, opacity, x, y } = layer;
+  const { image, width, height, zoom, opacity, x, y } = layer;
 
   return (
     <mesh
-      scale={[width / image.naturalWidth, height / image.naturalHeight, 1]}
+      scale={[
+        (width / image.naturalWidth) * zoom,
+        (height / image.naturalHeight) * zoom,
+        1,
+      ]}
       position={[
         x + width / 2 - image.naturalWidth / 2,
         y + height / 2 - image.naturalHeight / 2,

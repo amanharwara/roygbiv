@@ -12,7 +12,7 @@ import LayersList from "./components/LayersList";
 
 function SelectedLayer({ atom }: { atom: PrimitiveAtom<ImageLayer> }) {
   const [layer, setLayer] = useAtom(atom);
-  const { name, image, width, height, opacity, x, y } = layer;
+  const { name, image, width, height, zoom, opacity, x, y } = layer;
 
   return (
     <>
@@ -53,6 +53,25 @@ function SelectedLayer({ atom }: { atom: PrimitiveAtom<ImageLayer> }) {
                 ...layer,
                 height,
               }));
+            }}
+          />
+        </div>
+        <div className="px-3 text-sm">
+          <NumberField
+            label="Zoom:"
+            defaultValue={1}
+            value={zoom}
+            name="zoom"
+            groupClassName="w-full"
+            onChange={(zoom) => {
+              setLayer((layer) => ({
+                ...layer,
+                zoom,
+              }));
+            }}
+            step={0.05}
+            formatOptions={{
+              style: "percent",
             }}
           />
         </div>

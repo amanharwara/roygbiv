@@ -10,6 +10,7 @@ export type ImageLayer = CommonLayerProps & {
   y: number;
   width: number;
   height: number;
+  zoom: number;
   opacity: number;
   name: string;
 };
@@ -28,6 +29,7 @@ export const createImageLayer = (image: HTMLImageElement, name: string) => {
     y: 0,
     width: image.naturalWidth,
     height: image.naturalHeight,
+    zoom: 1,
     opacity: 1,
     name,
   });
