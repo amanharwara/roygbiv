@@ -3,8 +3,9 @@ import { useCallback } from "react";
 import { Dialog, Button, Popover } from "react-aria-components";
 import { useCanvasStore } from "../stores/canvas";
 import { TextureLoader } from "three";
-import { ImageLayer, useLayerStore } from "../stores/layers";
+import { AsciiEffectLayer, ImageLayer, useLayerStore } from "../stores/layers";
 import NumberField from "./NumberField";
+import { AsciiRenderer } from "@react-three/drei";
 
 function ImageLayerMesh({ layer }: { layer: ImageLayer }) {
   const { image, width, height, zoom, opacity, x, y } = layer;
@@ -39,6 +40,19 @@ function ImageLayerMesh({ layer }: { layer: ImageLayer }) {
   );
 }
 
+function AsciiLayer({ layer }: { layer: AsciiEffectLayer }) {
+  const { bgColor, fgColor, invert, resolution } = layer;
+
+  return (
+    <AsciiRenderer
+      bgColor={bgColor}
+      fgColor={fgColor}
+      invert={invert}
+      resolution={resolution}
+    />
+  );
+}
+
 export function SizedCanvas() {
   const { width, height } = useCanvasStore();
   const layers = useLayerStore((state) => state.layers);
@@ -52,9 +66,15 @@ export function SizedCanvas() {
       }}
     >
       <Canvas orthographic>
-        {layers.toReversed().map((layer, index) => (
-          <ImageLayerMesh key={index} layer={layer} />
-        ))}
+        {layers
+          .toReversed()
+          .map((layer, index) =>
+            layer.type === "image" ? (
+              <ImageLayerMesh key={index} layer={layer} />
+            ) : (
+              <AsciiLayer key={index} layer={layer} />
+            ),
+          )}
       </Canvas>
     </div>
   );

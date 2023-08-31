@@ -29,6 +29,9 @@ function LayerListItem({ layer }: { layer: Layer }) {
       {layer.type === "image" && (
         <ImageIcon className="h-4 w-4 flex-shrink-0" />
       )}
+      {layer.type === "ascii" && (
+        <AsciiIcon className="h-4 w-4 flex-shrink-0" />
+      )}
       <div className="overflow-hidden text-ellipsis">{layer.name}</div>
     </Item>
   );
@@ -122,6 +125,8 @@ function LayersList() {
               onAction={(key) => {
                 if (key === "add-image") {
                   addAndSelectImageLayer();
+                } else if (key === "ascii-effect") {
+                  useLayerStore.getState().addAsciiEffectLayer();
                 }
               }}
             >
@@ -137,18 +142,20 @@ function LayersList() {
                   Add image
                 </Item>
               </Section>
-              <Section>
-                <Header className="px-1.5 pb-1 text-sm font-semibold">
-                  Effects
-                </Header>
-                <Item
-                  className="flex items-center gap-2 rounded px-2.5 py-1.5 text-sm outline-none data-[focused]:bg-neutral-900"
-                  id="ascii-effect"
-                >
-                  <AsciiIcon className="h-4 w-4" />
-                  ASCII effect
-                </Item>
-              </Section>
+              {!layers.some((layer) => layer.type === "ascii") && (
+                <Section>
+                  <Header className="px-1.5 pb-1 text-sm font-semibold">
+                    Effects
+                  </Header>
+                  <Item
+                    className="flex items-center gap-2 rounded px-2.5 py-1.5 text-sm outline-none data-[focused]:bg-neutral-900"
+                    id="ascii-effect"
+                  >
+                    <AsciiIcon className="h-4 w-4" />
+                    ASCII effect
+                  </Item>
+                </Section>
+              )}
             </Menu>
           </Popover>
         </MenuTrigger>

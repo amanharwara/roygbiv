@@ -4,12 +4,12 @@ import { DropPosition } from "react-aria-components";
 import { create } from "zustand";
 
 type CommonLayerProps = {
-  type: "image";
   id: string;
   name: string;
 };
 
 export type ImageLayer = CommonLayerProps & {
+  type: "image";
   image: HTMLImageElement;
   x: number;
   y: number;
@@ -19,7 +19,15 @@ export type ImageLayer = CommonLayerProps & {
   opacity: number;
 };
 
-export type Layer = ImageLayer;
+export type AsciiEffectLayer = CommonLayerProps & {
+  type: "ascii";
+  bgColor: string;
+  fgColor: string;
+  invert: boolean;
+  resolution: number;
+};
+
+export type Layer = ImageLayer | AsciiEffectLayer;
 
 type LayerStore = {
   selectedLayerId: string | null;
@@ -32,9 +40,13 @@ type LayerStore = {
     targetId: string,
     draggedId: string,
   ) => void;
-  updateLayer: (layerId: string, layer: Partial<Layer>) => void;
+  updateLayer: <_Layer extends Layer>(
+    layerId: string,
+    layer: Partial<_Layer>,
+  ) => void;
   removeSelectedLayer: () => void;
   addImageLayer: (image: HTMLImageElement, name: string) => void;
+  addAsciiEffectLayer: () => void;
 };
 export const useLayerStore = create<LayerStore>()((set) => ({
   selectedLayerId: null,
@@ -51,6 +63,15 @@ export const useLayerStore = create<LayerStore>()((set) => ({
         const imageLayer = createImageLayer(image, name);
         state.layers.unshift(imageLayer);
         state.selectedLayerId = imageLayer.id;
+      }),
+    );
+  },
+  addAsciiEffectLayer: () => {
+    set(
+      produce((state: LayerStore) => {
+        const asciiEffectLayer = createAsciiEffectLayer();
+        state.layers.unshift(asciiEffectLayer);
+        state.selectedLayerId = asciiEffectLayer.id;
       }),
     );
   },
@@ -94,7 +115,10 @@ export const useLayerStore = create<LayerStore>()((set) => ({
       }),
     );
   },
-  updateLayer: (layerId: string, layer: Partial<Layer>) => {
+  updateLayer: <_Layer extends Layer>(
+    layerId: string,
+    layer: Partial<_Layer>,
+  ) => {
     set(
       produce((state: LayerStore) => {
         const index = state.layers.findIndex((layer) => layer.id === layerId);
@@ -122,6 +146,18 @@ const createImageLayer = (
     zoom: 1,
     opacity: 1,
     name,
+    id: nanoid(),
+  };
+};
+
+const createAsciiEffectLayer = (): AsciiEffectLayer => {
+  return {
+    type: "ascii",
+    bgColor: "#000000",
+    fgColor: "#ffffff",
+    invert: true,
+    resolution: 0.15,
+    name: "ASCII Effect",
     id: nanoid(),
   };
 };
