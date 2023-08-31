@@ -19,7 +19,7 @@ const NumberField = ({ label, className, groupClassName, ...props }: Props) => {
   return (
     <RacNumberField
       minValue={0}
-      className={twMerge("group flex flex-col gap-1", className)}
+      className={twMerge("group flex flex-col items-start gap-1", className)}
       {...props}
     >
       {({ state }) => (
