@@ -130,7 +130,7 @@ function LayersList() {
                   Displays
                 </Header>
                 <Item
-                  className="flex items-center gap-2 rounded px-2.5 py-1.5 text-sm outline-none hover:bg-neutral-900 data-[focused]:bg-neutral-900"
+                  className="flex items-center gap-2 rounded px-2.5 py-1.5 text-sm outline-none data-[focused]:bg-neutral-900"
                   id="add-image"
                 >
                   <ImageIcon className="h-4 w-4" />
@@ -142,7 +142,7 @@ function LayersList() {
                   Effects
                 </Header>
                 <Item
-                  className="flex items-center gap-2 rounded px-2.5 py-1.5 text-sm outline-none hover:bg-neutral-900 data-[focused]:bg-neutral-900"
+                  className="flex items-center gap-2 rounded px-2.5 py-1.5 text-sm outline-none data-[focused]:bg-neutral-900"
                   id="ascii-effect"
                 >
                   <AsciiIcon className="h-4 w-4" />
