@@ -1,13 +1,13 @@
 import { Button, Slider, Label } from "react-aria-components";
 import VolumeIcon from "../icons/VolumeIcon";
 import VolumeOffIcon from "../icons/VolumeOffIcon";
-import { audio, audioVolumeAtom } from "../stores/audio";
+import { useAudioStore } from "../stores/audio";
 import SliderTrack from "./SliderTrack";
-import { useAtomValue } from "jotai";
 import { useRef, useCallback } from "react";
 
 const AudioVolumeControls = () => {
-  const volume = useAtomValue(audioVolumeAtom);
+  const audio = useAudioStore((state) => state.audio);
+  const volume = useAudioStore((state) => state.volume);
   const prevVolume = useRef(volume);
   const isMuted = volume === 0;
 
@@ -18,7 +18,7 @@ const AudioVolumeControls = () => {
       prevVolume.current = audio.volume;
       audio.volume = 0;
     }
-  }, [isMuted]);
+  }, [audio, isMuted]);
 
   return (
     <>

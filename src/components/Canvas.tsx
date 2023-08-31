@@ -1,18 +1,12 @@
 import { Canvas, useLoader } from "@react-three/fiber";
-import { useAtomValue, useAtom, PrimitiveAtom } from "jotai";
 import { useCallback } from "react";
 import { Dialog, Button, Popover } from "react-aria-components";
-import { canvasSizeAtom } from "../stores/canvas";
+import { useCanvasStore } from "../stores/canvas";
 import { TextureLoader } from "three";
-import { ImageLayer, layersAtom } from "../stores/layers";
+import { ImageLayer, useLayerStore } from "../stores/layers";
 import NumberField from "./NumberField";
 
-function ImageLayerMesh({
-  layerAtom,
-}: {
-  layerAtom: PrimitiveAtom<ImageLayer>;
-}) {
-  const layer = useAtomValue(layerAtom);
+function ImageLayerMesh({ layer }: { layer: ImageLayer }) {
   const { image, width, height, zoom, opacity, x, y } = layer;
 
   return (
@@ -46,8 +40,8 @@ function ImageLayerMesh({
 }
 
 export function SizedCanvas() {
-  const { width, height } = useAtomValue(canvasSizeAtom);
-  const layers = useAtomValue(layersAtom);
+  const { width, height } = useCanvasStore();
+  const layers = useLayerStore((state) => state.layers);
 
   return (
     <div
@@ -59,7 +53,7 @@ export function SizedCanvas() {
     >
       <Canvas orthographic>
         {layers.toReversed().map((layer, index) => (
-          <ImageLayerMesh key={index} layerAtom={layer} />
+          <ImageLayerMesh key={index} layer={layer} />
         ))}
       </Canvas>
     </div>
@@ -67,17 +61,14 @@ export function SizedCanvas() {
 }
 
 export function CanvasSettingsModal() {
-  const [{ width, height }, setSize] = useAtom(canvasSizeAtom);
+  const { width, height, setSize } = useCanvasStore();
 
   const saveSettings = useCallback(
     (event: React.FormEvent<HTMLFormElement>, close: () => void) => {
       const formData = new FormData(event.currentTarget);
       const width = Number(formData.get("width"));
       const height = Number(formData.get("height"));
-      setSize({
-        width,
-        height,
-      });
+      setSize(width, height);
       close();
     },
     [setSize],

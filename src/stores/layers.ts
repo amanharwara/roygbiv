@@ -1,7 +1,12 @@
-import { PrimitiveAtom, atom } from "jotai";
+import { produce } from "immer";
+import { nanoid } from "nanoid";
+import { DropPosition } from "react-aria-components";
+import { create } from "zustand";
 
 type CommonLayerProps = {
   type: "image";
+  id: string;
+  name: string;
 };
 
 export type ImageLayer = CommonLayerProps & {
@@ -12,17 +17,102 @@ export type ImageLayer = CommonLayerProps & {
   height: number;
   zoom: number;
   opacity: number;
-  name: string;
 };
 
 export type Layer = ImageLayer;
 
-export const selectedLayerAtom = atom<PrimitiveAtom<Layer> | null>(null);
+type LayerStore = {
+  selectedLayerId: string | null;
+  setSelectedLayerId: (selectedLayerId: string | null) => void;
+  layers: Layer[];
+  setLayers: (layers: Layer[]) => void;
+  removeLayer: (layerId: string) => void;
+  moveLayer: (
+    position: DropPosition,
+    targetId: string,
+    draggedId: string,
+  ) => void;
+  updateLayer: (layerId: string, layer: Partial<Layer>) => void;
+  removeSelectedLayer: () => void;
+  addImageLayer: (image: HTMLImageElement, name: string) => void;
+};
+export const useLayerStore = create<LayerStore>()((set) => ({
+  selectedLayerId: null,
+  setSelectedLayerId: (selectedLayerId: string | null) => {
+    set({ selectedLayerId });
+  },
+  layers: [],
+  setLayers: (layers: Layer[]) => {
+    set({ layers });
+  },
+  addImageLayer: (image: HTMLImageElement, name: string) => {
+    set(
+      produce((state: LayerStore) => {
+        const imageLayer = createImageLayer(image, name);
+        state.layers.unshift(imageLayer);
+        state.selectedLayerId = imageLayer.id;
+      }),
+    );
+  },
+  removeLayer: (layerId: string) => {
+    set(
+      produce((state: LayerStore) => {
+        state.layers = state.layers.filter((layer) => layer.id !== layerId);
+      }),
+    );
+  },
+  removeSelectedLayer: () => {
+    set(
+      produce((state: LayerStore) => {
+        state.layers = state.layers.filter(
+          (layer) => layer.id !== state.selectedLayerId,
+        );
+        state.selectedLayerId = null;
+      }),
+    );
+  },
+  moveLayer: (position: DropPosition, targetId: string, draggedId: string) => {
+    if (position === "on") {
+      return;
+    }
+    set(
+      produce((state: LayerStore) => {
+        const targetIndex = state.layers.findIndex(
+          (layer) => layer.id === targetId,
+        );
+        const draggedIndex = state.layers.findIndex(
+          (layer) => layer.id === draggedId,
+        );
+        if (targetIndex === -1 || draggedIndex === -1) {
+          return;
+        }
+        state.layers.splice(
+          targetIndex,
+          0,
+          state.layers.splice(draggedIndex, 1)[0]!,
+        );
+      }),
+    );
+  },
+  updateLayer: (layerId: string, layer: Partial<Layer>) => {
+    set(
+      produce((state: LayerStore) => {
+        const index = state.layers.findIndex((layer) => layer.id === layerId);
+        if (index === -1) {
+          return;
+        }
+        const currentLayer = state.layers[index]!;
+        state.layers[index] = { ...currentLayer, ...layer };
+      }),
+    );
+  },
+}));
 
-export const layersAtom = atom<PrimitiveAtom<Layer>[]>([]);
-
-export const createImageLayer = (image: HTMLImageElement, name: string) => {
-  return atom<ImageLayer>({
+const createImageLayer = (
+  image: HTMLImageElement,
+  name: string,
+): ImageLayer => {
+  return {
     type: "image",
     image,
     x: 0,
@@ -32,5 +122,6 @@ export const createImageLayer = (image: HTMLImageElement, name: string) => {
     zoom: 1,
     opacity: 1,
     name,
-  });
+    id: nanoid(),
+  };
 };

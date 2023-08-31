@@ -1,31 +1,50 @@
-import { atom, getDefaultStore } from "jotai";
+import { create } from "zustand";
 
 const audioContext = new AudioContext();
 
 const analyserNode = audioContext.createAnalyser();
 analyserNode.fftSize = 64;
 
-const defaultStore = getDefaultStore();
-
-export const audio = new Audio();
-export const isAudioPlayingAtom = atom(false);
-export const audioDurationAtom = atom(0);
-export const audioElapsedAtom = atom(0);
-export const audioVolumeAtom = atom(1);
+type AudioStore = {
+  audio: HTMLAudioElement;
+  audioFile: File | null;
+  setAudioFile: (audioFile: File | null) => void;
+  isPlaying: boolean;
+  duration: number;
+  elapsed: number;
+  volume: number;
+};
+const audio = new Audio();
+export const useAudioStore = create<AudioStore>()((set) => ({
+  audio,
+  audioFile: null,
+  setAudioFile: (audioFile: File | null) => {
+    set({ audioFile });
+    if (audioFile) {
+      audio.src = URL.createObjectURL(audioFile);
+    } else {
+      audio.src = "";
+    }
+  },
+  isPlaying: false,
+  duration: 0,
+  elapsed: 0,
+  volume: 1,
+}));
 audio.addEventListener("loadedmetadata", () => {
-  defaultStore.set(audioDurationAtom, audio.duration);
+  useAudioStore.setState({ duration: audio.duration });
 });
 audio.addEventListener("timeupdate", () => {
-  defaultStore.set(audioElapsedAtom, audio.currentTime);
+  useAudioStore.setState({ elapsed: audio.currentTime });
 });
 audio.addEventListener("play", () => {
-  defaultStore.set(isAudioPlayingAtom, true);
+  useAudioStore.setState({ isPlaying: true });
 });
 audio.addEventListener("pause", () => {
-  defaultStore.set(isAudioPlayingAtom, false);
+  useAudioStore.setState({ isPlaying: false });
 });
 audio.addEventListener("volumechange", () => {
-  defaultStore.set(audioVolumeAtom, audio.volume);
+  useAudioStore.setState({ volume: audio.volume });
 });
 document.addEventListener("keydown", (e) => {
   if (document.activeElement && document.activeElement.tagName !== "BODY")
@@ -36,15 +55,5 @@ document.addEventListener("keydown", (e) => {
     } else {
       audio.pause();
     }
-  }
-});
-
-export const audioFileAtom = atom<File | null>(null);
-defaultStore.sub(audioFileAtom, () => {
-  const file = defaultStore.get(audioFileAtom);
-  if (file) {
-    audio.src = URL.createObjectURL(file);
-  } else {
-    audio.src = "";
   }
 });

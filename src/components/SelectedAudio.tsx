@@ -1,11 +1,4 @@
-import { useAtomValue, useSetAtom } from "jotai";
-import {
-  audio,
-  audioDurationAtom,
-  audioElapsedAtom,
-  audioFileAtom,
-  isAudioPlayingAtom,
-} from "../stores/audio";
+import { useAudioStore } from "../stores/audio";
 import PlaybackControls from "./AudioPlaybackControls";
 import PlaybackProgressBar from "./AudioPlaybackProgressBar";
 import { useCallback } from "react";
@@ -14,14 +7,18 @@ import DeleteIcon from "../icons/DeleteIcon";
 import AudioVolumeControls from "./AudioVolumeControls";
 
 export function SelectedAudio({ file }: { file: File }) {
-  const setAudioFile = useSetAtom(audioFileAtom);
-  const isPlaying = useAtomValue(isAudioPlayingAtom);
-  const duration = useAtomValue(audioDurationAtom);
-  const elapsed = useAtomValue(audioElapsedAtom);
+  const audio = useAudioStore((state) => state.audio);
+  const setAudioFile = useAudioStore((state) => state.setAudioFile);
+  const isPlaying = useAudioStore((state) => state.isPlaying);
+  const duration = useAudioStore((state) => state.duration);
+  const elapsed = useAudioStore((state) => state.elapsed);
 
-  const setElapsed = useCallback((elapsed: number) => {
-    audio.currentTime = elapsed;
-  }, []);
+  const setElapsed = useCallback(
+    (elapsed: number) => {
+      audio.currentTime = elapsed;
+    },
+    [audio],
+  );
 
   return (
     <div className="grid grid-cols-3 items-center gap-4 p-8">

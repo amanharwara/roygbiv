@@ -1,4 +1,3 @@
-import { PrimitiveAtom, useAtom, useAtomValue } from "jotai";
 import { useCallback } from "react";
 import {
   ListBox,
@@ -9,30 +8,22 @@ import {
   Item,
   Menu,
   useDragAndDrop,
+  Header,
+  Section,
 } from "react-aria-components";
 import AddIcon from "../icons/AddIcon";
 import DeleteIcon from "../icons/DeleteIcon";
 import ImageIcon from "../icons/ImageIcon";
-import {
-  selectedLayerAtom,
-  layersAtom,
-  createImageLayer,
-  ImageLayer,
-} from "../stores/layers";
+import { useLayerStore, Layer } from "../stores/layers";
 import { readFileAsImage } from "../utils/readFile";
 import Tooltip from "./Tooltip";
+import AsciiIcon from "../icons/AsciiIcon";
 
-function LayerListItem({
-  layerAtom,
-}: {
-  layerAtom: PrimitiveAtom<ImageLayer>;
-}) {
-  const layer = useAtomValue(layerAtom);
-
+function LayerListItem({ layer }: { layer: Layer }) {
   return (
     <Item
       className="flex w-full items-center gap-2 overflow-hidden bg-neutral-900 px-3 py-1.5 text-sm outline-none aria-selected:bg-neutral-700 aria-selected:font-medium data-[dragging]:opacity-75"
-      id={layerAtom.toString()}
+      id={layer.id}
       textValue={layer.name}
     >
       {layer.type === "image" && (
@@ -44,9 +35,13 @@ function LayerListItem({
 }
 
 function LayersList() {
-  const [selectedLayer, setSelectedLayer] = useAtom(selectedLayerAtom);
-  const selectedLayerKey = selectedLayer?.toString();
-  const [layers, setLayers] = useAtom(layersAtom);
+  const layers = useLayerStore((state) => state.layers);
+  const moveLayer = useLayerStore((state) => state.moveLayer);
+  const selectedLayerId = useLayerStore((state) => state.selectedLayerId);
+  const setSelectedLayerId = useLayerStore((state) => state.setSelectedLayerId);
+  const removeSelectedLayer = useLayerStore(
+    (state) => state.removeSelectedLayer,
+  );
 
   const addAndSelectImageLayer = useCallback(async () => {
     const input = document.createElement("input");
@@ -56,64 +51,24 @@ function LayersList() {
       const file = input.files?.[0];
       if (file) {
         const image = await readFileAsImage(file);
-        const layer = createImageLayer(image, file.name);
-        setLayers((layers) => [layer, ...layers]);
-        setSelectedLayer(layer);
+        useLayerStore.getState().addImageLayer(image, file.name);
       }
     };
     input.click();
-  }, [setLayers, setSelectedLayer]);
-
-  const deleteSelectedLayer = useCallback(() => {
-    if (selectedLayer) {
-      setLayers((layers) => {
-        const selectedLayerIndex = layers.findIndex(
-          (layer) => layer === selectedLayer,
-        );
-        if (selectedLayerIndex === -1) {
-          return layers;
-        }
-        const newLayers = [...layers];
-        newLayers.splice(selectedLayerIndex, 1);
-        const previousLayerIndex = Math.max(selectedLayerIndex - 1, 0);
-        const previousLayer = newLayers[previousLayerIndex];
-        if (previousLayer) {
-          setSelectedLayer(previousLayer);
-        } else {
-          setSelectedLayer(null);
-        }
-        return newLayers;
-      });
-    }
-  }, [selectedLayer, setLayers, setSelectedLayer]);
+  }, []);
 
   const { dragAndDropHooks } = useDragAndDrop({
-    getItems: () => layers.map((layer) => ({ "text/plain": layer.toString() })),
+    getItems: () => layers.map((layer) => ({ "text/plain": layer.id })),
     onReorder(e) {
       const draggedKey = [...e.keys][0];
       const targetKey = e.target.key;
-      const targetIndex = layers.findIndex(
-        (layer) => layer.toString() === targetKey,
-      );
-      const sourceIndex = layers.findIndex(
-        (layer) => layer.toString() === draggedKey,
-      );
-      if (targetIndex === -1 || sourceIndex === -1) {
+      if (
+        !(typeof draggedKey === "string") ||
+        !(typeof targetKey === "string")
+      ) {
         return;
       }
-      if (e.target.dropPosition === "before") {
-        const newLayers = [...layers];
-        newLayers.splice(targetIndex, 0, newLayers.splice(sourceIndex, 1)[0]!);
-        setLayers(newLayers);
-      } else if (e.target.dropPosition === "after") {
-        const newLayers = [...layers];
-        newLayers.splice(
-          targetIndex + 1,
-          0,
-          newLayers.splice(sourceIndex, 1)[0]!,
-        );
-        setLayers(newLayers);
-      }
+      moveLayer(e.target.dropPosition, targetKey, draggedKey);
     },
   });
 
@@ -127,23 +82,23 @@ function LayersList() {
           className="w-full overflow-hidden"
           aria-label="Layers"
           items={layers}
-          selectedKeys={selectedLayerKey ? [selectedLayerKey] : []}
+          selectedKeys={selectedLayerId ? [selectedLayerId] : []}
           selectionMode="single"
           selectionBehavior="replace"
           onSelectionChange={(keys) => {
             if (keys !== "all") {
               keys.forEach((key) => {
-                const layer = layers.find((layer) => layer.toString() === key);
-                if (layer) {
-                  setSelectedLayer(layer);
+                if (!(typeof key === "string")) {
+                  return;
                 }
+                setSelectedLayerId(key);
               });
             }
           }}
           dragAndDropHooks={dragAndDropHooks}
         >
           {layers.map((layer) => (
-            <LayerListItem key={layer.toString()} layerAtom={layer} />
+            <LayerListItem key={layer.id} layer={layer} />
           ))}
         </ListBox>
       </div>
@@ -162,28 +117,45 @@ function LayersList() {
             <Menu
               autoFocus="first"
               shouldFocusWrap
-              className="max-h-[inherit] min-w-[10rem] select-none overflow-auto p-1 outline-none"
+              className="max-h-[inherit] min-w-[10rem] select-none space-y-2 overflow-auto px-1.5 pb-1.5 pt-2 outline-none"
               onAction={(key) => {
                 if (key === "add-image") {
                   addAndSelectImageLayer();
                 }
               }}
             >
-              <Item
-                className="flex items-center gap-2 rounded px-2.5 py-1.5 text-sm outline-none hover:bg-neutral-900 data-[focused]:bg-neutral-900"
-                id="add-image"
-              >
-                <ImageIcon className="h-4 w-4" />
-                Add image
-              </Item>
+              <Section>
+                <Header className="px-1.5 pb-1 text-sm font-semibold">
+                  Displays
+                </Header>
+                <Item
+                  className="flex items-center gap-2 rounded px-2.5 py-1.5 text-sm outline-none hover:bg-neutral-900 data-[focused]:bg-neutral-900"
+                  id="add-image"
+                >
+                  <ImageIcon className="h-4 w-4" />
+                  Add image
+                </Item>
+              </Section>
+              <Section>
+                <Header className="px-1.5 pb-1 text-sm font-semibold">
+                  Effects
+                </Header>
+                <Item
+                  className="flex items-center gap-2 rounded px-2.5 py-1.5 text-sm outline-none hover:bg-neutral-900 data-[focused]:bg-neutral-900"
+                  id="ascii-effect"
+                >
+                  <AsciiIcon className="h-4 w-4" />
+                  ASCII effect
+                </Item>
+              </Section>
             </Menu>
           </Popover>
         </MenuTrigger>
         <TooltipTrigger delay={150} closeDelay={0}>
           <Button
-            onPress={deleteSelectedLayer}
+            onPress={removeSelectedLayer}
             className="flex items-center justify-center rounded p-1 hover:bg-neutral-600 disabled:opacity-70"
-            isDisabled={!selectedLayer}
+            isDisabled={!selectedLayerId}
           >
             <DeleteIcon className="h-4 w-4" />
           </Button>

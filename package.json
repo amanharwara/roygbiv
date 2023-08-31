@@ -41,16 +41,19 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "@react-three/drei": "^9.80.9",
     "@react-three/fiber": "^8.13.7",
     "@types/three": "^0.155.0",
     "@vitejs/plugin-react": "^4.0.4",
     "dayjs": "^1.11.9",
     "electron-squirrel-startup": "^1.0.0",
-    "jotai": "^2.4.0",
+    "immer": "^10.0.2",
+    "nanoid": "^4.0.2",
     "react": "^18.2.0",
     "react-aria-components": "^1.0.0-alpha.6",
     "react-dom": "^18.2.0",
     "tailwind-merge": "^1.14.0",
-    "three": "^0.155.0"
+    "three": "^0.155.0",
+    "zustand": "^4.4.1"
   }
 }

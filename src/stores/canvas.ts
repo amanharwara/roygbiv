@@ -1,10 +1,14 @@
-import { atom } from "jotai";
+import { create } from "zustand";
 
-export const canvasSizeAtom = atom({
+type CanvasStore = {
+  width: number;
+  height: number;
+  setSize: (width: number, height: number) => void;
+};
+export const useCanvasStore = create<CanvasStore>()((set) => ({
   width: 1280,
   height: 800,
-});
-
-export const canvasImageAtom = atom(new Image());
-
-// store image element in atom to use size of image to calculate mesh scale
+  setSize: (width: number, height: number) => {
+    set({ width, height });
+  },
+}));
