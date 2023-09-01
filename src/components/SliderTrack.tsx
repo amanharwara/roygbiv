@@ -4,7 +4,7 @@ import {
   SliderThumb,
 } from "react-aria-components";
 
-const SliderTrack = () => {
+const SingleThumbSliderTrack = () => {
   return (
     <RacSliderTrack className="group relative h-3 w-full rounded before:absolute before:top-1/2 before:h-1 before:w-full before:-translate-y-1/2 before:rounded before:bg-neutral-600">
       {({ state }) => (
@@ -32,4 +32,4 @@ const SliderTrack = () => {
   );
 };
 
-export default SliderTrack;
+export default SingleThumbSliderTrack;

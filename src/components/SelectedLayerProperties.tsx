@@ -8,8 +8,14 @@ import {
   useLayerStore,
 } from "../stores/layers";
 import Switch from "./Switch";
-import { Label, Slider, SliderOutput } from "react-aria-components";
-import SliderTrack from "./SliderTrack";
+import {
+  Label,
+  Slider,
+  SliderTrack,
+  SliderOutput,
+  SliderThumb,
+} from "react-aria-components";
+import SingleThumbSliderTrack from "./SliderTrack";
 import { useRef } from "react";
 import { Select, SelectItem } from "./Select";
 import { GradientType } from "@react-three/drei";
@@ -142,13 +148,69 @@ function ImageLayerProperties({ layer }: { layer: ImageLayer }) {
 }
 
 function GradientLayerProperties({ layer }: { layer: GradientLayer }) {
-  const { gradientType } = layer;
+  const { colors, stops, gradientType } = layer;
   const updateLayer = useLayerStore(
     (state) => state.updateLayer<GradientLayer>,
   );
 
   return (
     <>
+      <div className="px-3 text-sm">
+        <div className="mb-2">Colors:</div>
+        <div className="flex items-center gap-3.5">
+          {colors.map((color, index) => (
+            <div
+              key={index}
+              className="h-10 w-10 rounded"
+              style={{
+                backgroundColor: color,
+              }}
+            />
+          ))}
+        </div>
+      </div>
+      <div className="px-3 text-sm">
+        <Slider
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr auto",
+            gridTemplateAreas: `"label output" "track track"`,
+          }}
+          minValue={0}
+          maxValue={1}
+          step={0.01}
+          value={stops}
+          onChange={(stops) => {
+            updateLayer(layer.id, {
+              stops,
+            });
+          }}
+        >
+          <Label>Color stops:</Label>
+          <SliderOutput
+            style={{
+              gridArea: "output",
+            }}
+          >
+            {({ state }) =>
+              state.values
+                .map((_, i) => state.getThumbValueLabel(i))
+                .join(" – ")
+            }
+          </SliderOutput>
+          <SliderTrack className="relative h-[30px] w-full [grid-area:track] before:absolute before:top-1/2 before:block before:h-[3px] before:w-full before:-translate-y-1/2 before:bg-neutral-700">
+            {({ state }) =>
+              state.values.map((_, i) => (
+                <SliderThumb
+                  className="top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-white"
+                  key={i}
+                  index={i}
+                />
+              ))
+            }
+          </SliderTrack>
+        </Slider>
+      </div>
       <div className="px-3 text-sm">
         <Select
           label="Gradient type:"
@@ -265,7 +327,7 @@ function AsciiLayerProperties({ layer }: { layer: AsciiEffectLayer }) {
               }}
             </SliderOutput>
           </div>
-          <SliderTrack />
+          <SingleThumbSliderTrack />
         </Slider>
       </div>
     </>

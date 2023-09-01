@@ -1,6 +1,6 @@
 import { Slider, Label, SliderOutput } from "react-aria-components";
 import { getFormattedDuration } from "../utils/getFormattedDuration";
-import SliderTrack from "./SliderTrack";
+import SingleThumbSliderTrack from "./SliderTrack";
 
 function PlaybackProgressBar({
   duration,
@@ -22,7 +22,7 @@ function PlaybackProgressBar({
       <SliderOutput>
         {({ state }) => <>{getFormattedDuration(state.getThumbValue(0))}</>}
       </SliderOutput>
-      <SliderTrack />
+      <SingleThumbSliderTrack />
       <div>{getFormattedDuration(duration)}</div>
     </Slider>
   );

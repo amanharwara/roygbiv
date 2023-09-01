@@ -2,7 +2,7 @@ import { Button, Slider, Label } from "react-aria-components";
 import VolumeIcon from "../icons/VolumeIcon";
 import VolumeOffIcon from "../icons/VolumeOffIcon";
 import { useAudioStore } from "../stores/audio";
-import SliderTrack from "./SliderTrack";
+import SingleThumbSliderTrack from "./SliderTrack";
 import { useRef, useCallback } from "react";
 
 const AudioVolumeControls = () => {
@@ -42,7 +42,7 @@ const AudioVolumeControls = () => {
         }}
       >
         <Label className="sr-only">Change volume</Label>
-        <SliderTrack />
+        <SingleThumbSliderTrack />
       </Slider>
     </>
   );
