@@ -14,11 +14,17 @@ import {
   SliderTrack,
   SliderOutput,
   SliderThumb,
+  TooltipTrigger,
+  Button,
 } from "react-aria-components";
 import SingleThumbSliderTrack from "./SliderTrack";
 import { useRef } from "react";
 import { Select, SelectItem } from "./Select";
 import { GradientType } from "@react-three/drei";
+import EditIcon from "../icons/EditIcon";
+import DeleteIcon from "../icons/DeleteIcon";
+import AddIcon from "../icons/AddIcon";
+import Tooltip from "./Tooltip";
 
 function CommonPlaneLayerProperties({
   layer,
@@ -157,16 +163,47 @@ function GradientLayerProperties({ layer }: { layer: GradientLayer }) {
     <>
       <div className="px-3 text-sm">
         <div className="mb-2">Colors:</div>
-        <div className="flex items-center gap-3.5">
+        <div className="flex flex-wrap items-center gap-4">
           {colors.map((color, index) => (
-            <div
-              key={index}
-              className="h-10 w-10 rounded"
-              style={{
-                backgroundColor: color,
-              }}
-            />
+            <div className="group/main relative" key={index}>
+              <button
+                className="group h-14 w-14 rounded"
+                style={{
+                  backgroundColor: color,
+                }}
+              >
+                <span className="sr-only">Choose color</span>
+                <div
+                  className="flex h-full w-full items-center justify-center bg-black/50 opacity-0 transition-[opacity,colors] duration-75 group-hover:opacity-100 group-hover:[outline:-webkit-focus-ring-color_auto_1px] group-focus:opacity-100"
+                  role="presentation"
+                >
+                  <EditIcon className="h-6 w-6" />
+                </div>
+              </button>
+              {colors.length > 2 && (
+                <button className="absolute right-0 top-0 -translate-y-2 translate-x-2 rounded bg-neutral-700 p-1.5 opacity-0 hover:bg-neutral-800 group-focus-within/main:opacity-100 group-hover/main:opacity-100">
+                  <span className="sr-only">Remove color</span>
+                  <DeleteIcon className="h-4 w-4" />
+                </button>
+              )}
+            </div>
           ))}
+          <TooltipTrigger delay={150} closeDelay={0}>
+            <Button
+              onPress={() => {
+                useLayerStore
+                  .getState()
+                  .addColorToGradientLayer(layer.id, "black");
+              }}
+              className="flex h-14 w-14 items-center justify-center rounded bg-neutral-700 hover:bg-neutral-800 hover:[outline:-webkit-focus-ring-color_auto_1px]"
+            >
+              <span className="sr-only">Add color</span>
+              <AddIcon className="h-6 w-6" />
+            </Button>
+            <Tooltip placement="bottom" offset={8}>
+              Add color
+            </Tooltip>
+          </TooltipTrigger>
         </div>
       </div>
       <div className="px-3 text-sm">
@@ -198,7 +235,7 @@ function GradientLayerProperties({ layer }: { layer: GradientLayer }) {
                 .join(" – ")
             }
           </SliderOutput>
-          <SliderTrack className="relative h-[30px] w-full [grid-area:track] before:absolute before:top-1/2 before:block before:h-[3px] before:w-full before:-translate-y-1/2 before:bg-neutral-700">
+          <SliderTrack className="relative h-[25px] w-full [grid-area:track] before:absolute before:top-1/2 before:block before:h-1 before:w-full before:-translate-y-1/2 before:bg-neutral-700">
             {({ state }) =>
               state.values.map((_, i) => (
                 <SliderThumb

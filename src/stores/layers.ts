@@ -4,6 +4,7 @@ import { DropPosition } from "react-aria-components";
 import { create } from "zustand";
 import { useCanvasStore } from "./canvas";
 import { GradientType } from "@react-three/drei";
+import { getStopsForGradientColors } from "../utils/gradientUtils";
 
 type CommonLayerProps = {
   id: string;
@@ -62,6 +63,7 @@ type LayerStore = {
   removeSelectedLayer: () => void;
   addImageLayer: (image: HTMLImageElement, name: string) => void;
   addGradientLayer: () => void;
+  addColorToGradientLayer: (layerId: string, color: string) => void;
   addAsciiEffectLayer: () => void;
 };
 export const useLayerStore = create<LayerStore>()((set) => ({
@@ -161,6 +163,26 @@ export const useLayerStore = create<LayerStore>()((set) => ({
         }
         const currentLayer = state.layers[index]!;
         state.layers[index] = { ...currentLayer, ...layer };
+      }),
+    );
+  },
+  addColorToGradientLayer: (layerId: string, color: string) => {
+    set(
+      produce((state: LayerStore) => {
+        const index = state.layers.findIndex((layer) => layer.id === layerId);
+        if (index === -1) {
+          return;
+        }
+        const currentLayer = state.layers[index]!;
+        if (currentLayer.type !== "gradient") {
+          return;
+        }
+        const colors = [...currentLayer.colors, color];
+        state.layers[index] = {
+          ...currentLayer,
+          colors,
+          stops: getStopsForGradientColors(colors),
+        };
       }),
     );
   },
