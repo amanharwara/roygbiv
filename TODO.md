@@ -1,0 +1,2 @@
+- Create utility for properties
+- Think about how something like a number field would be modulated

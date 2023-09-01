@@ -7,7 +7,13 @@ import { AsciiEffectLayer, ImageLayer, useLayerStore } from "../stores/layers";
 import NumberField from "./NumberField";
 import { AsciiRenderer } from "@react-three/drei";
 
-function ImageLayerMesh({ layer }: { layer: ImageLayer }) {
+function ImageLayerMesh({
+  layer,
+  index,
+}: {
+  layer: ImageLayer;
+  index: number;
+}) {
   const { image, width, height, zoom, opacity, x, y } = layer;
 
   return (
@@ -20,7 +26,7 @@ function ImageLayerMesh({ layer }: { layer: ImageLayer }) {
       position={[
         x + width / 2 - image.naturalWidth / 2,
         y + height / 2 - image.naturalHeight / 2,
-        0,
+        index,
       ]}
       frustumCulled={false}
     >
@@ -70,9 +76,9 @@ export function SizedCanvas() {
           .toReversed()
           .map((layer, index) =>
             layer.type === "image" ? (
-              <ImageLayerMesh key={index} layer={layer} />
+              <ImageLayerMesh key={layer.id} layer={layer} index={index} />
             ) : (
-              <AsciiLayer key={index} layer={layer} />
+              <AsciiLayer key={layer.id} layer={layer} />
             ),
           )}
       </Canvas>
