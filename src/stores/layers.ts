@@ -110,10 +110,19 @@ export const useLayerStore = create<LayerStore>()((set) => ({
   removeSelectedLayer: () => {
     set(
       produce((state: LayerStore) => {
-        state.layers = state.layers.filter(
-          (layer) => layer.id !== state.selectedLayerId,
+        const selectedLayerIndex = state.layers.findIndex(
+          (layer) => layer.id === state.selectedLayerId,
         );
-        state.selectedLayerId = null;
+        if (selectedLayerIndex === -1) {
+          return;
+        }
+        state.layers.splice(selectedLayerIndex, 1);
+        const previousLayer = state.layers[Math.max(selectedLayerIndex - 1, 0)];
+        if (previousLayer) {
+          state.selectedLayerId = previousLayer.id;
+        } else {
+          state.selectedLayerId = null;
+        }
       }),
     );
   },
