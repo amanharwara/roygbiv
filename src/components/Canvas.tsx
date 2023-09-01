@@ -10,7 +10,8 @@ import {
   useLayerStore,
 } from "../stores/layers";
 import NumberField from "./NumberField";
-import { AsciiRenderer, GradientTexture } from "@react-three/drei";
+import { AsciiRenderer } from "@react-three/drei";
+import { GradientTexture } from "../three/GradientTexture";
 
 function ImageLayerMesh({
   layer,
@@ -54,9 +55,9 @@ function GradientLayerMesh({
   layer: GradientLayer;
   index: number;
 }) {
-  const { width, height, zoom, opacity, x, y, stops, colors } = layer;
+  const { width, height, zoom, opacity, x, y, stops, colors, gradientType } =
+    layer;
   const { size } = useThree();
-
   return (
     <mesh
       scale={[(width / size.width) * zoom, (height / size.height) * zoom, 1]}
@@ -74,7 +75,14 @@ function GradientLayerMesh({
         transparent
         opacity={opacity}
       >
-        <GradientTexture stops={stops} colors={colors} />
+        <GradientTexture
+          stops={stops}
+          colors={colors}
+          /* @ts-expect-error - https://github.com/pmndrs/drei/blob/master/src/core/GradientTexture.tsx#L24 */
+          type={gradientType}
+          size={size.height}
+          width={size.width}
+        />
       </meshBasicMaterial>
     </mesh>
   );

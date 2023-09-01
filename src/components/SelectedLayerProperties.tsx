@@ -2,6 +2,7 @@ import NumberField from "./NumberField";
 import {
   AsciiEffectLayer,
   CommonPlaneObjectProps,
+  GradientLayer,
   ImageLayer,
   PlaneLayer,
   useLayerStore,
@@ -10,6 +11,8 @@ import Switch from "./Switch";
 import { Label, Slider, SliderOutput } from "react-aria-components";
 import SliderTrack from "./SliderTrack";
 import { useRef } from "react";
+import { Select, SelectItem } from "./Select";
+import { GradientType } from "@react-three/drei";
 
 function CommonPlaneLayerProperties({
   layer,
@@ -138,6 +141,42 @@ function ImageLayerProperties({ layer }: { layer: ImageLayer }) {
   );
 }
 
+function GradientLayerProperties({ layer }: { layer: GradientLayer }) {
+  const { gradientType } = layer;
+  const updateLayer = useLayerStore(
+    (state) => state.updateLayer<GradientLayer>,
+  );
+
+  return (
+    <>
+      <div className="px-3 text-sm">
+        <Select
+          label="Gradient type:"
+          items={[
+            {
+              id: GradientType.Linear,
+              name: "Linear",
+            },
+            {
+              id: GradientType.Radial,
+              name: "Radial",
+            },
+          ]}
+          selectedKey={gradientType}
+          onSelectionChange={(selected) =>
+            updateLayer(layer.id, {
+              gradientType: selected as GradientType,
+            })
+          }
+        >
+          {(item) => <SelectItem>{item.name}</SelectItem>}
+        </Select>
+      </div>
+      <CommonPlaneLayerProperties layer={layer} />
+    </>
+  );
+}
+
 function AsciiLayerProperties({ layer }: { layer: AsciiEffectLayer }) {
   const { bgColor, fgColor, invert, resolution } = layer;
   const updateLayer = useLayerStore(
@@ -253,9 +292,7 @@ function SelectedLayerProperties() {
       </div>
       <div className="flex flex-col gap-4 overflow-y-auto overflow-x-hidden py-3">
         {layer.type === "image" && <ImageLayerProperties layer={layer} />}
-        {layer.type === "gradient" && (
-          <CommonPlaneLayerProperties layer={layer} />
-        )}
+        {layer.type === "gradient" && <GradientLayerProperties layer={layer} />}
         {layer.type === "ascii" && <AsciiLayerProperties layer={layer} />}
       </div>
     </>

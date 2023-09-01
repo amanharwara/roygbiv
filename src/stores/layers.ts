@@ -3,6 +3,7 @@ import { nanoid } from "nanoid";
 import { DropPosition } from "react-aria-components";
 import { create } from "zustand";
 import { useCanvasStore } from "./canvas";
+import { GradientType } from "@react-three/drei";
 
 type CommonLayerProps = {
   id: string;
@@ -35,6 +36,7 @@ export type AsciiEffectLayer = CommonLayerProps & {
 export type GradientLayer = CommonLayerProps &
   CommonPlaneObjectProps & {
     type: "gradient";
+    gradientType: GradientType;
     stops: number[];
     colors: string[];
   };
@@ -176,6 +178,7 @@ const createImageLayer = (
 const createGradientLayer = (): GradientLayer => {
   return {
     type: "gradient",
+    gradientType: GradientType.Linear,
     x: 0,
     y: 0,
     width: useCanvasStore.getState().width,
