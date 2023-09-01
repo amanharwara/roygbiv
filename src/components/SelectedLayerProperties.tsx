@@ -1,6 +1,8 @@
 import NumberField from "./NumberField";
 import { AsciiEffectLayer, ImageLayer, useLayerStore } from "../stores/layers";
 import Switch from "./Switch";
+import { Label, Slider, SliderOutput } from "react-aria-components";
+import SliderTrack from "./SliderTrack";
 
 function ImageLayerProperties({ layer }: { layer: ImageLayer }) {
   const { name, image, width, height, zoom, opacity, x, y } = layer;
@@ -168,24 +170,41 @@ function AsciiLayerProperties({ layer }: { layer: AsciiEffectLayer }) {
         </div>
       </div>
       <div className="px-3 text-sm">
-        {/* Convert this to a slider instead and max to 25% */}
-        <NumberField
-          label="Level of detail:"
+        <Slider
           defaultValue={0.15}
-          maxValue={1}
+          minValue={0.05}
+          maxValue={0.25}
+          step={0.05}
           value={resolution}
-          name="resolution"
-          groupClassName="w-full"
           onChange={(resolution) => {
             updateLayer(layer.id, {
               resolution,
             });
           }}
-          step={0.05}
-          formatOptions={{
-            style: "percent",
-          }}
-        />
+        >
+          <div className="mb-1.5 flex items-center justify-between">
+            <Label>Level of detail:</Label>
+            <SliderOutput>
+              {({ state }) => {
+                const value = state.getThumbValue(0);
+                const min = state.getThumbMinValue(0);
+                const max = state.getThumbMaxValue(0);
+                const defaultValue = 0.15;
+                if (value === min) {
+                  return "Extremely low";
+                } else if (value > min && value < defaultValue) {
+                  return "Low";
+                } else if (value < max && value > defaultValue) {
+                  return "High";
+                } else if (value === max) {
+                  return "Extremely high";
+                }
+                return "Normal";
+              }}
+            </SliderOutput>
+          </div>
+          <SliderTrack />
+        </Slider>
       </div>
     </>
   );
