@@ -222,6 +222,7 @@ function GradientLayerProperties({ layer }: { layer: GradientLayer }) {
               stops,
             });
           }}
+          key={stops.length}
         >
           <Label>Color stops:</Label>
           <SliderOutput
