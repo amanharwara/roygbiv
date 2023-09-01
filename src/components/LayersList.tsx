@@ -125,7 +125,7 @@ function LayersList() {
             <Menu
               autoFocus="first"
               shouldFocusWrap
-              className="max-h-[inherit] min-w-[10rem] select-none space-y-2 overflow-auto px-1.5 pb-1.5 pt-2 outline-none"
+              className="max-h-[inherit] min-w-[12rem] select-none space-y-2 overflow-auto px-1.5 pb-1.5 pt-2 outline-none"
               onAction={(key) => {
                 if (key === "add-image") {
                   addAndSelectImageLayer();

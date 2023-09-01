@@ -39,7 +39,7 @@ export function Select<T extends object>({
           <path d="M0 0,L6 6,L12 0" />
         </svg>
       </Button>
-      <Popover className="rounded border border-neutral-700 bg-neutral-800 data-[entering]:animate-fade-in data-[exiting]:animate-fade-out">
+      <Popover className="w-[--trigger-width] rounded border border-neutral-700 bg-neutral-800 data-[entering]:animate-fade-in data-[exiting]:animate-fade-out">
         <ListBox className="max-h-[inherit] min-w-[10rem] select-none overflow-auto px-1 pb-1 pt-1 outline-none">
           {children}
         </ListBox>
