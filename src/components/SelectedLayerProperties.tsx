@@ -1,5 +1,6 @@
 import NumberField from "./NumberField";
 import { AsciiEffectLayer, ImageLayer, useLayerStore } from "../stores/layers";
+import Switch from "./Switch";
 
 function ImageLayerProperties({ layer }: { layer: ImageLayer }) {
   const { name, image, width, height, zoom, opacity, x, y } = layer;
@@ -153,18 +154,17 @@ function AsciiLayerProperties({ layer }: { layer: AsciiEffectLayer }) {
         </div>
       </div>
       <div className="px-3 text-sm">
-        {/* Convert this to a color picker */}
         <div className="group flex flex-col items-start gap-1">
-          <label>Invert:</label>
-          <input
-            type="checkbox"
-            checked={invert}
-            onChange={(event) => {
+          <Switch
+            isSelected={invert}
+            onChange={(invert) => {
               updateLayer(layer.id, {
-                invert: event.target.checked,
+                invert,
               });
             }}
-          />
+          >
+            Invert
+          </Switch>
         </div>
       </div>
       <div className="px-3 text-sm">
