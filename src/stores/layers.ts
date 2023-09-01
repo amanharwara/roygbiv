@@ -2,15 +2,14 @@ import { produce } from "immer";
 import { nanoid } from "nanoid";
 import { DropPosition } from "react-aria-components";
 import { create } from "zustand";
+import { useCanvasStore } from "./canvas";
 
 type CommonLayerProps = {
   id: string;
   name: string;
 };
 
-export type ImageLayer = CommonLayerProps & {
-  type: "image";
-  image: HTMLImageElement;
+export type CommonPlaneObjectProps = {
   x: number;
   y: number;
   width: number;
@@ -18,6 +17,12 @@ export type ImageLayer = CommonLayerProps & {
   zoom: number;
   opacity: number;
 };
+
+export type ImageLayer = CommonLayerProps &
+  CommonPlaneObjectProps & {
+    type: "image";
+    image: HTMLImageElement;
+  };
 
 export type AsciiEffectLayer = CommonLayerProps & {
   type: "ascii";
@@ -27,7 +32,15 @@ export type AsciiEffectLayer = CommonLayerProps & {
   resolution: number;
 };
 
-export type Layer = ImageLayer | AsciiEffectLayer;
+export type GradientLayer = CommonLayerProps &
+  CommonPlaneObjectProps & {
+    type: "gradient";
+    stops: number[];
+    colors: string[];
+  };
+
+export type PlaneLayer = ImageLayer | GradientLayer;
+export type Layer = ImageLayer | GradientLayer | AsciiEffectLayer;
 
 type LayerStore = {
   selectedLayerId: string | null;
@@ -46,6 +59,7 @@ type LayerStore = {
   ) => void;
   removeSelectedLayer: () => void;
   addImageLayer: (image: HTMLImageElement, name: string) => void;
+  addGradientLayer: () => void;
   addAsciiEffectLayer: () => void;
 };
 export const useLayerStore = create<LayerStore>()((set) => ({
@@ -63,6 +77,15 @@ export const useLayerStore = create<LayerStore>()((set) => ({
         const imageLayer = createImageLayer(image, name);
         state.layers.unshift(imageLayer);
         state.selectedLayerId = imageLayer.id;
+      }),
+    );
+  },
+  addGradientLayer: () => {
+    set(
+      produce((state: LayerStore) => {
+        const gradientLayer = createGradientLayer();
+        state.layers.unshift(gradientLayer);
+        state.selectedLayerId = gradientLayer.id;
       }),
     );
   },
@@ -146,6 +169,22 @@ const createImageLayer = (
     zoom: 1,
     opacity: 1,
     name,
+    id: nanoid(),
+  };
+};
+
+const createGradientLayer = (): GradientLayer => {
+  return {
+    type: "gradient",
+    x: 0,
+    y: 0,
+    width: useCanvasStore.getState().width,
+    height: useCanvasStore.getState().height,
+    zoom: 1,
+    opacity: 1,
+    stops: [0, 1],
+    colors: ["aquamarine", "hotpink"],
+    name: "Gradient",
     id: nanoid(),
   };
 };

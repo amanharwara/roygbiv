@@ -1,11 +1,16 @@
-import { Canvas, useLoader } from "@react-three/fiber";
+import { Canvas, useLoader, useThree } from "@react-three/fiber";
 import { useCallback } from "react";
 import { Dialog, Button, Popover } from "react-aria-components";
 import { useCanvasStore } from "../stores/canvas";
 import { TextureLoader } from "three";
-import { AsciiEffectLayer, ImageLayer, useLayerStore } from "../stores/layers";
+import {
+  AsciiEffectLayer,
+  GradientLayer,
+  ImageLayer,
+  useLayerStore,
+} from "../stores/layers";
 import NumberField from "./NumberField";
-import { AsciiRenderer } from "@react-three/drei";
+import { AsciiRenderer, GradientTexture } from "@react-three/drei";
 
 function ImageLayerMesh({
   layer,
@@ -30,18 +35,47 @@ function ImageLayerMesh({
       ]}
       frustumCulled={false}
     >
-      <planeGeometry
-        attach="geometry"
-        args={[image.naturalWidth, image.naturalHeight]}
-      />
+      <planeGeometry args={[image.naturalWidth, image.naturalHeight]} />
       <meshBasicMaterial
-        attach="material"
         map={useLoader(TextureLoader, image.src)}
         depthTest={false}
         depthWrite={false}
         transparent
         opacity={opacity}
       />
+    </mesh>
+  );
+}
+
+function GradientLayerMesh({
+  layer,
+  index,
+}: {
+  layer: GradientLayer;
+  index: number;
+}) {
+  const { width, height, zoom, opacity, x, y, stops, colors } = layer;
+  const { size } = useThree();
+
+  return (
+    <mesh
+      scale={[(width / size.width) * zoom, (height / size.height) * zoom, 1]}
+      position={[
+        x + width / 2 - size.width / 2,
+        y + height / 2 - size.height / 2,
+        index,
+      ]}
+      frustumCulled={false}
+    >
+      <planeGeometry args={[size.width, size.height]} />
+      <meshBasicMaterial
+        depthTest={false}
+        depthWrite={false}
+        transparent
+        opacity={opacity}
+      >
+        <GradientTexture stops={stops} colors={colors} />
+      </meshBasicMaterial>
     </mesh>
   );
 }
@@ -77,6 +111,8 @@ export function SizedCanvas() {
           .map((layer, index) =>
             layer.type === "image" ? (
               <ImageLayerMesh key={layer.id} layer={layer} index={index} />
+            ) : layer.type === "gradient" ? (
+              <GradientLayerMesh key={layer.id} layer={layer} index={index} />
             ) : (
               <AsciiLayer key={layer.id} layer={layer} />
             ),

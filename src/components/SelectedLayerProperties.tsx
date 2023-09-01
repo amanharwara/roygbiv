@@ -1,25 +1,32 @@
 import NumberField from "./NumberField";
-import { AsciiEffectLayer, ImageLayer, useLayerStore } from "../stores/layers";
+import {
+  AsciiEffectLayer,
+  CommonPlaneObjectProps,
+  ImageLayer,
+  PlaneLayer,
+  useLayerStore,
+} from "../stores/layers";
 import Switch from "./Switch";
 import { Label, Slider, SliderOutput } from "react-aria-components";
 import SliderTrack from "./SliderTrack";
+import { useRef } from "react";
 
-function ImageLayerProperties({ layer }: { layer: ImageLayer }) {
-  const { name, image, width, height, zoom, opacity, x, y } = layer;
-  const updateLayer = useLayerStore((state) => state.updateLayer<ImageLayer>);
+function CommonPlaneLayerProperties({
+  layer,
+}: {
+  layer: CommonPlaneObjectProps & { id: string };
+}) {
+  const { width, height, zoom, opacity, x, y } = layer;
+  const defaultWidth = useRef(width);
+  const defaultHeight = useRef(height);
+  const updateLayer = useLayerStore((state) => state.updateLayer<PlaneLayer>);
 
   return (
     <>
       <div className="px-3 text-sm">
-        Preview:
-        <div className="mt-2 flex items-center justify-center rounded border border-neutral-600 p-2">
-          <img src={image.src} alt={name} className="max-h-32 max-w-full" />
-        </div>
-      </div>
-      <div className="px-3 text-sm">
         <NumberField
           label="Width:"
-          defaultValue={image.naturalWidth}
+          defaultValue={defaultWidth.current}
           value={width}
           name="width"
           groupClassName="w-full"
@@ -33,7 +40,7 @@ function ImageLayerProperties({ layer }: { layer: ImageLayer }) {
       <div className="px-3 text-sm">
         <NumberField
           label="Height:"
-          defaultValue={image.naturalHeight}
+          defaultValue={defaultHeight.current}
           value={height}
           name="height"
           groupClassName="w-full"
@@ -111,6 +118,22 @@ function ImageLayerProperties({ layer }: { layer: ImageLayer }) {
           }}
         />
       </div>
+    </>
+  );
+}
+
+function ImageLayerProperties({ layer }: { layer: ImageLayer }) {
+  const { name, image } = layer;
+
+  return (
+    <>
+      <div className="px-3 text-sm">
+        Preview:
+        <div className="mt-2 flex items-center justify-center rounded border border-neutral-600 p-2">
+          <img src={image.src} alt={name} className="max-h-32 max-w-full" />
+        </div>
+      </div>
+      <CommonPlaneLayerProperties layer={layer} />
     </>
   );
 }
@@ -230,6 +253,9 @@ function SelectedLayerProperties() {
       </div>
       <div className="flex flex-col gap-4 overflow-y-auto overflow-x-hidden py-3">
         {layer.type === "image" && <ImageLayerProperties layer={layer} />}
+        {layer.type === "gradient" && (
+          <CommonPlaneLayerProperties layer={layer} />
+        )}
         {layer.type === "ascii" && <AsciiLayerProperties layer={layer} />}
       </div>
     </>

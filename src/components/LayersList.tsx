@@ -18,6 +18,7 @@ import { useLayerStore, Layer } from "../stores/layers";
 import { readFileAsImage } from "../utils/readFile";
 import Tooltip from "./Tooltip";
 import AsciiIcon from "../icons/AsciiIcon";
+import GradientIcon from "../icons/GradientIcon";
 
 function LayerListItem({ layer }: { layer: Layer }) {
   return (
@@ -31,6 +32,9 @@ function LayerListItem({ layer }: { layer: Layer }) {
       )}
       {layer.type === "ascii" && (
         <AsciiIcon className="h-4 w-4 flex-shrink-0" />
+      )}
+      {layer.type === "gradient" && (
+        <GradientIcon className="h-4 w-4 flex-shrink-0" />
       )}
       <div className="overflow-hidden text-ellipsis">{layer.name}</div>
     </Item>
@@ -125,6 +129,8 @@ function LayersList() {
               onAction={(key) => {
                 if (key === "add-image") {
                   addAndSelectImageLayer();
+                } else if (key === "add-gradient") {
+                  useLayerStore.getState().addGradientLayer();
                 } else if (key === "ascii-effect") {
                   useLayerStore.getState().addAsciiEffectLayer();
                 }
@@ -132,14 +138,21 @@ function LayersList() {
             >
               <Section>
                 <Header className="px-1.5 pb-1 text-sm font-semibold">
-                  Displays
+                  Objects
                 </Header>
                 <Item
                   className="flex items-center gap-2 rounded px-2.5 py-1.5 text-sm outline-none data-[focused]:bg-neutral-900"
                   id="add-image"
                 >
                   <ImageIcon className="h-4 w-4" />
-                  Add image
+                  Image
+                </Item>
+                <Item
+                  className="flex items-center gap-2 rounded px-2.5 py-1.5 text-sm outline-none data-[focused]:bg-neutral-900"
+                  id="add-gradient"
+                >
+                  <GradientIcon className="h-4 w-4" />
+                  Gradient
                 </Item>
               </Section>
               {!layers.some((layer) => layer.type === "ascii") && (
