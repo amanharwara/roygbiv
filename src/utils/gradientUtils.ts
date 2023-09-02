@@ -1,11 +1,8 @@
-const randomColors = [
-  "hsl(0, 0%, 0%)",
-  "hsl(180, 100%, 50%)",
-  "hsl(330, 100%, 50%)",
-];
-
 export const getRandomColor = (): string => {
-  return randomColors[Math.floor(Math.random() * randomColors.length)]!;
+  const h = Math.floor(Math.random() * 360);
+  const s = Math.floor(Math.random() * 100);
+  const l = Math.floor(Math.random() * 100);
+  return `hsl(${h}, ${s}%, ${l}%)`;
 };
 
 export const getRandomColors = (count: number): string[] => {
