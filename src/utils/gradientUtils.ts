@@ -1,7 +1,7 @@
 export const getRandomColor = (): string => {
-  const h = Math.floor(Math.random() * 360);
-  const s = Math.floor(Math.random() * 100);
-  const l = Math.floor(Math.random() * 100);
+  const h = Math.floor(Math.random() * 360) + 1;
+  const s = Math.floor(Math.random() * 100) + 1;
+  const l = Math.floor(Math.random() * 100) + 1;
   return `hsl(${h}, ${s}%, ${l}%)`;
 };
 
