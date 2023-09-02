@@ -16,6 +16,9 @@ import {
   SliderThumb,
   TooltipTrigger,
   Button,
+  DialogTrigger,
+  Dialog,
+  Popover,
 } from "react-aria-components";
 import SingleThumbSliderTrack from "../ui/SliderTrack";
 import { useRef } from "react";
@@ -25,6 +28,7 @@ import EditIcon from "../../icons/EditIcon";
 import DeleteIcon from "../../icons/DeleteIcon";
 import AddIcon from "../../icons/AddIcon";
 import Tooltip from "../ui/Tooltip";
+import ColorArea from "../ui/ColorArea";
 
 function CommonPlaneLayerProperties({
   layer,
@@ -166,20 +170,53 @@ function GradientLayerProperties({ layer }: { layer: GradientLayer }) {
         <div className="flex flex-wrap items-center gap-4">
           {colors.map((color, index) => (
             <div className="group/main relative" key={index}>
-              <button
-                className="group h-14 w-14 rounded"
-                style={{
-                  backgroundColor: color,
-                }}
-              >
-                <span className="sr-only">Choose color</span>
-                <div
-                  className="flex h-full w-full items-center justify-center bg-black/50 opacity-0 transition-[opacity,colors] duration-75 group-hover:opacity-100 group-hover:[outline:-webkit-focus-ring-color_auto_1px] group-focus:opacity-100"
-                  role="presentation"
+              <DialogTrigger>
+                <Button
+                  className="group h-14 w-14 rounded"
+                  style={{
+                    backgroundColor: color,
+                  }}
                 >
-                  <EditIcon className="h-6 w-6" />
-                </div>
-              </button>
+                  <span className="sr-only">Choose color</span>
+                  <div
+                    className="flex h-full w-full items-center justify-center bg-black/50 opacity-0 transition-[opacity,colors] duration-75 group-hover:opacity-100 group-hover:[outline:-webkit-focus-ring-color_auto_1px] group-focus:opacity-100"
+                    role="presentation"
+                  >
+                    <EditIcon className="h-6 w-6" />
+                  </div>
+                </Button>
+                <Popover
+                  placement="bottom end"
+                  className="rounded border border-neutral-700 bg-neutral-800 p-3 data-[entering]:animate-fade-in data-[exiting]:animate-fade-out "
+                >
+                  <Dialog className="outline-none">
+                    {({ close }) => (
+                      <>
+                        <div className="mb-2 w-full">
+                          <Button
+                            onPress={close}
+                            className="ml-auto rounded bg-neutral-700 p-1.5 hover:bg-neutral-800"
+                          >
+                            Close
+                          </Button>
+                        </div>
+                        <ColorArea
+                          defaultValue={color}
+                          onChangeEnd={(value) => {
+                            useLayerStore
+                              .getState()
+                              .updateColorInGradientLayer(
+                                layer.id,
+                                index,
+                                value.toString("css"),
+                              );
+                          }}
+                        />
+                      </>
+                    )}
+                  </Dialog>
+                </Popover>
+              </DialogTrigger>
               {colors.length > 2 && (
                 <button
                   className="absolute right-0 top-0 -translate-y-2 translate-x-2 rounded bg-neutral-700 p-1.5 opacity-0 hover:bg-neutral-800 hover:[outline:-webkit-focus-ring-color_auto_1px] group-focus-within/main:opacity-100 group-hover/main:opacity-100"
@@ -200,7 +237,7 @@ function GradientLayerProperties({ layer }: { layer: GradientLayer }) {
               onPress={() => {
                 useLayerStore
                   .getState()
-                  .addColorToGradientLayer(layer.id, "black");
+                  .addColorToGradientLayer(layer.id, "#000000");
               }}
               className="flex h-14 w-14 items-center justify-center rounded bg-neutral-700 hover:bg-neutral-800 hover:[outline:-webkit-focus-ring-color_auto_1px]"
             >

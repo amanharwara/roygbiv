@@ -931,6 +931,24 @@
     "@react-types/shared" "^3.19.0"
     "@swc/helpers" "^0.5.0"
 
+"@react-aria/color@^3.0.0-beta.23":
+  version "3.0.0-beta.23"
+  resolved "https://registry.yarnpkg.com/@react-aria/color/-/color-3.0.0-beta.23.tgz#be438575172716c3ec2e819bc00d434fa66ea078"
+  integrity sha512-XzleI59TeQSn1p4ecpm3vrKgEcQxdsfAnFSmTz2TRe+b/ShS7Uyp6pHQSkO3xfXjmGIT7vVg5bRd85NVC61SlA==
+  dependencies:
+    "@react-aria/i18n" "^3.8.1"
+    "@react-aria/interactions" "^3.17.0"
+    "@react-aria/slider" "^3.6.0"
+    "@react-aria/spinbutton" "^3.5.1"
+    "@react-aria/textfield" "^3.11.0"
+    "@react-aria/utils" "^3.19.0"
+    "@react-aria/visually-hidden" "^3.8.3"
+    "@react-stately/color" "^3.4.1"
+    "@react-types/color" "3.0.0-beta.18"
+    "@react-types/shared" "^3.19.0"
+    "@react-types/slider" "^3.6.0"
+    "@swc/helpers" "^0.5.0"
+
 "@react-aria/combobox@^3.6.3":
   version "3.6.3"
   resolved "https://registry.yarnpkg.com/@react-aria/combobox/-/combobox-3.6.3.tgz#7f98513e794cfa00acf614dc56cf98b58ee6dad4"
@@ -1508,6 +1526,20 @@
     "@react-types/shared" "^3.19.0"
     "@swc/helpers" "^0.5.0"
 
+"@react-stately/color@^3.4.1":
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/@react-stately/color/-/color-3.4.1.tgz#e6d6cf021f5f52d9f112eec7bdb0ba11f91b9129"
+  integrity sha512-Gr5LbHxlphmSCeilem4LLpIzv3O9GrPnzXVp9IQlf0FOYxC+FZ1fG4/qeyoaeO8To3Oa9Tp1bs9QZb2RllL67g==
+  dependencies:
+    "@internationalized/number" "^3.2.1"
+    "@internationalized/string" "^3.1.1"
+    "@react-stately/slider" "^3.4.1"
+    "@react-stately/utils" "^3.7.0"
+    "@react-types/color" "3.0.0-beta.18"
+    "@react-types/numberfield" "^3.5.0"
+    "@react-types/shared" "^3.19.0"
+    "@swc/helpers" "^0.5.0"
+
 "@react-stately/combobox@^3.6.0":
   version "3.6.0"
   resolved "https://registry.yarnpkg.com/@react-stately/combobox/-/combobox-3.6.0.tgz#bd9985e2259adc71697d4aff068b1caaf79934c5"
@@ -1825,6 +1857,14 @@
   integrity sha512-fCisTdqFKkz7FvxNoexXIiVsTBt0ZwIyeIZz/S41M6hzIZM38nKbh6yS/lveQ+/877Dn7+ngvbpJ8QYnXYVrIQ==
   dependencies:
     "@react-types/shared" "^3.19.0"
+
+"@react-types/color@3.0.0-beta.18":
+  version "3.0.0-beta.18"
+  resolved "https://registry.yarnpkg.com/@react-types/color/-/color-3.0.0-beta.18.tgz#fece7d4f35e768ba93f140d67ecd4530e9851197"
+  integrity sha512-w5rBoFnNCgRCIeIjHoGBp+5QvwTg7bmRPVyWiqpvbvzaRwKM8+SKK2gm6xhuOdXFg1EHlEtQaPTqDXL+E3/alA==
+  dependencies:
+    "@react-types/shared" "^3.19.0"
+    "@react-types/slider" "^3.6.0"
 
 "@react-types/combobox@^3.7.0":
   version "3.7.0"

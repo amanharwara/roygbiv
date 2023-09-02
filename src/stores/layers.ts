@@ -64,6 +64,11 @@ type LayerStore = {
   addImageLayer: (image: HTMLImageElement, name: string) => void;
   addGradientLayer: () => void;
   addColorToGradientLayer: (layerId: string, color: string) => void;
+  updateColorInGradientLayer: (
+    layerId: string,
+    colorIndex: number,
+    color: string,
+  ) => void;
   removeColorFromGradientLayer: (layerId: string, index: number) => void;
   addAsciiEffectLayer: () => void;
 };
@@ -187,6 +192,33 @@ export const useLayerStore = create<LayerStore>()((set) => ({
       }),
     );
   },
+  updateColorInGradientLayer: (
+    layerId: string,
+    colorIndex: number,
+    color: string,
+  ) => {
+    set(
+      produce((state: LayerStore) => {
+        const layerIndex = state.layers.findIndex(
+          (layer) => layer.id === layerId,
+        );
+        if (layerIndex === -1) {
+          return;
+        }
+        const layer = state.layers[layerIndex]!;
+        if (layer.type !== "gradient") {
+          return;
+        }
+        const colors = [...layer.colors];
+        colors[colorIndex] = color;
+        state.layers[layerIndex] = {
+          ...layer,
+          colors,
+          stops: getStopsForGradientColors(colors),
+        };
+      }),
+    );
+  },
   removeColorFromGradientLayer: (layerId: string, colorIndex: number) => {
     set(
       produce((state: LayerStore) => {
@@ -246,7 +278,7 @@ const createGradientLayer = (): GradientLayer => {
     opacity: 1,
     stops: [0, 1],
     // create utility for generating random colors
-    colors: ["aquamarine", "hotpink"],
+    colors: ["#7fffd4", "#ff69b4"],
     name: "Gradient",
     id: nanoid(),
   };
