@@ -181,7 +181,14 @@ function GradientLayerProperties({ layer }: { layer: GradientLayer }) {
                 </div>
               </button>
               {colors.length > 2 && (
-                <button className="absolute right-0 top-0 -translate-y-2 translate-x-2 rounded bg-neutral-700 p-1.5 opacity-0 hover:bg-neutral-800 group-focus-within/main:opacity-100 group-hover/main:opacity-100">
+                <button
+                  className="absolute right-0 top-0 -translate-y-2 translate-x-2 rounded bg-neutral-700 p-1.5 opacity-0 hover:bg-neutral-800 hover:[outline:-webkit-focus-ring-color_auto_1px] group-focus-within/main:opacity-100 group-hover/main:opacity-100"
+                  onClick={() => {
+                    useLayerStore
+                      .getState()
+                      .removeColorFromGradientLayer(layer.id, index);
+                  }}
+                >
                   <span className="sr-only">Remove color</span>
                   <DeleteIcon className="h-4 w-4" />
                 </button>
