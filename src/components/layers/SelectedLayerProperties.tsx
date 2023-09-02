@@ -21,14 +21,17 @@ import {
   Popover,
 } from "react-aria-components";
 import SingleThumbSliderTrack from "../ui/SliderTrack";
-import { useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Select, SelectItem } from "../ui/Select";
 import { GradientType } from "@react-three/drei";
 import EditIcon from "../../icons/EditIcon";
 import DeleteIcon from "../../icons/DeleteIcon";
 import AddIcon from "../../icons/AddIcon";
 import Tooltip from "../ui/Tooltip";
-import ColorArea from "../ui/ColorArea";
+import CloseIcon from "../../icons/CloseIcon";
+import ColorSlider from "../ui/ColorSlider";
+import { Color, parseColor } from "@react-stately/color";
+import { getRandomColor } from "../../utils/gradientUtils";
 
 function CommonPlaneLayerProperties({
   layer,
@@ -157,6 +160,68 @@ function ImageLayerProperties({ layer }: { layer: ImageLayer }) {
   );
 }
 
+function GradientColorDialog({
+  color,
+  index,
+  id,
+}: {
+  color: string;
+  index: number;
+  id: string;
+}) {
+  const [parsedColor, setParsedColor] = useState(() =>
+    parseColor(color).toFormat("hsb"),
+  );
+
+  const onChange = useCallback((color: Color) => {
+    setParsedColor(color);
+  }, []);
+
+  const onChangeEnd = useCallback(
+    (color: Color) => {
+      useLayerStore
+        .getState()
+        .updateColorInGradientLayer(id, index, color.toString("css"));
+    },
+    [id, index],
+  );
+
+  return (
+    <Dialog className="flex select-none flex-col gap-3 outline-none">
+      {({ close }) => (
+        <>
+          <div className="mb-3 flex w-full">
+            <Button
+              onPress={close}
+              className="ml-auto rounded bg-neutral-700 p-1.5 hover:bg-neutral-600"
+            >
+              <CloseIcon className="h-4 w-4" />
+            </Button>
+          </div>
+          <ColorSlider
+            channel="hue"
+            value={parsedColor}
+            onChange={onChange}
+            onChangeEnd={onChangeEnd}
+          />
+          <ColorSlider
+            channel="saturation"
+            value={parsedColor}
+            onChange={onChange}
+            onChangeEnd={onChangeEnd}
+          />
+          <ColorSlider
+            channel="brightness"
+            value={parsedColor}
+            onChange={onChange}
+            onChangeEnd={onChangeEnd}
+          />
+        </>
+      )}
+    </Dialog>
+  );
+}
+
 function GradientLayerProperties({ layer }: { layer: GradientLayer }) {
   const { colors, stops, gradientType } = layer;
   const updateLayer = useLayerStore(
@@ -179,7 +244,7 @@ function GradientLayerProperties({ layer }: { layer: GradientLayer }) {
                 >
                   <span className="sr-only">Choose color</span>
                   <div
-                    className="flex h-full w-full items-center justify-center bg-black/50 opacity-0 transition-[opacity,colors] duration-75 group-hover:opacity-100 group-hover:[outline:-webkit-focus-ring-color_auto_1px] group-focus:opacity-100"
+                    className="flex h-full w-full items-center justify-center bg-black/50 opacity-0 transition-[opacity,colors] duration-75 group-hover:opacity-100 group-hover:[outline:-webkit-focus-ring-color_auto_1px] group-focus:opacity-100 group-focus:[outline:-webkit-focus-ring-color_auto_1px]"
                     role="presentation"
                   >
                     <EditIcon className="h-6 w-6" />
@@ -189,32 +254,11 @@ function GradientLayerProperties({ layer }: { layer: GradientLayer }) {
                   placement="bottom end"
                   className="rounded border border-neutral-700 bg-neutral-800 p-3 data-[entering]:animate-fade-in data-[exiting]:animate-fade-out "
                 >
-                  <Dialog className="outline-none">
-                    {({ close }) => (
-                      <>
-                        <div className="mb-2 w-full">
-                          <Button
-                            onPress={close}
-                            className="ml-auto rounded bg-neutral-700 p-1.5 hover:bg-neutral-800"
-                          >
-                            Close
-                          </Button>
-                        </div>
-                        <ColorArea
-                          defaultValue={color}
-                          onChangeEnd={(value) => {
-                            useLayerStore
-                              .getState()
-                              .updateColorInGradientLayer(
-                                layer.id,
-                                index,
-                                value.toString("css"),
-                              );
-                          }}
-                        />
-                      </>
-                    )}
-                  </Dialog>
+                  <GradientColorDialog
+                    color={color}
+                    index={index}
+                    id={layer.id}
+                  />
                 </Popover>
               </DialogTrigger>
               {colors.length > 2 && (
@@ -237,7 +281,7 @@ function GradientLayerProperties({ layer }: { layer: GradientLayer }) {
               onPress={() => {
                 useLayerStore
                   .getState()
-                  .addColorToGradientLayer(layer.id, "#000000");
+                  .addColorToGradientLayer(layer.id, getRandomColor());
               }}
               className="flex h-14 w-14 items-center justify-center rounded bg-neutral-700 hover:bg-neutral-800 hover:[outline:-webkit-focus-ring-color_auto_1px]"
             >

@@ -4,7 +4,10 @@ import { DropPosition } from "react-aria-components";
 import { create } from "zustand";
 import { useCanvasStore } from "./canvas";
 import { GradientType } from "@react-three/drei";
-import { getStopsForGradientColors } from "../utils/gradientUtils";
+import {
+  getRandomColors,
+  getStopsForGradientColors,
+} from "../utils/gradientUtils";
 
 type CommonLayerProps = {
   id: string;
@@ -278,7 +281,7 @@ const createGradientLayer = (): GradientLayer => {
     opacity: 1,
     stops: [0, 1],
     // create utility for generating random colors
-    colors: ["#7fffd4", "#ff69b4"],
+    colors: getRandomColors(2),
     name: "Gradient",
     id: nanoid(),
   };
