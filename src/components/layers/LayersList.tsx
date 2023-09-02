@@ -11,14 +11,14 @@ import {
   Header,
   Section,
 } from "react-aria-components";
-import AddIcon from "../icons/AddIcon";
-import DeleteIcon from "../icons/DeleteIcon";
-import ImageIcon from "../icons/ImageIcon";
-import { useLayerStore, Layer } from "../stores/layers";
-import { readFileAsImage } from "../utils/readFile";
-import Tooltip from "./Tooltip";
-import AsciiIcon from "../icons/AsciiIcon";
-import GradientIcon from "../icons/GradientIcon";
+import AddIcon from "../../icons/AddIcon";
+import DeleteIcon from "../../icons/DeleteIcon";
+import ImageIcon from "../../icons/ImageIcon";
+import { useLayerStore, Layer } from "../../stores/layers";
+import { readFileAsImage } from "../../utils/readFile";
+import Tooltip from "../ui/Tooltip";
+import AsciiIcon from "../../icons/AsciiIcon";
+import GradientIcon from "../../icons/GradientIcon";
 
 function LayerListItem({ layer }: { layer: Layer }) {
   return (

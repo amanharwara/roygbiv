@@ -9,7 +9,7 @@ import {
   ImageLayer,
   useLayerStore,
 } from "../stores/layers";
-import NumberField from "./NumberField";
+import NumberField from "./ui/NumberField";
 import { AsciiRenderer } from "@react-three/drei";
 import { GradientTexture } from "../three/GradientTexture";
 

@@ -7,7 +7,7 @@ import {
   Button,
 } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
-import ResetIcon from "../icons/ResetIcon";
+import ResetIcon from "../../icons/ResetIcon";
 
 type Props = NumberFieldProps & {
   label: string;

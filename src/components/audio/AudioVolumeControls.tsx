@@ -1,8 +1,8 @@
 import { Button, Slider, Label } from "react-aria-components";
-import VolumeIcon from "../icons/VolumeIcon";
-import VolumeOffIcon from "../icons/VolumeOffIcon";
-import { useAudioStore } from "../stores/audio";
-import SingleThumbSliderTrack from "./SliderTrack";
+import VolumeIcon from "../../icons/VolumeIcon";
+import VolumeOffIcon from "../../icons/VolumeOffIcon";
+import { useAudioStore } from "../../stores/audio";
+import SingleThumbSliderTrack from "../ui/SliderTrack";
 import { useRef, useCallback } from "react";
 
 const AudioVolumeControls = () => {

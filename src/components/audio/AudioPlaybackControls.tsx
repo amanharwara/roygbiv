@@ -1,7 +1,7 @@
 import { Button } from "react-aria-components";
-import PauseIcon from "../icons/PauseIcon";
-import PlayIcon from "../icons/PlayIcon";
-import RewindIcon from "../icons/RewindIcon";
+import PauseIcon from "../../icons/PauseIcon";
+import PlayIcon from "../../icons/PlayIcon";
+import RewindIcon from "../../icons/RewindIcon";
 
 function PlaybackControls({
   isPlaying,

@@ -1,9 +1,9 @@
-import { useAudioStore } from "../stores/audio";
+import { useAudioStore } from "../../stores/audio";
 import PlaybackControls from "./AudioPlaybackControls";
 import PlaybackProgressBar from "./AudioPlaybackProgressBar";
 import { useCallback } from "react";
 import { Button } from "react-aria-components";
-import DeleteIcon from "../icons/DeleteIcon";
+import DeleteIcon from "../../icons/DeleteIcon";
 import AudioVolumeControls from "./AudioVolumeControls";
 
 export function SelectedAudio({ file }: { file: File }) {

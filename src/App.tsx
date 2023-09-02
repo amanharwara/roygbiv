@@ -1,12 +1,12 @@
-import AudioFileDropZone from "./components/AudioFileDropZone";
+import AudioFileDropZone from "./components/audio/AudioFileDropZone";
 import { useAudioStore } from "./stores/audio";
 import { Button, DialogTrigger, TooltipTrigger } from "react-aria-components";
 import SettingsIcon from "./icons/SettingsIcon";
 import { CanvasSettingsModal, SizedCanvas } from "./components/Canvas";
-import { SelectedAudio } from "./components/SelectedAudio";
-import Tooltip from "./components/Tooltip";
-import LayersList from "./components/LayersList";
-import SelectedLayerProperties from "./components/SelectedLayerProperties";
+import { SelectedAudio } from "./components/audio/SelectedAudio";
+import Tooltip from "./components/ui/Tooltip";
+import LayersList from "./components/layers/LayersList";
+import SelectedLayerProperties from "./components/layers/SelectedLayerProperties";
 
 export default function App() {
   const audioFile = useAudioStore((state) => state.audioFile);

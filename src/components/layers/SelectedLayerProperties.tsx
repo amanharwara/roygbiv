@@ -1,4 +1,4 @@
-import NumberField from "./NumberField";
+import NumberField from "../ui/NumberField";
 import {
   AsciiEffectLayer,
   CommonPlaneObjectProps,
@@ -6,8 +6,8 @@ import {
   ImageLayer,
   PlaneLayer,
   useLayerStore,
-} from "../stores/layers";
-import Switch from "./Switch";
+} from "../../stores/layers";
+import Switch from "../ui/Switch";
 import {
   Label,
   Slider,
@@ -17,14 +17,14 @@ import {
   TooltipTrigger,
   Button,
 } from "react-aria-components";
-import SingleThumbSliderTrack from "./SliderTrack";
+import SingleThumbSliderTrack from "../ui/SliderTrack";
 import { useRef } from "react";
-import { Select, SelectItem } from "./Select";
+import { Select, SelectItem } from "../ui/Select";
 import { GradientType } from "@react-three/drei";
-import EditIcon from "../icons/EditIcon";
-import DeleteIcon from "../icons/DeleteIcon";
-import AddIcon from "../icons/AddIcon";
-import Tooltip from "./Tooltip";
+import EditIcon from "../../icons/EditIcon";
+import DeleteIcon from "../../icons/DeleteIcon";
+import AddIcon from "../../icons/AddIcon";
+import Tooltip from "../ui/Tooltip";
 
 function CommonPlaneLayerProperties({
   layer,
