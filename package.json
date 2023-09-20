@@ -52,7 +52,7 @@
     "immer": "^10.0.2",
     "nanoid": "^4.0.2",
     "react": "^18.2.0",
-    "react-aria-components": "^1.0.0-alpha.6",
+    "react-aria-components": "^1.0.0-beta.0",
     "react-dom": "^18.2.0",
     "tailwind-merge": "^1.14.0",
     "three": "^0.155.0",
