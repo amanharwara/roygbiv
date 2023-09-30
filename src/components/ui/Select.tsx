@@ -8,6 +8,7 @@ import {
   ListBox,
   ItemProps,
   Item,
+  ListBoxProps,
 } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
 
@@ -15,6 +16,7 @@ interface SelectProps<T extends object>
   extends Omit<RacSelectProps<T>, "children"> {
   label: string;
   children: React.ReactNode | ((item: T) => React.ReactNode);
+  items: ListBoxProps<T>["items"];
   className?: string;
 }
 
@@ -22,6 +24,7 @@ export function Select<T extends object>({
   label,
   children,
   className,
+  items,
   ...props
 }: SelectProps<T>) {
   return (
@@ -40,7 +43,10 @@ export function Select<T extends object>({
         </svg>
       </Button>
       <Popover className="w-[--trigger-width] rounded border border-neutral-700 bg-neutral-800 data-[entering]:animate-fade-in data-[exiting]:animate-fade-out">
-        <ListBox className="max-h-[inherit] min-w-[10rem] select-none overflow-auto px-1 pb-1 pt-1 outline-none">
+        <ListBox
+          items={items}
+          className="max-h-[inherit] min-w-[10rem] select-none overflow-auto px-1 pb-1 pt-1 outline-none"
+        >
           {children}
         </ListBox>
       </Popover>
