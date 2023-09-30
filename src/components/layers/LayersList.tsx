@@ -17,7 +17,6 @@ import ImageIcon from "../../icons/ImageIcon";
 import { useLayerStore, Layer } from "../../stores/layers";
 import { readFileAsImage } from "../../utils/readFile";
 import Tooltip from "../ui/Tooltip";
-import AsciiIcon from "../../icons/AsciiIcon";
 import GradientIcon from "../../icons/GradientIcon";
 
 function LayerListItem({ layer }: { layer: Layer }) {
@@ -29,9 +28,6 @@ function LayerListItem({ layer }: { layer: Layer }) {
     >
       {layer.type === "image" && (
         <ImageIcon className="h-4 w-4 flex-shrink-0" />
-      )}
-      {layer.type === "ascii" && (
-        <AsciiIcon className="h-4 w-4 flex-shrink-0" />
       )}
       {layer.type === "gradient" && (
         <GradientIcon className="h-4 w-4 flex-shrink-0" />
@@ -131,8 +127,6 @@ function LayersList() {
                   addAndSelectImageLayer();
                 } else if (key === "add-gradient") {
                   useLayerStore.getState().addGradientLayer();
-                } else if (key === "ascii-effect") {
-                  useLayerStore.getState().addAsciiEffectLayer();
                 }
               }}
             >
@@ -155,20 +149,6 @@ function LayersList() {
                   Gradient
                 </Item>
               </Section>
-              {!layers.some((layer) => layer.type === "ascii") && (
-                <Section>
-                  <Header className="px-1.5 pb-1 text-sm font-semibold">
-                    Effects
-                  </Header>
-                  <Item
-                    className="flex items-center gap-2 rounded px-2.5 py-1.5 text-sm outline-none data-[focused]:bg-neutral-900"
-                    id="ascii-effect"
-                  >
-                    <AsciiIcon className="h-4 w-4" />
-                    ASCII effect
-                  </Item>
-                </Section>
-              )}
             </Menu>
           </Popover>
         </MenuTrigger>

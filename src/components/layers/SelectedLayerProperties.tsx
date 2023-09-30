@@ -1,13 +1,11 @@
 import NumberField from "../ui/NumberField";
 import {
-  AsciiEffectLayer,
   CommonPlaneObjectProps,
   GradientLayer,
   ImageLayer,
   PlaneLayer,
   useLayerStore,
 } from "../../stores/layers";
-import Switch from "../ui/Switch";
 import {
   Label,
   Slider,
@@ -20,7 +18,6 @@ import {
   Dialog,
   Popover,
 } from "react-aria-components";
-import SingleThumbSliderTrack from "../ui/SliderTrack";
 import { useCallback, useRef, useState } from "react";
 import { Select, SelectItem } from "../ui/Select";
 import { GradientType } from "@react-three/drei";
@@ -365,101 +362,6 @@ function GradientLayerProperties({ layer }: { layer: GradientLayer }) {
   );
 }
 
-function AsciiLayerProperties({ layer }: { layer: AsciiEffectLayer }) {
-  const { bgColor, fgColor, invert, resolution } = layer;
-  const updateLayer = useLayerStore(
-    (state) => state.updateLayer<AsciiEffectLayer>,
-  );
-
-  return (
-    <>
-      <div className="px-3 text-sm">
-        {/* Convert this to a color picker */}
-        <div className="group flex flex-col items-start gap-1">
-          <label htmlFor="ascii-bgColor">Background color:</label>
-          <input
-            id="ascii-bgColor"
-            value={bgColor}
-            onChange={(event) => {
-              updateLayer(layer.id, {
-                bgColor: event.target.value,
-              });
-            }}
-            className="w-full rounded border border-neutral-600 bg-neutral-700 px-2 py-1.5 text-sm outline-none focus:border-slate-400"
-          />
-        </div>
-      </div>
-      <div className="px-3 text-sm">
-        {/* Convert this to a color picker */}
-        <div className="group flex flex-col items-start gap-1">
-          <label htmlFor="ascii-fgColor">Text color:</label>
-          <input
-            id="ascii-fgColor"
-            value={fgColor}
-            onChange={(event) => {
-              updateLayer(layer.id, {
-                fgColor: event.target.value,
-              });
-            }}
-            className="w-full rounded border border-neutral-600 bg-neutral-700 px-2 py-1.5 text-sm outline-none focus:border-slate-400"
-          />
-        </div>
-      </div>
-      <div className="px-3 text-sm">
-        <div className="group flex flex-col items-start gap-1">
-          <Switch
-            isSelected={invert}
-            onChange={(invert) => {
-              updateLayer(layer.id, {
-                invert,
-              });
-            }}
-          >
-            Invert
-          </Switch>
-        </div>
-      </div>
-      <div className="px-3 text-sm">
-        <Slider
-          defaultValue={0.15}
-          minValue={0.05}
-          maxValue={0.25}
-          step={0.05}
-          value={resolution}
-          onChange={(resolution) => {
-            updateLayer(layer.id, {
-              resolution,
-            });
-          }}
-        >
-          <div className="mb-1.5 flex items-center justify-between">
-            <Label>Level of detail:</Label>
-            <SliderOutput>
-              {({ state }) => {
-                const value = state.getThumbValue(0);
-                const min = state.getThumbMinValue(0);
-                const max = state.getThumbMaxValue(0);
-                const defaultValue = 0.15;
-                if (value === min) {
-                  return "Extremely low";
-                } else if (value > min && value < defaultValue) {
-                  return "Low";
-                } else if (value < max && value > defaultValue) {
-                  return "High";
-                } else if (value === max) {
-                  return "Extremely high";
-                }
-                return "Normal";
-              }}
-            </SliderOutput>
-          </div>
-          <SingleThumbSliderTrack />
-        </Slider>
-      </div>
-    </>
-  );
-}
-
 function SelectedLayerProperties() {
   const selectedLayerId = useLayerStore((state) => state.selectedLayerId);
   const layers = useLayerStore((state) => state.layers);
@@ -481,7 +383,6 @@ function SelectedLayerProperties() {
       <div className="flex flex-col gap-4 overflow-y-auto overflow-x-hidden py-3">
         {layer.type === "image" && <ImageLayerProperties layer={layer} />}
         {layer.type === "gradient" && <GradientLayerProperties layer={layer} />}
-        {layer.type === "ascii" && <AsciiLayerProperties layer={layer} />}
       </div>
     </>
   );

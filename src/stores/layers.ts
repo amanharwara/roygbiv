@@ -29,14 +29,6 @@ export type ImageLayer = CommonLayerProps &
     image: HTMLImageElement;
   };
 
-export type AsciiEffectLayer = CommonLayerProps & {
-  type: "ascii";
-  bgColor: string;
-  fgColor: string;
-  invert: boolean;
-  resolution: number;
-};
-
 export type GradientLayer = CommonLayerProps &
   CommonPlaneObjectProps & {
     type: "gradient";
@@ -46,7 +38,7 @@ export type GradientLayer = CommonLayerProps &
   };
 
 export type PlaneLayer = ImageLayer | GradientLayer;
-export type Layer = ImageLayer | GradientLayer | AsciiEffectLayer;
+export type Layer = ImageLayer | GradientLayer;
 
 type LayerStore = {
   selectedLayerId: string | null;
@@ -73,7 +65,6 @@ type LayerStore = {
     color: string,
   ) => void;
   removeColorFromGradientLayer: (layerId: string, index: number) => void;
-  addAsciiEffectLayer: () => void;
 };
 export const useLayerStore = create<LayerStore>()((set) => ({
   selectedLayerId: null,
@@ -99,15 +90,6 @@ export const useLayerStore = create<LayerStore>()((set) => ({
         const gradientLayer = createGradientLayer();
         state.layers.unshift(gradientLayer);
         state.selectedLayerId = gradientLayer.id;
-      }),
-    );
-  },
-  addAsciiEffectLayer: () => {
-    set(
-      produce((state: LayerStore) => {
-        const asciiEffectLayer = createAsciiEffectLayer();
-        state.layers.unshift(asciiEffectLayer);
-        state.selectedLayerId = asciiEffectLayer.id;
       }),
     );
   },
@@ -283,18 +265,6 @@ const createGradientLayer = (): GradientLayer => {
     // create utility for generating random colors
     colors: getRandomColors(2),
     name: "Gradient",
-    id: nanoid(),
-  };
-};
-
-const createAsciiEffectLayer = (): AsciiEffectLayer => {
-  return {
-    type: "ascii",
-    bgColor: "#000000",
-    fgColor: "#ffffff",
-    invert: true,
-    resolution: 0.15,
-    name: "ASCII Effect",
     id: nanoid(),
   };
 };

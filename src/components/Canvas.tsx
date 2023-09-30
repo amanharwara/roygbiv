@@ -3,14 +3,8 @@ import { useCallback } from "react";
 import { Dialog, Button, Popover } from "react-aria-components";
 import { useCanvasStore } from "../stores/canvas";
 import { TextureLoader } from "three";
-import {
-  AsciiEffectLayer,
-  GradientLayer,
-  ImageLayer,
-  useLayerStore,
-} from "../stores/layers";
+import { GradientLayer, ImageLayer, useLayerStore } from "../stores/layers";
 import NumberField from "./ui/NumberField";
-import { AsciiRenderer } from "@react-three/drei";
 import { GradientTexture } from "../three/GradientTexture";
 
 function ImageLayerMesh({
@@ -88,19 +82,6 @@ function GradientLayerMesh({
   );
 }
 
-function AsciiLayer({ layer }: { layer: AsciiEffectLayer }) {
-  const { bgColor, fgColor, invert, resolution } = layer;
-
-  return (
-    <AsciiRenderer
-      bgColor={bgColor}
-      fgColor={fgColor}
-      invert={invert}
-      resolution={resolution}
-    />
-  );
-}
-
 export function SizedCanvas() {
   const { width, height } = useCanvasStore();
   const layers = useLayerStore((state) => state.layers);
@@ -121,9 +102,7 @@ export function SizedCanvas() {
               <ImageLayerMesh key={layer.id} layer={layer} index={index} />
             ) : layer.type === "gradient" ? (
               <GradientLayerMesh key={layer.id} layer={layer} index={index} />
-            ) : (
-              <AsciiLayer key={layer.id} layer={layer} />
-            ),
+            ) : null,
           )}
       </Canvas>
     </div>
