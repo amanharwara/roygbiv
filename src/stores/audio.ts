@@ -1,9 +1,9 @@
 import { create } from "zustand";
 
 const audioContext = new AudioContext();
-
 const analyserNode = audioContext.createAnalyser();
-analyserNode.fftSize = 64;
+analyserNode.fftSize = 4096;
+analyserNode.connect(audioContext.destination);
 
 type AudioStore = {
   audio: HTMLAudioElement;
@@ -57,3 +57,19 @@ document.addEventListener("keydown", (e) => {
     }
   }
 });
+
+const sourceNode = audioContext.createMediaElementSource(audio);
+sourceNode.connect(analyserNode);
+
+const frequencyData = new Uint8Array(analyserNode.frequencyBinCount);
+const timeDomainData = new Uint8Array(analyserNode.frequencyBinCount);
+
+export const getFrequencyData = () => {
+  analyserNode.getByteFrequencyData(frequencyData);
+  return frequencyData;
+};
+
+export const getTimeDomainData = () => {
+  analyserNode.getByteTimeDomainData(timeDomainData);
+  return timeDomainData;
+};

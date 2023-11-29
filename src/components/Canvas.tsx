@@ -3,9 +3,15 @@ import { useCallback } from "react";
 import { Dialog, Button, Popover } from "react-aria-components";
 import { useCanvasStore } from "../stores/canvas";
 import { TextureLoader } from "three";
-import { GradientLayer, ImageLayer, useLayerStore } from "../stores/layers";
+import {
+  GradientLayer,
+  ImageLayer,
+  OscillatorLayer,
+  useLayerStore,
+} from "../stores/layers";
 import NumberField from "./ui/NumberField";
 import { GradientTexture } from "../three/GradientTexture";
+import { OscillatorTexture } from "../three/OscillatorTexture";
 
 function ImageLayerMesh({
   layer,
@@ -82,6 +88,38 @@ function GradientLayerMesh({
   );
 }
 
+function OscillatorLayerMesh({
+  layer,
+  index,
+}: {
+  layer: OscillatorLayer;
+  index: number;
+}) {
+  const { width, height, zoom, opacity, x, y } = layer;
+  const { size } = useThree();
+  return (
+    <mesh
+      scale={[(width / size.width) * zoom, (height / size.height) * zoom, 1]}
+      position={[
+        x + width / 2 - size.width / 2,
+        y + height / 2 - size.height / 2,
+        index,
+      ]}
+      frustumCulled={false}
+    >
+      <planeGeometry args={[size.width, size.height]} />
+      <meshBasicMaterial
+        depthTest={false}
+        depthWrite={false}
+        transparent
+        opacity={opacity}
+      >
+        <OscillatorTexture />
+      </meshBasicMaterial>
+    </mesh>
+  );
+}
+
 export function SizedCanvas() {
   const { width, height } = useCanvasStore();
   const layers = useLayerStore((state) => state.layers);
@@ -102,6 +140,8 @@ export function SizedCanvas() {
               <ImageLayerMesh key={layer.id} layer={layer} index={index} />
             ) : layer.type === "gradient" ? (
               <GradientLayerMesh key={layer.id} layer={layer} index={index} />
+            ) : layer.type === "oscillator" ? (
+              <OscillatorLayerMesh key={layer.id} layer={layer} index={index} />
             ) : null,
           )}
       </Canvas>

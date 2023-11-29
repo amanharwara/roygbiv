@@ -37,8 +37,13 @@ export type GradientLayer = CommonLayerProps &
     colors: string[];
   };
 
-export type PlaneLayer = ImageLayer | GradientLayer;
-export type Layer = ImageLayer | GradientLayer;
+export type OscillatorLayer = CommonLayerProps &
+  CommonPlaneObjectProps & {
+    type: "oscillator";
+  };
+
+export type PlaneLayer = ImageLayer | GradientLayer | OscillatorLayer;
+export type Layer = ImageLayer | GradientLayer | OscillatorLayer;
 
 type LayerStore = {
   selectedLayerId: string | null;
@@ -58,6 +63,7 @@ type LayerStore = {
   removeSelectedLayer: () => void;
   addImageLayer: (image: HTMLImageElement, name: string) => void;
   addGradientLayer: () => void;
+  addOscillatorLayer: () => void;
   addColorToGradientLayer: (layerId: string, color: string) => void;
   updateColorInGradientLayer: (
     layerId: string,
@@ -90,6 +96,15 @@ export const useLayerStore = create<LayerStore>()((set) => ({
         const gradientLayer = createGradientLayer();
         state.layers.unshift(gradientLayer);
         state.selectedLayerId = gradientLayer.id;
+      }),
+    );
+  },
+  addOscillatorLayer: () => {
+    set(
+      produce((state: LayerStore) => {
+        const oscillatorLayer = createOscillatorLayer();
+        state.layers.unshift(oscillatorLayer);
+        state.selectedLayerId = oscillatorLayer.id;
       }),
     );
   },
@@ -265,6 +280,20 @@ const createGradientLayer = (): GradientLayer => {
     // create utility for generating random colors
     colors: getRandomColors(2),
     name: "Gradient",
+    id: nanoid(),
+  };
+};
+
+const createOscillatorLayer = (): OscillatorLayer => {
+  return {
+    type: "oscillator",
+    x: 0,
+    y: 0,
+    width: useCanvasStore.getState().width,
+    height: useCanvasStore.getState().height,
+    zoom: 1,
+    opacity: 1,
+    name: "Oscillator",
     id: nanoid(),
   };
 };
