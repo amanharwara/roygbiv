@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import { getTimeDomainData, useAudioStore } from "../stores/audio";
 import { CanvasTexture } from "three";
 
-export function OscillatorTexture() {
+export function WaveformTexture() {
   const gl = useThree((state) => state.gl);
 
   const ref = useRef<CanvasTexture>(null);

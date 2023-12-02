@@ -37,13 +37,13 @@ export type GradientLayer = CommonLayerProps &
     colors: string[];
   };
 
-export type OscillatorLayer = CommonLayerProps &
+export type WaveformLayer = CommonLayerProps &
   CommonPlaneObjectProps & {
-    type: "oscillator";
+    type: "waveform";
   };
 
-export type PlaneLayer = ImageLayer | GradientLayer | OscillatorLayer;
-export type Layer = ImageLayer | GradientLayer | OscillatorLayer;
+export type PlaneLayer = ImageLayer | GradientLayer | WaveformLayer;
+export type Layer = ImageLayer | GradientLayer | WaveformLayer;
 
 type LayerStore = {
   selectedLayerId: string | null;
@@ -63,7 +63,7 @@ type LayerStore = {
   removeSelectedLayer: () => void;
   addImageLayer: (image: HTMLImageElement, name: string) => void;
   addGradientLayer: () => void;
-  addOscillatorLayer: () => void;
+  addWaveformLayer: () => void;
   addColorToGradientLayer: (layerId: string, color: string) => void;
   updateColorInGradientLayer: (
     layerId: string,
@@ -99,12 +99,12 @@ export const useLayerStore = create<LayerStore>()((set) => ({
       }),
     );
   },
-  addOscillatorLayer: () => {
+  addWaveformLayer: () => {
     set(
       produce((state: LayerStore) => {
-        const oscillatorLayer = createOscillatorLayer();
-        state.layers.unshift(oscillatorLayer);
-        state.selectedLayerId = oscillatorLayer.id;
+        const waveformLayer = createWaveformLayer();
+        state.layers.unshift(waveformLayer);
+        state.selectedLayerId = waveformLayer.id;
       }),
     );
   },
@@ -284,16 +284,16 @@ const createGradientLayer = (): GradientLayer => {
   };
 };
 
-const createOscillatorLayer = (): OscillatorLayer => {
+const createWaveformLayer = (): WaveformLayer => {
   return {
-    type: "oscillator",
+    type: "waveform",
     x: 0,
     y: 0,
     width: useCanvasStore.getState().width,
     height: useCanvasStore.getState().height,
     zoom: 1,
     opacity: 1,
-    name: "Oscillator",
+    name: "Waveform",
     id: nanoid(),
   };
 };

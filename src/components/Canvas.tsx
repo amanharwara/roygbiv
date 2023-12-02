@@ -6,12 +6,12 @@ import { TextureLoader } from "three";
 import {
   GradientLayer,
   ImageLayer,
-  OscillatorLayer,
+  WaveformLayer,
   useLayerStore,
 } from "../stores/layers";
 import NumberField from "./ui/NumberField";
 import { GradientTexture } from "../three/GradientTexture";
-import { OscillatorTexture } from "../three/OscillatorTexture";
+import { WaveformTexture } from "../three/WaveformTexture";
 
 function ImageLayerMesh({
   layer,
@@ -88,11 +88,11 @@ function GradientLayerMesh({
   );
 }
 
-function OscillatorLayerMesh({
+function WaveformLayerMesh({
   layer,
   index,
 }: {
-  layer: OscillatorLayer;
+  layer: WaveformLayer;
   index: number;
 }) {
   const { width, height, zoom, opacity, x, y } = layer;
@@ -114,7 +114,7 @@ function OscillatorLayerMesh({
         transparent
         opacity={opacity}
       >
-        <OscillatorTexture />
+        <WaveformTexture />
       </meshBasicMaterial>
     </mesh>
   );
@@ -140,8 +140,8 @@ export function SizedCanvas() {
               <ImageLayerMesh key={layer.id} layer={layer} index={index} />
             ) : layer.type === "gradient" ? (
               <GradientLayerMesh key={layer.id} layer={layer} index={index} />
-            ) : layer.type === "oscillator" ? (
-              <OscillatorLayerMesh key={layer.id} layer={layer} index={index} />
+            ) : layer.type === "waveform" ? (
+              <WaveformLayerMesh key={layer.id} layer={layer} index={index} />
             ) : null,
           )}
       </Canvas>

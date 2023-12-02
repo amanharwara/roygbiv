@@ -127,8 +127,8 @@ function LayersList() {
                   addAndSelectImageLayer();
                 } else if (key === "add-gradient") {
                   useLayerStore.getState().addGradientLayer();
-                } else if (key === "add-oscillator") {
-                  useLayerStore.getState().addOscillatorLayer();
+                } else if (key === "add-waveform") {
+                  useLayerStore.getState().addWaveformLayer();
                 }
               }}
             >
@@ -152,10 +152,10 @@ function LayersList() {
                 </Item>
                 <Item
                   className="flex items-center gap-2 rounded px-2.5 py-1.5 text-sm outline-none data-[focused]:bg-neutral-900"
-                  id="add-oscillator"
+                  id="add-waveform"
                 >
                   <GradientIcon className="h-4 w-4" />
-                  Oscillator
+                  Waveform
                 </Item>
               </Section>
             </Menu>
