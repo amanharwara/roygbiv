@@ -93,7 +93,7 @@ function WaveformLayerMesh({
   const { size } = useThree();
   return (
     <mesh
-      scale={[(width / size.width) * scale, (height / size.height) * scale, 1]}
+      scale={useAspect(width, height, scale)}
       position={[
         x + width / 2 - size.width / 2,
         y + height / 2 - size.height / 2,
@@ -101,7 +101,7 @@ function WaveformLayerMesh({
       ]}
       frustumCulled={false}
     >
-      <planeGeometry args={[size.width, size.height]} />
+      <planeGeometry args={[1, 1, 1, 1]} />
       <meshBasicMaterial
         depthTest={false}
         depthWrite={false}
