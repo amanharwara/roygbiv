@@ -35,7 +35,7 @@ function CommonPlaneLayerProperties({
 }: {
   layer: CommonPlaneObjectProps & { id: string };
 }) {
-  const { width, height, zoom, opacity, x, y } = layer;
+  const { width, height, scale, zoom, opacity, x, y } = layer;
   const defaultWidth = useRef(width);
   const defaultHeight = useRef(height);
   const updateLayer = useLayerStore((state) => state.updateLayer<PlaneLayer>);
@@ -67,6 +67,24 @@ function CommonPlaneLayerProperties({
             updateLayer(layer.id, {
               height,
             });
+          }}
+        />
+      </div>
+      <div className="px-3 text-sm">
+        <NumberField
+          label="Scale:"
+          defaultValue={1}
+          value={scale}
+          name="scale"
+          groupClassName="w-full"
+          onChange={(scale) => {
+            updateLayer(layer.id, {
+              scale,
+            });
+          }}
+          step={0.05}
+          formatOptions={{
+            style: "percent",
           }}
         />
       </div>

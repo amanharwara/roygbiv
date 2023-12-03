@@ -6,8 +6,8 @@ type CanvasStore = {
   setSize: (width: number, height: number) => void;
 };
 export const useCanvasStore = create<CanvasStore>()((set) => ({
-  width: 1280,
-  height: 800,
+  width: Math.round(window.innerWidth / 1.6),
+  height: Math.round(window.innerHeight / 1.6),
   setSize: (width: number, height: number) => {
     set({ width, height });
   },

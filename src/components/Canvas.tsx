@@ -1,8 +1,8 @@
-import { Canvas, useLoader, useThree } from "@react-three/fiber";
-import { useCallback } from "react";
+import { Canvas, useThree } from "@react-three/fiber";
+import { useCallback, useRef } from "react";
 import { Dialog, Button, Popover } from "react-aria-components";
 import { useCanvasStore } from "../stores/canvas";
-import { TextureLoader } from "three";
+import { Mesh } from "three";
 import {
   GradientLayer,
   ImageLayer,
@@ -12,6 +12,8 @@ import {
 import NumberField from "./ui/NumberField";
 import { GradientTexture } from "../three/GradientTexture";
 import { WaveformTexture } from "../three/WaveformTexture";
+import { IrisVisualizer } from "../three/IrisVisualizer";
+import { Image, useAspect } from "@react-three/drei";
 
 function ImageLayerMesh({
   layer,
@@ -20,31 +22,23 @@ function ImageLayerMesh({
   layer: ImageLayer;
   index: number;
 }) {
-  const { image, width, height, zoom, opacity, x, y } = layer;
+  const { image, width, height, zoom, scale, opacity, x, y } = layer;
+
+  const size = useAspect(width, height, scale);
+
+  const ref = useRef<Mesh>(null!);
 
   return (
-    <mesh
-      scale={[
-        (width / image.naturalWidth) * zoom,
-        (height / image.naturalHeight) * zoom,
-        1,
-      ]}
-      position={[
-        x + width / 2 - image.naturalWidth / 2,
-        y + height / 2 - image.naturalHeight / 2,
-        index,
-      ]}
-      frustumCulled={false}
-    >
-      <planeGeometry args={[image.naturalWidth, image.naturalHeight]} />
-      <meshBasicMaterial
-        map={useLoader(TextureLoader, image.src)}
-        depthTest={false}
-        depthWrite={false}
+    <group position={[x, y, index]}>
+      <Image
+        scale={[size[0], size[1]]}
+        zoom={zoom}
+        ref={ref}
+        url={image.src}
         transparent
         opacity={opacity}
       />
-    </mesh>
+    </group>
   );
 }
 
@@ -132,7 +126,7 @@ export function SizedCanvas() {
         height,
       }}
     >
-      <Canvas orthographic>
+      <Canvas>
         {layers
           .toReversed()
           .map((layer, index) =>
@@ -142,6 +136,8 @@ export function SizedCanvas() {
               <GradientLayerMesh key={layer.id} layer={layer} index={index} />
             ) : layer.type === "waveform" ? (
               <WaveformLayerMesh key={layer.id} layer={layer} index={index} />
+            ) : layer.type === "irisVisualizer" ? (
+              <IrisVisualizer key={layer.id} layer={layer} index={index} />
             ) : null,
           )}
       </Canvas>
