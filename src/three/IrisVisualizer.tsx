@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-import { RefObject, useEffect, useRef } from "react";
+import { RefObject, useEffect, useMemo, useRef } from "react";
 import { IrisVisualizerLayer } from "../stores/layers";
 import { Color, Matrix4, Mesh, Object3D, ShaderMaterial } from "three";
 import { useFrame, useThree } from "@react-three/fiber";
@@ -59,12 +59,14 @@ export function VizComp({
   opacity,
   spectrum,
   groupRef,
+  color,
 }: {
   numberOfBars: number;
   i: number;
   opacity: number;
   spectrum: RefObject<Spectrum>;
   groupRef: RefObject<Object3D>;
+  color?: string;
 }) {
   const shaderMaterialRef = useRef<ShaderMaterial>(null!);
 
@@ -121,16 +123,22 @@ export function VizComp({
     }
   });
 
+  const uniforms = useMemo(
+    () => ({
+      col: {
+        value: color ? new Color(color) : new Color(`hsl(100, 100%, 50%)`),
+      },
+    }),
+    [color],
+  );
+
   const shaderMaterial = (
     <shaderMaterial
+      key={color}
       ref={shaderMaterialRef}
       vertexShader={vertexShader}
       fragmentShader={fragmentShader}
-      uniforms={{
-        col: {
-          value: new Color(`hsl(100, 100%, 50%)`),
-        },
-      }}
+      uniforms={uniforms}
       depthTest={false}
       depthWrite={false}
       transparent
@@ -169,7 +177,7 @@ export function IrisVisualizer({
   layer: IrisVisualizerLayer;
   index: number;
 }) {
-  const { width, height, scale, opacity, x, y } = layer;
+  const { width, height, scale, opacity, x, y, color } = layer;
   const { size } = useThree();
 
   const spectrumRef = useRef(new Spectrum());
@@ -195,6 +203,7 @@ export function IrisVisualizer({
               spectrum={spectrumRef}
               groupRef={groupRef}
               key={i}
+              color={color}
             />
           );
         })}

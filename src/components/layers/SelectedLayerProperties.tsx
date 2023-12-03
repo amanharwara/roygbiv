@@ -3,6 +3,7 @@ import {
   CommonPlaneObjectProps,
   GradientLayer,
   ImageLayer,
+  IrisVisualizerLayer,
   PlaneLayer,
   useLayerStore,
 } from "../../stores/layers";
@@ -391,6 +392,31 @@ function GradientLayerProperties({ layer }: { layer: GradientLayer }) {
   );
 }
 
+function IrisVisualizerLayerProperties({
+  layer,
+}: {
+  layer: IrisVisualizerLayer;
+}) {
+  const { color } = layer;
+
+  return (
+    <>
+      <div className="px-3 text-sm">
+        <div className="mb-2">Color:</div>
+        <ColorButton
+          color={color}
+          onChangeEnd={(color: Color) => {
+            useLayerStore.getState().updateLayer(layer.id, {
+              color: color.toString("hsl"),
+            });
+          }}
+        />
+      </div>
+      <CommonPlaneLayerProperties layer={layer} />
+    </>
+  );
+}
+
 function SelectedLayerProperties() {
   const selectedLayerId = useLayerStore((state) => state.selectedLayerId);
   const layers = useLayerStore((state) => state.layers);
@@ -412,7 +438,10 @@ function SelectedLayerProperties() {
       <div className="flex flex-col gap-4 overflow-y-auto overflow-x-hidden py-3">
         {layer.type === "image" && <ImageLayerProperties layer={layer} />}
         {layer.type === "gradient" && <GradientLayerProperties layer={layer} />}
-        {(layer.type === "waveform" || layer.type === "irisVisualizer") && (
+        {layer.type === "irisVisualizer" && (
+          <IrisVisualizerLayerProperties layer={layer} />
+        )}
+        {layer.type === "waveform" && (
           <CommonPlaneLayerProperties layer={layer} />
         )}
       </div>

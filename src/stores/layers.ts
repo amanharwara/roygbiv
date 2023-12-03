@@ -5,6 +5,7 @@ import { create } from "zustand";
 import { useCanvasStore } from "./canvas";
 import { GradientType } from "@react-three/drei";
 import {
+  getRandomColor,
   getRandomColors,
   getStopsForGradientColors,
 } from "../utils/gradientUtils";
@@ -46,6 +47,7 @@ export type WaveformLayer = CommonLayerProps &
 export type IrisVisualizerLayer = CommonLayerProps &
   CommonPlaneObjectProps & {
     type: "irisVisualizer";
+    color: string;
   };
 
 export type PlaneLayer =
@@ -333,5 +335,6 @@ const createIrisVisualizerLayer = (): IrisVisualizerLayer => {
     opacity: 1,
     name: "Iris Visualizer",
     id: nanoid(),
+    color: getRandomColor(),
   };
 };
