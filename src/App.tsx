@@ -13,7 +13,7 @@ export default function App() {
   const setAudioFile = useAudioStore((state) => state.setAudioFile);
 
   return (
-    <div className="grid h-full grid-cols-[5fr,1fr] overflow-hidden">
+    <div className="grid h-full grid-cols-[5fr,1.5fr] overflow-hidden">
       <div className="flex flex-grow flex-col overflow-hidden">
         <div className="relative flex min-h-0 flex-grow items-center justify-center overflow-hidden">
           <div className="h-full w-full overflow-auto p-8">

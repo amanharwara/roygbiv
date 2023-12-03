@@ -20,6 +20,7 @@ export type CommonPlaneObjectProps = {
   width: number;
   height: number;
   zoom: number;
+  scale: number;
   opacity: number;
 };
 
@@ -283,6 +284,7 @@ const createImageLayer = (
     width: image.naturalWidth,
     height: image.naturalHeight,
     zoom: 1,
+    scale: 1,
     opacity: 1,
     name,
     id: nanoid(),
@@ -298,9 +300,9 @@ const createGradientLayer = (): GradientLayer => {
     width: useCanvasStore.getState().width,
     height: useCanvasStore.getState().height,
     zoom: 1,
+    scale: 1,
     opacity: 1,
     stops: [0, 1],
-    // create utility for generating random colors
     colors: getRandomColors(2),
     name: "Gradient",
     id: nanoid(),
@@ -315,6 +317,7 @@ const createWaveformLayer = (): WaveformLayer => {
     width: useCanvasStore.getState().width,
     height: useCanvasStore.getState().height,
     zoom: 1,
+    scale: 1,
     opacity: 1,
     name: "Waveform",
     id: nanoid(),
@@ -328,6 +331,7 @@ const createIrisVisualizerLayer = (): IrisVisualizerLayer => {
     y: 0,
     width: useCanvasStore.getState().width,
     height: useCanvasStore.getState().height,
+    scale: 1,
     zoom: 1,
     opacity: 1,
     name: "Iris Visualizer",
