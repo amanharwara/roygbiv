@@ -49,12 +49,12 @@ function GradientLayerMesh({
   layer: GradientLayer;
   index: number;
 }) {
-  const { width, height, zoom, opacity, x, y, stops, colors, gradientType } =
+  const { width, height, scale, opacity, x, y, stops, colors, gradientType } =
     layer;
   const { size } = useThree();
   return (
     <mesh
-      scale={[(width / size.width) * zoom, (height / size.height) * zoom, 1]}
+      scale={useAspect(width, height, scale)}
       position={[
         x + width / 2 - size.width / 2,
         y + height / 2 - size.height / 2,
@@ -62,7 +62,7 @@ function GradientLayerMesh({
       ]}
       frustumCulled={false}
     >
-      <planeGeometry args={[size.width, size.height]} />
+      <planeGeometry args={[1, 1, 1, 1]} />
       <meshBasicMaterial
         depthTest={false}
         depthWrite={false}
@@ -89,11 +89,11 @@ function WaveformLayerMesh({
   layer: WaveformLayer;
   index: number;
 }) {
-  const { width, height, zoom, opacity, x, y } = layer;
+  const { width, height, scale, opacity, x, y } = layer;
   const { size } = useThree();
   return (
     <mesh
-      scale={[(width / size.width) * zoom, (height / size.height) * zoom, 1]}
+      scale={[(width / size.width) * scale, (height / size.height) * scale, 1]}
       position={[
         x + width / 2 - size.width / 2,
         y + height / 2 - size.height / 2,

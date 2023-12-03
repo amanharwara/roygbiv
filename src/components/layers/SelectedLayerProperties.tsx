@@ -35,7 +35,7 @@ function CommonPlaneLayerProperties({
 }: {
   layer: CommonPlaneObjectProps & { id: string };
 }) {
-  const { width, height, scale, zoom, opacity, x, y } = layer;
+  const { width, height, scale, opacity, x, y } = layer;
   const defaultWidth = useRef(width);
   const defaultHeight = useRef(height);
   const updateLayer = useLayerStore((state) => state.updateLayer<PlaneLayer>);
@@ -80,24 +80,6 @@ function CommonPlaneLayerProperties({
           onChange={(scale) => {
             updateLayer(layer.id, {
               scale,
-            });
-          }}
-          step={0.05}
-          formatOptions={{
-            style: "percent",
-          }}
-        />
-      </div>
-      <div className="px-3 text-sm">
-        <NumberField
-          label="Zoom:"
-          defaultValue={1}
-          value={zoom}
-          name="zoom"
-          groupClassName="w-full"
-          onChange={(zoom) => {
-            updateLayer(layer.id, {
-              zoom,
             });
           }}
           step={0.05}
@@ -160,7 +142,8 @@ function CommonPlaneLayerProperties({
 }
 
 function ImageLayerProperties({ layer }: { layer: ImageLayer }) {
-  const { name, image } = layer;
+  const { name, zoom, image } = layer;
+  const updateLayer = useLayerStore((state) => state.updateLayer<ImageLayer>);
 
   return (
     <>
@@ -171,6 +154,24 @@ function ImageLayerProperties({ layer }: { layer: ImageLayer }) {
         </div>
       </div>
       <CommonPlaneLayerProperties layer={layer} />
+      <div className="px-3 text-sm">
+        <NumberField
+          label="Zoom:"
+          defaultValue={1}
+          value={zoom}
+          name="zoom"
+          groupClassName="w-full"
+          onChange={(zoom) => {
+            updateLayer(layer.id, {
+              zoom,
+            });
+          }}
+          step={0.05}
+          formatOptions={{
+            style: "percent",
+          }}
+        />
+      </div>
     </>
   );
 }

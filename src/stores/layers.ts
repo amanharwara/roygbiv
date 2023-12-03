@@ -19,7 +19,6 @@ export type CommonPlaneObjectProps = {
   y: number;
   width: number;
   height: number;
-  zoom: number;
   scale: number;
   opacity: number;
 };
@@ -28,6 +27,7 @@ export type ImageLayer = CommonLayerProps &
   CommonPlaneObjectProps & {
     type: "image";
     image: HTMLImageElement;
+    zoom: number;
   };
 
 export type GradientLayer = CommonLayerProps &
@@ -299,7 +299,6 @@ const createGradientLayer = (): GradientLayer => {
     y: 0,
     width: useCanvasStore.getState().width,
     height: useCanvasStore.getState().height,
-    zoom: 1,
     scale: 1,
     opacity: 1,
     stops: [0, 1],
@@ -316,7 +315,6 @@ const createWaveformLayer = (): WaveformLayer => {
     y: 0,
     width: useCanvasStore.getState().width,
     height: useCanvasStore.getState().height,
-    zoom: 1,
     scale: 1,
     opacity: 1,
     name: "Waveform",
@@ -332,7 +330,6 @@ const createIrisVisualizerLayer = (): IrisVisualizerLayer => {
     width: useCanvasStore.getState().width,
     height: useCanvasStore.getState().height,
     scale: 1,
-    zoom: 1,
     opacity: 1,
     name: "Iris Visualizer",
     id: nanoid(),
