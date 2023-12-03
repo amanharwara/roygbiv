@@ -176,14 +176,47 @@ function ImageLayerProperties({ layer }: { layer: ImageLayer }) {
   );
 }
 
-function GradientColorDialog({
+function ColorButton({
   color,
-  index,
-  id,
+  onChangeEnd,
 }: {
   color: string;
-  index: number;
-  id: string;
+  onChangeEnd: (color: Color) => void;
+}) {
+  return (
+    <div className="group/main relative">
+      <DialogTrigger>
+        <Button
+          className="group h-14 w-14 rounded"
+          style={{
+            backgroundColor: color,
+          }}
+        >
+          <span className="sr-only">Choose color</span>
+          <div
+            className="flex h-full w-full items-center justify-center bg-black/50 opacity-0 transition-[opacity,colors] duration-75 group-hover:opacity-100 group-hover:[outline:-webkit-focus-ring-color_auto_1px] group-focus:opacity-100 group-focus:[outline:-webkit-focus-ring-color_auto_1px]"
+            role="presentation"
+          >
+            <EditIcon className="h-6 w-6" />
+          </div>
+        </Button>
+        <Popover
+          placement="bottom end"
+          className="rounded border border-neutral-700 bg-neutral-800 p-3 data-[entering]:animate-fade-in data-[exiting]:animate-fade-out "
+        >
+          <ColorDialog color={color} onChangeEnd={onChangeEnd} />
+        </Popover>
+      </DialogTrigger>
+    </div>
+  );
+}
+
+function ColorDialog({
+  color,
+  onChangeEnd,
+}: {
+  color: string;
+  onChangeEnd: (color: Color) => void;
 }) {
   const [parsedColor, setParsedColor] = useState(() =>
     parseColor(color).toFormat("hsb"),
@@ -192,15 +225,6 @@ function GradientColorDialog({
   const onChange = useCallback((color: Color) => {
     setParsedColor(color);
   }, []);
-
-  const onChangeEnd = useCallback(
-    (color: Color) => {
-      useLayerStore
-        .getState()
-        .updateColorInGradientLayer(id, index, color.toString("css"));
-    },
-    [id, index],
-  );
 
   return (
     <Dialog className="flex select-none flex-col gap-3 outline-none">
@@ -251,32 +275,18 @@ function GradientLayerProperties({ layer }: { layer: GradientLayer }) {
         <div className="flex flex-wrap items-center gap-4">
           {colors.map((color, index) => (
             <div className="group/main relative" key={index}>
-              <DialogTrigger>
-                <Button
-                  className="group h-14 w-14 rounded"
-                  style={{
-                    backgroundColor: color,
-                  }}
-                >
-                  <span className="sr-only">Choose color</span>
-                  <div
-                    className="flex h-full w-full items-center justify-center bg-black/50 opacity-0 transition-[opacity,colors] duration-75 group-hover:opacity-100 group-hover:[outline:-webkit-focus-ring-color_auto_1px] group-focus:opacity-100 group-focus:[outline:-webkit-focus-ring-color_auto_1px]"
-                    role="presentation"
-                  >
-                    <EditIcon className="h-6 w-6" />
-                  </div>
-                </Button>
-                <Popover
-                  placement="bottom end"
-                  className="rounded border border-neutral-700 bg-neutral-800 p-3 data-[entering]:animate-fade-in data-[exiting]:animate-fade-out "
-                >
-                  <GradientColorDialog
-                    color={color}
-                    index={index}
-                    id={layer.id}
-                  />
-                </Popover>
-              </DialogTrigger>
+              <ColorButton
+                color={color}
+                onChangeEnd={(color: Color) => {
+                  useLayerStore
+                    .getState()
+                    .updateColorInGradientLayer(
+                      layer.id,
+                      index,
+                      color.toString("css"),
+                    );
+                }}
+              />
               {colors.length > 2 && (
                 <button
                   className="absolute right-0 top-0 -translate-y-2 translate-x-2 rounded bg-neutral-700 p-1.5 opacity-0 hover:bg-neutral-800 hover:[outline:-webkit-focus-ring-color_auto_1px] group-focus-within/main:opacity-100 group-hover/main:opacity-100"
