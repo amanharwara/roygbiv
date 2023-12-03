@@ -402,6 +402,9 @@ function SelectedLayerProperties() {
       <div className="flex flex-col gap-4 overflow-y-auto overflow-x-hidden py-3">
         {layer.type === "image" && <ImageLayerProperties layer={layer} />}
         {layer.type === "gradient" && <GradientLayerProperties layer={layer} />}
+        {(layer.type === "waveform" || layer.type === "irisVisualizer") && (
+          <CommonPlaneLayerProperties layer={layer} />
+        )}
       </div>
     </>
   );
