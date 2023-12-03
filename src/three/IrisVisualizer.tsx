@@ -53,10 +53,6 @@ function getLoudness(arr: Uint8Array) {
   return sum / arr.length;
 }
 
-function modn(n: number, m: number) {
-  return ((n % m) + m) % m;
-}
-
 export function VizComp({
   numberOfBars,
   i,
@@ -103,18 +99,8 @@ export function VizComp({
 
     const group = groupRef.current!;
 
-    function setUniformColor(loudness: number) {
-      const h = modn(250 - loudness * 2.2, 360);
-      shaderMaterialRef.current.uniforms.col!.value = new Color(
-        "hsl(" + h + ", 100%, 50%)",
-      );
-    }
-
     if (group) {
       for (let i = 0; i < visualArray.length / 2; i++) {
-        //Left and right share the same material hence why we don't need i*2+1
-        setUniformColor(loudness);
-
         const visualArrayI = visualArray[i]!;
 
         const groupChildrenFirst = group.children[i * 2]!;
