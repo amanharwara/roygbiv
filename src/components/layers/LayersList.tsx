@@ -129,6 +129,8 @@ function LayersList() {
                   useLayerStore.getState().addGradientLayer();
                 } else if (key === "add-waveform") {
                   useLayerStore.getState().addWaveformLayer();
+                } else if (key === "add-iris-visualizer") {
+                  useLayerStore.getState().addIrisVisualizerLayer();
                 }
               }}
             >
@@ -156,6 +158,13 @@ function LayersList() {
                 >
                   <GradientIcon className="h-4 w-4" />
                   Waveform
+                </Item>
+                <Item
+                  className="flex items-center gap-2 rounded px-2.5 py-1.5 text-sm outline-none data-[focused]:bg-neutral-900"
+                  id="add-iris-visualizer"
+                >
+                  <GradientIcon className="h-4 w-4" />
+                  Iris Visualizer
                 </Item>
               </Section>
             </Menu>

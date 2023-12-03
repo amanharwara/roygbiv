@@ -42,8 +42,21 @@ export type WaveformLayer = CommonLayerProps &
     type: "waveform";
   };
 
-export type PlaneLayer = ImageLayer | GradientLayer | WaveformLayer;
-export type Layer = ImageLayer | GradientLayer | WaveformLayer;
+export type IrisVisualizerLayer = CommonLayerProps &
+  CommonPlaneObjectProps & {
+    type: "irisVisualizer";
+  };
+
+export type PlaneLayer =
+  | ImageLayer
+  | GradientLayer
+  | WaveformLayer
+  | IrisVisualizerLayer;
+export type Layer =
+  | ImageLayer
+  | GradientLayer
+  | WaveformLayer
+  | IrisVisualizerLayer;
 
 type LayerStore = {
   selectedLayerId: string | null;
@@ -64,6 +77,7 @@ type LayerStore = {
   addImageLayer: (image: HTMLImageElement, name: string) => void;
   addGradientLayer: () => void;
   addWaveformLayer: () => void;
+  addIrisVisualizerLayer: () => void;
   addColorToGradientLayer: (layerId: string, color: string) => void;
   updateColorInGradientLayer: (
     layerId: string,
@@ -105,6 +119,15 @@ export const useLayerStore = create<LayerStore>()((set) => ({
         const waveformLayer = createWaveformLayer();
         state.layers.unshift(waveformLayer);
         state.selectedLayerId = waveformLayer.id;
+      }),
+    );
+  },
+  addIrisVisualizerLayer: () => {
+    set(
+      produce((state: LayerStore) => {
+        const irisVisualizerLayer = createIrisVisualizerLayer();
+        state.layers.unshift(irisVisualizerLayer);
+        state.selectedLayerId = irisVisualizerLayer.id;
       }),
     );
   },
@@ -294,6 +317,20 @@ const createWaveformLayer = (): WaveformLayer => {
     zoom: 1,
     opacity: 1,
     name: "Waveform",
+    id: nanoid(),
+  };
+};
+
+const createIrisVisualizerLayer = (): IrisVisualizerLayer => {
+  return {
+    type: "irisVisualizer",
+    x: 0,
+    y: 0,
+    width: useCanvasStore.getState().width,
+    height: useCanvasStore.getState().height,
+    zoom: 1,
+    opacity: 1,
+    name: "Iris Visualizer",
     id: nanoid(),
   };
 };

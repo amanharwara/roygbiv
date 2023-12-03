@@ -12,6 +12,7 @@ import {
 import NumberField from "./ui/NumberField";
 import { GradientTexture } from "../three/GradientTexture";
 import { WaveformTexture } from "../three/WaveformTexture";
+import { IrisVisualizer } from "../three/IrisVisualizer";
 
 function ImageLayerMesh({
   layer,
@@ -132,7 +133,7 @@ export function SizedCanvas() {
         height,
       }}
     >
-      <Canvas orthographic>
+      <Canvas>
         {layers
           .toReversed()
           .map((layer, index) =>
@@ -142,6 +143,8 @@ export function SizedCanvas() {
               <GradientLayerMesh key={layer.id} layer={layer} index={index} />
             ) : layer.type === "waveform" ? (
               <WaveformLayerMesh key={layer.id} layer={layer} index={index} />
+            ) : layer.type === "irisVisualizer" ? (
+              <IrisVisualizer key={layer.id} layer={layer} index={index} />
             ) : null,
           )}
       </Canvas>
