@@ -30,20 +30,21 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { Spectrum } from "./SpectrumUtil";
 import { getFrequencyData, useAudioStore } from "../stores/audio";
 
-const vertexShader = [
-  "varying vec4 pos;",
-  "void main() {",
-  "pos = modelViewMatrix * vec4( position, 1.0 );",
-  "gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
-  "}",
-].join("\n");
-const fragmentShader = [
-  "uniform vec3 col;",
-  "varying vec4 pos;",
-  "void main() {",
-  "gl_FragColor = vec4( -pos.z/180.0 * col.r, -pos.z/180.0 * col.g, -pos.z/180.0 * col.b, 1.0 );",
-  "}",
-].join("\n");
+const vertexShader = `
+varying vec4 pos;
+void main() {
+  pos = modelViewMatrix * vec4(position, 1.0);
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+`;
+
+const fragmentShader = `
+uniform vec3 col;
+varying vec4 pos;
+void main() {
+  gl_FragColor = vec4(-pos.z/180.0*col.r, -pos.z/180.0*col.g, -pos.z/180.0*col.b, 1.0);
+}
+`;
 
 function getLoudness(arr: Uint8Array) {
   let sum = 0;
