@@ -25,10 +25,19 @@ SOFTWARE.
 
 import { RefObject, useEffect, useMemo, useRef } from "react";
 import { IrisVisualizerLayer } from "../stores/layers";
-import { Color, Matrix4, Mesh, Object3D, ShaderMaterial } from "three";
-import { useFrame, useThree } from "@react-three/fiber";
+import {
+  Color,
+  Matrix4,
+  Mesh,
+  Object3D,
+  PerspectiveCamera,
+  Scene,
+  ShaderMaterial,
+} from "three";
+import { useFrame } from "@react-three/fiber";
 import { Spectrum } from "./SpectrumUtil";
 import { getFrequencyData, useAudioStore } from "../stores/audio";
+import { Billboard, useAspect, useFBO } from "@react-three/drei";
 
 const vertexShader = `
 varying vec4 pos;
@@ -179,36 +188,60 @@ export function IrisVisualizer({
   index: number;
 }) {
   const { width, height, scale, opacity, x, y, color } = layer;
-  const { size } = useThree();
 
   const spectrumRef = useRef(new Spectrum());
   const groupRef = useRef<Object3D>(null!);
 
+  const buffer = useFBO();
+
+  const sceneRef = useRef<Scene>(null!);
+  const cameraRef = useRef<PerspectiveCamera>(null!);
+
+  useFrame(({ gl }) => {
+    if (!sceneRef.current || !cameraRef.current) return;
+    gl.setRenderTarget(buffer);
+    gl.render(sceneRef.current, cameraRef.current);
+    gl.setRenderTarget(null);
+  });
+
   return (
-    <scene
-      scale={[(width / size.width) * scale, (height / size.height) * scale, 1]}
-      position={[
-        x + width / 2 - size.width / 2,
-        y + height / 2 - size.height / 2,
-        index,
-      ]}
-      frustumCulled={false}
-    >
-      <object3D ref={groupRef}>
-        {[...Array(numberOfBars / 2)].map((_, i) => {
-          return (
-            <VizComp
-              numberOfBars={numberOfBars}
-              i={i}
-              opacity={opacity}
-              spectrum={spectrumRef}
-              groupRef={groupRef}
-              key={i}
-              color={color}
-            />
-          );
-        })}
-      </object3D>
-    </scene>
+    <Billboard>
+      <scene frustumCulled={false} ref={sceneRef}>
+        <perspectiveCamera
+          ref={cameraRef}
+          scale={useAspect(width, height, 0.005)}
+          position={[0, 0, 1]}
+        />
+        <object3D ref={groupRef}>
+          {[...Array(numberOfBars / 2)].map((_, i) => {
+            return (
+              <VizComp
+                numberOfBars={numberOfBars}
+                i={i}
+                opacity={opacity}
+                spectrum={spectrumRef}
+                groupRef={groupRef}
+                key={i}
+                color={color}
+              />
+            );
+          })}
+        </object3D>
+      </scene>
+      <mesh
+        scale={useAspect(width, height, scale)}
+        position={[x, y, index]}
+        frustumCulled={false}
+      >
+        <planeGeometry args={[1, 1, 1, 1]} />
+        <meshBasicMaterial
+          depthTest={false}
+          depthWrite={false}
+          transparent
+          opacity={opacity}
+          map={buffer.texture}
+        />
+      </mesh>
+    </Billboard>
   );
 }

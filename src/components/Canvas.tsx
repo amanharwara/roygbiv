@@ -52,14 +52,11 @@ function GradientLayerMesh({
   const { width, height, scale, opacity, x, y, stops, colors, gradientType } =
     layer;
   const { size } = useThree();
+
   return (
     <mesh
       scale={useAspect(width, height, scale)}
-      position={[
-        x + width / 2 - size.width / 2,
-        y + height / 2 - size.height / 2,
-        index,
-      ]}
+      position={[x, y, index]}
       frustumCulled={false}
     >
       <planeGeometry args={[1, 1, 1, 1]} />
@@ -90,15 +87,11 @@ function WaveformLayerMesh({
   index: number;
 }) {
   const { width, height, scale, opacity, x, y } = layer;
-  const { size } = useThree();
+
   return (
     <mesh
       scale={useAspect(width, height, scale)}
-      position={[
-        x + width / 2 - size.width / 2,
-        y + height / 2 - size.height / 2,
-        index,
-      ]}
+      position={[x, y, index]}
       frustumCulled={false}
     >
       <planeGeometry args={[1, 1, 1, 1]} />
@@ -126,7 +119,7 @@ export function SizedCanvas() {
         height,
       }}
     >
-      <Canvas>
+      <Canvas orthographic>
         {layers
           .toReversed()
           .map((layer, index) =>
