@@ -5,6 +5,7 @@ import {
   ImageLayer,
   IrisVisualizerLayer,
   PlaneLayer,
+  WaveformLayer,
   useLayerStore,
 } from "../../stores/layers";
 import {
@@ -417,6 +418,27 @@ function IrisVisualizerLayerProperties({
   );
 }
 
+function WaveformLayerProperties({ layer }: { layer: WaveformLayer }) {
+  const { color } = layer;
+
+  return (
+    <>
+      <div className="px-3 text-sm">
+        <div className="mb-2">Color:</div>
+        <ColorButton
+          color={color}
+          onChangeEnd={(color: Color) => {
+            useLayerStore.getState().updateLayer(layer.id, {
+              color: color.toString("hsl"),
+            });
+          }}
+        />
+      </div>
+      <CommonPlaneLayerProperties layer={layer} />
+    </>
+  );
+}
+
 function SelectedLayerProperties() {
   const selectedLayerId = useLayerStore((state) => state.selectedLayerId);
   const layers = useLayerStore((state) => state.layers);
@@ -441,9 +463,7 @@ function SelectedLayerProperties() {
         {layer.type === "irisVisualizer" && (
           <IrisVisualizerLayerProperties layer={layer} />
         )}
-        {layer.type === "waveform" && (
-          <CommonPlaneLayerProperties layer={layer} />
-        )}
+        {layer.type === "waveform" && <WaveformLayerProperties layer={layer} />}
       </div>
     </>
   );

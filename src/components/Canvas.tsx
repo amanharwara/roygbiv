@@ -86,7 +86,7 @@ function WaveformLayerMesh({
   layer: WaveformLayer;
   index: number;
 }) {
-  const { width, height, scale, opacity, x, y } = layer;
+  const { width, height, scale, opacity, x, y, color } = layer;
 
   return (
     <mesh
@@ -101,7 +101,7 @@ function WaveformLayerMesh({
         transparent
         opacity={opacity}
       >
-        <WaveformTexture />
+        <WaveformTexture color={color} />
       </meshBasicMaterial>
     </mesh>
   );

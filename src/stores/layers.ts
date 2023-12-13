@@ -42,6 +42,7 @@ export type GradientLayer = CommonLayerProps &
 export type WaveformLayer = CommonLayerProps &
   CommonPlaneObjectProps & {
     type: "waveform";
+    color: string;
   };
 
 export type IrisVisualizerLayer = CommonLayerProps &
@@ -321,6 +322,7 @@ const createWaveformLayer = (): WaveformLayer => {
     opacity: 1,
     name: "Waveform",
     id: nanoid(),
+    color: getRandomColor(),
   };
 };
 

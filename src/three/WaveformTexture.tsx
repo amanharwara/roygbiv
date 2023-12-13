@@ -3,7 +3,7 @@ import { useRef } from "react";
 import { getTimeDomainData, useAudioStore } from "../stores/audio";
 import { CanvasTexture } from "three";
 
-export function WaveformTexture() {
+export function WaveformTexture({ color = "#ffffff" }: { color: string }) {
   const gl = useThree((state) => state.gl);
 
   const ref = useRef<CanvasTexture>(null);
@@ -44,7 +44,7 @@ export function WaveformTexture() {
 
     ctx.lineTo(width, height / 2);
 
-    ctx.strokeStyle = "#ffffff";
+    ctx.strokeStyle = color;
 
     ctx.stroke();
 
