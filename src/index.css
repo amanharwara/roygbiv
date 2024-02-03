@@ -40,3 +40,7 @@ body {
 .react-aria-DropIndicator[data-drop-target] {
   @apply outline outline-1 outline-neutral-300;
 }
+
+button {
+  @apply rounded bg-neutral-700 px-3 py-1 hover:bg-neutral-600;
+}
