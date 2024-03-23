@@ -40,7 +40,7 @@ export type FrequencyRange = {
 
 export const store = create<{
   ranges: FrequencyRange[];
-  addNewRange: (preset?: PresetFrequencyRange) => void;
+  addNewRange: (preset?: PresetFrequencyRange) => string;
   updateRange: (id: string, range: Partial<FrequencyRange>) => void;
   removeRange: (id: string) => void;
 
@@ -70,6 +70,7 @@ export const store = create<{
         },
       ],
     }));
+    return id;
   },
   updateRange: (id: string, range: Partial<FrequencyRange>) => {
     set((state) => ({
@@ -96,7 +97,7 @@ export const store = create<{
 function update() {
   requestAnimationFrame(update);
 
-  // const ranges = store.getState().ranges;
+  const ranges = store.getState().ranges;
 
   if (isAudioPaused()) {
     return;
@@ -106,10 +107,10 @@ function update() {
 
   store.getState().setLevel(getAudioLevel());
 
-  // for (const range of ranges) {
-  //   const value = Math.floor(getEnergyForFreqs(range.min, range.max));
-  //   store.getState().updateRange(range.id, { value });
-  // }
+  for (const range of ranges) {
+    const value = Math.floor(getEnergyForFreqs(range.min, range.max));
+    store.getState().updateRange(range.id, { value });
+  }
 }
 
 requestAnimationFrame(update);

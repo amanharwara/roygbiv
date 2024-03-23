@@ -1,6 +1,6 @@
 export const audioContext = new AudioContext();
 
-const audioElement = new Audio();
+export const audioElement = new Audio();
 export const playAudio = () => audioElement.play();
 export const pauseAudio = () => audioElement.pause();
 export const resetAudio = () => {
