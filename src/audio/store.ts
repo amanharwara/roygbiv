@@ -48,7 +48,8 @@ export const store = create<{
   setValue: (value: number) => void;
 
   level: number;
-}>((set) => ({
+  setLevel: (level: number) => void;
+}>((set, get) => ({
   ranges: [],
   addNewRange: (preset?: PresetFrequencyRange) => {
     const id = nanoid();
@@ -85,6 +86,11 @@ export const store = create<{
   setValue: (value) => set({ value }),
 
   level: 0,
+  setLevel: (level: number) => {
+    if (get().level !== level) {
+      set({ level });
+    }
+  },
 }));
 
 function update() {
@@ -98,7 +104,7 @@ function update() {
 
   analyze();
 
-  store.setState({ level: getAudioLevel() });
+  store.getState().setLevel(getAudioLevel());
 
   // for (const range of ranges) {
   //   const value = Math.floor(getEnergyForFreqs(range.min, range.max));
