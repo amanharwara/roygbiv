@@ -3,9 +3,7 @@ import {
   CommonPlaneObjectProps,
   GradientLayer,
   ImageLayer,
-  IrisVisualizerLayer,
   PlaneLayer,
-  WaveformLayer,
   useLayerStore,
 } from "../../stores/layers";
 import {
@@ -31,6 +29,7 @@ import CloseIcon from "../../icons/CloseIcon";
 import ColorSlider from "../ui/ColorSlider";
 import { Color, parseColor } from "@react-stately/color";
 import { getRandomColor } from "../../utils/gradientUtils";
+import TextField from "../ui/TextField";
 
 function CommonPlaneLayerProperties({
   layer,
@@ -73,20 +72,14 @@ function CommonPlaneLayerProperties({
         />
       </div>
       <div className="px-3 text-sm">
-        <NumberField
+        <TextField
           label="Scale:"
-          defaultValue={1}
+          className="w-full"
           value={scale}
-          name="scale"
-          groupClassName="w-full"
           onChange={(scale) => {
             updateLayer(layer.id, {
               scale,
             });
-          }}
-          step={0.05}
-          formatOptions={{
-            style: "percent",
           }}
         />
       </div>
@@ -393,52 +386,6 @@ function GradientLayerProperties({ layer }: { layer: GradientLayer }) {
   );
 }
 
-function IrisVisualizerLayerProperties({
-  layer,
-}: {
-  layer: IrisVisualizerLayer;
-}) {
-  const { color } = layer;
-
-  return (
-    <>
-      <div className="px-3 text-sm">
-        <div className="mb-2">Color:</div>
-        <ColorButton
-          color={color}
-          onChangeEnd={(color: Color) => {
-            useLayerStore.getState().updateLayer(layer.id, {
-              color: color.toString("hsl"),
-            });
-          }}
-        />
-      </div>
-      <CommonPlaneLayerProperties layer={layer} />
-    </>
-  );
-}
-
-function WaveformLayerProperties({ layer }: { layer: WaveformLayer }) {
-  const { color } = layer;
-
-  return (
-    <>
-      <div className="px-3 text-sm">
-        <div className="mb-2">Color:</div>
-        <ColorButton
-          color={color}
-          onChangeEnd={(color: Color) => {
-            useLayerStore.getState().updateLayer(layer.id, {
-              color: color.toString("hsl"),
-            });
-          }}
-        />
-      </div>
-      <CommonPlaneLayerProperties layer={layer} />
-    </>
-  );
-}
-
 function SelectedLayerProperties() {
   const selectedLayerId = useLayerStore((state) => state.selectedLayerId);
   const layers = useLayerStore((state) => state.layers);
@@ -460,10 +407,6 @@ function SelectedLayerProperties() {
       <div className="flex flex-col gap-4 overflow-y-auto overflow-x-hidden py-3">
         {layer.type === "image" && <ImageLayerProperties layer={layer} />}
         {layer.type === "gradient" && <GradientLayerProperties layer={layer} />}
-        {layer.type === "irisVisualizer" && (
-          <IrisVisualizerLayerProperties layer={layer} />
-        )}
-        {layer.type === "waveform" && <WaveformLayerProperties layer={layer} />}
       </div>
     </>
   );

@@ -1,17 +1,51 @@
-import { Canvas, useThree } from "@react-three/fiber";
+import { Canvas, Viewport, useFrame, useThree } from "@react-three/fiber";
 import { useCallback, useRef } from "react";
 import { Dialog, Button, Popover } from "react-aria-components";
 import { useCanvasStore } from "../stores/canvas";
 import { Mesh } from "three";
-import {
-  GradientLayer,
-  ImageLayer,
-  WaveformLayer,
-  useLayerStore,
-} from "../stores/layers";
+import { GradientLayer, ImageLayer, useLayerStore } from "../stores/layers";
 import NumberField from "./ui/NumberField";
 import { GradientTexture } from "../three/GradientTexture";
 import { Image, useAspect } from "@react-three/drei";
+import { store } from "../audio/store";
+import { mapNumber } from "../utils/numbers";
+import { lerp } from "three/src/math/MathUtils";
+
+function aspect(
+  width: number,
+  height: number,
+  factor: number = 1,
+  viewport: Viewport,
+): [number, number, number] {
+  const adaptedHeight =
+    height *
+    (viewport.aspect > width / height
+      ? viewport.width / width
+      : viewport.height / height);
+  const adaptedWidth =
+    width *
+    (viewport.aspect > width / height
+      ? viewport.width / width
+      : viewport.height / height);
+  return [adaptedWidth * factor, adaptedHeight * factor, 1];
+}
+
+function computedValue(value: string) {
+  try {
+    const volume = store.getState().level;
+    // Declaring map so that it can be used in eval
+    const map = mapNumber;
+    return eval(value.replace(/volume/g, volume.toString()));
+  } catch {
+    /* empty */
+  }
+  try {
+    return parseFloat(value);
+  } catch {
+    /* empty */
+  }
+  throw new Error("Invalid value");
+}
 
 function ImageLayerMesh({
   layer,
@@ -22,14 +56,36 @@ function ImageLayerMesh({
 }) {
   const { image, width, height, zoom, scale, opacity, x, y } = layer;
 
-  const size = useAspect(width, height, scale);
+  // const computedScale = useComputedValue(scale);
+
+  // const size = useAspect(width, height, computedScale);
+
+  const viewport = useThree((state) => state.viewport);
 
   const ref = useRef<Mesh>(null!);
+
+  useFrame(() => {
+    const computedScale = computedValue(scale);
+    const [wScale, hScale] = aspect(width, height, computedScale, viewport);
+    const currentScaleX = ref.current.scale.x;
+    const currentScaleY = ref.current.scale.y;
+    const wScaleLerp = lerp(
+      isNaN(currentScaleX) ? 1 : currentScaleX,
+      wScale,
+      0.05,
+    );
+    const hScaleLerp = lerp(
+      isNaN(currentScaleY) ? 1 : currentScaleY,
+      hScale,
+      0.05,
+    );
+    ref.current.scale.set(wScaleLerp, hScaleLerp, 1);
+  });
 
   return (
     <group position={[x, y, index]}>
       <Image
-        scale={[size[0], size[1]]}
+        // scale={[size[0], size[1]]}
         zoom={zoom}
         ref={ref}
         url={image.src}

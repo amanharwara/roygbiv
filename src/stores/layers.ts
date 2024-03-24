@@ -5,7 +5,6 @@ import { create } from "zustand";
 import { useCanvasStore } from "./canvas";
 import { GradientType } from "@react-three/drei";
 import {
-  getRandomColor,
   getRandomColors,
   getStopsForGradientColors,
 } from "../utils/gradientUtils";
@@ -20,7 +19,7 @@ export type CommonPlaneObjectProps = {
   y: number;
   width: number;
   height: number;
-  scale: number;
+  scale: string;
   opacity: number;
 };
 
@@ -39,28 +38,9 @@ export type GradientLayer = CommonLayerProps &
     colors: string[];
   };
 
-export type WaveformLayer = CommonLayerProps &
-  CommonPlaneObjectProps & {
-    type: "waveform";
-    color: string;
-  };
+export type PlaneLayer = ImageLayer | GradientLayer;
 
-export type IrisVisualizerLayer = CommonLayerProps &
-  CommonPlaneObjectProps & {
-    type: "irisVisualizer";
-    color: string;
-  };
-
-export type PlaneLayer =
-  | ImageLayer
-  | GradientLayer
-  | WaveformLayer
-  | IrisVisualizerLayer;
-export type Layer =
-  | ImageLayer
-  | GradientLayer
-  | WaveformLayer
-  | IrisVisualizerLayer;
+export type Layer = ImageLayer | GradientLayer;
 
 type LayerStore = {
   selectedLayerId: string | null;
@@ -80,8 +60,6 @@ type LayerStore = {
   removeSelectedLayer: () => void;
   addImageLayer: (image: HTMLImageElement, name: string) => void;
   addGradientLayer: () => void;
-  addWaveformLayer: () => void;
-  addIrisVisualizerLayer: () => void;
   addColorToGradientLayer: (layerId: string, color: string) => void;
   updateColorInGradientLayer: (
     layerId: string,
@@ -114,24 +92,6 @@ export const useLayerStore = create<LayerStore>()((set) => ({
         const gradientLayer = createGradientLayer();
         state.layers.unshift(gradientLayer);
         state.selectedLayerId = gradientLayer.id;
-      }),
-    );
-  },
-  addWaveformLayer: () => {
-    set(
-      produce((state: LayerStore) => {
-        const waveformLayer = createWaveformLayer();
-        state.layers.unshift(waveformLayer);
-        state.selectedLayerId = waveformLayer.id;
-      }),
-    );
-  },
-  addIrisVisualizerLayer: () => {
-    set(
-      produce((state: LayerStore) => {
-        const irisVisualizerLayer = createIrisVisualizerLayer();
-        state.layers.unshift(irisVisualizerLayer);
-        state.selectedLayerId = irisVisualizerLayer.id;
       }),
     );
   },
@@ -287,7 +247,7 @@ const createImageLayer = (
     width: image.naturalWidth,
     height: image.naturalHeight,
     zoom: 1,
-    scale: 1,
+    scale: "1",
     opacity: 1,
     name,
     id: nanoid(),
@@ -302,41 +262,11 @@ const createGradientLayer = (): GradientLayer => {
     y: 0,
     width: useCanvasStore.getState().width,
     height: useCanvasStore.getState().height,
-    scale: 1,
+    scale: "1",
     opacity: 1,
     stops: [0, 1],
     colors: getRandomColors(2),
     name: "Gradient",
     id: nanoid(),
-  };
-};
-
-const createWaveformLayer = (): WaveformLayer => {
-  return {
-    type: "waveform",
-    x: 0,
-    y: 0,
-    width: useCanvasStore.getState().width,
-    height: useCanvasStore.getState().height,
-    scale: 1,
-    opacity: 1,
-    name: "Waveform",
-    id: nanoid(),
-    color: getRandomColor(),
-  };
-};
-
-const createIrisVisualizerLayer = (): IrisVisualizerLayer => {
-  return {
-    type: "irisVisualizer",
-    x: 0,
-    y: 0,
-    width: useCanvasStore.getState().width,
-    height: useCanvasStore.getState().height,
-    scale: 1,
-    opacity: 1,
-    name: "Iris Visualizer",
-    id: nanoid(),
-    color: getRandomColor(),
   };
 };

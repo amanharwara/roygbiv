@@ -114,7 +114,8 @@ function update() {
 
   analyze();
 
-  store.getState().setLevel(getAudioLevel());
+  const audioLevel = getAudioLevel();
+  store.getState().setLevel(audioLevel);
 
   for (const range of ranges) {
     const value = Math.floor(getEnergyForFreqs(range.min, range.max));

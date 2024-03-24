@@ -9,11 +9,11 @@ import {
 import { twMerge } from "tailwind-merge";
 import ResetIcon from "../../icons/ResetIcon";
 
-type Props = NumberFieldProps & {
+interface Props extends NumberFieldProps {
   label: string;
   className?: string;
   groupClassName?: string;
-};
+}
 
 const NumberField = ({ label, className, groupClassName, ...props }: Props) => {
   return (

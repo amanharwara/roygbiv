@@ -2,10 +2,16 @@ import { RingBuffer } from "./RingBuffer";
 
 class AmplitudeProcessor extends AudioWorkletProcessor {
   stereoVolume = [0, 0];
+  stereoVolumeNorm = [0, 0];
+
   maxVolume = 0.001;
+
   bufferSize = 2048;
+
   numberOfInputChannels = 2;
+
   smoothing = 0;
+
   inputRingBuffer = new RingBuffer(this.bufferSize, this.numberOfInputChannels);
   outputRingBuffer = new RingBuffer(this.bufferSize, 1);
   inputRingBufferArraySequence = new Array(this.numberOfInputChannels)
@@ -57,6 +63,10 @@ class AmplitudeProcessor extends AudioWorkletProcessor {
       // calculate stero normalized volume and add volume from all channels together
       let volSum = 0;
       for (let index = 0; index < this.stereoVolume.length; index++) {
+        this.stereoVolumeNorm[index] = Math.max(
+          Math.min(this.stereoVolume[index]! / this.maxVolume, 1),
+          0,
+        );
         volSum += this.stereoVolume[index]!;
       }
 
@@ -71,6 +81,7 @@ class AmplitudeProcessor extends AudioWorkletProcessor {
         volume: volume,
         volNorm: volNorm,
         stereoVol: this.stereoVolume,
+        stereoVolNorm: this.stereoVolumeNorm,
       });
 
       // pass input through to output
