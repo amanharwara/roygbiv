@@ -2,10 +2,10 @@ import { audioElement } from "../../audio/context";
 import { Button } from "react-aria-components";
 import DeleteIcon from "../../icons/DeleteIcon";
 import { useCallback } from "react";
-import { store } from "../../audio/store";
+import { audioStore } from "../../audio/store";
 
 export function SelectedAudio() {
-  const file = store((state) => state.audioFile);
+  const file = audioStore((state) => state.audioFile);
 
   const appendAudioElement = useCallback((containerRef: HTMLElement | null) => {
     if (!containerRef) return;
@@ -24,7 +24,7 @@ export function SelectedAudio() {
         <Button
           className="flex items-center gap-1 rounded border border-neutral-600 px-2 py-1.5 text-sm hover:bg-white hover:text-black"
           onPress={() => {
-            store.getState().setAudioFile(null);
+            audioStore.getState().setAudioFile(null);
           }}
         >
           <DeleteIcon className="h-4 w-4" />

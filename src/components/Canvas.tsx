@@ -12,7 +12,7 @@ import {
 import NumberField from "./ui/NumberField";
 import { GradientTexture } from "../three/GradientTexture";
 import { Image } from "@react-three/drei";
-import { store } from "../audio/store";
+import { audioStore, getRangeValue } from "../audio/store";
 import { getRandomNumber, mapNumber } from "../utils/numbers";
 import { lerp } from "three/src/math/MathUtils";
 import { isAudioPaused } from "../audio/context";
@@ -38,12 +38,14 @@ function aspect(
 
 function computedValue(property: ComputedProperty) {
   try {
-    const volume = store.getState().level;
-    // Declaring map so that it can be used in eval
+    const volume = audioStore.getState().level;
+    // Declaring utils so they can be used in eval
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const map = mapNumber;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const random = isAudioPaused() ? () => 0 : getRandomNumber;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const fRange = getRangeValue;
     let result = eval(property.value.replace(/volume/g, volume.toString()));
     if (property.min !== undefined) {
       result = Math.max(result, property.min);
@@ -52,11 +54,6 @@ function computedValue(property: ComputedProperty) {
       result = Math.min(result, property.max);
     }
     return result;
-  } catch {
-    /* empty */
-  }
-  try {
-    return parseFloat(property.value);
   } catch {
     /* empty */
   }

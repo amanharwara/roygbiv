@@ -1,15 +1,28 @@
 import AudioFileDropZone from "./components/audio/AudioFileDropZone";
-import { Button, DialogTrigger, TooltipTrigger } from "react-aria-components";
+import {
+  Button,
+  DialogTrigger,
+  Key,
+  Tab,
+  TabList,
+  TabPanel,
+  Tabs,
+  TooltipTrigger,
+} from "react-aria-components";
 import SettingsIcon from "./icons/SettingsIcon";
 import { CanvasSettingsModal, SizedCanvas } from "./components/Canvas";
 import { SelectedAudio } from "./components/audio/SelectedAudio";
 import Tooltip from "./components/ui/Tooltip";
 import LayersList from "./components/layers/LayersList";
 import SelectedLayerProperties from "./components/layers/SelectedLayerProperties";
-import { store } from "./audio/store";
+import { audioStore } from "./audio/store";
+import { useState } from "react";
+import FrequencyRangesList from "./components/frequency-ranges/FrequencyRangesList";
 
 export default function App() {
-  const file = store((state) => state.audioFile);
+  const file = audioStore((state) => state.audioFile);
+
+  const [selectedTab, setSelectedTab] = useState<Key>("layers");
 
   return (
     <div className="grid h-full grid-cols-[5fr,1.5fr] overflow-hidden">
@@ -34,9 +47,34 @@ export default function App() {
       </div>
       <div className="grid h-full grid-rows-[60%_40%] overflow-hidden border-l border-neutral-600 [grid-column:2]">
         <div className="flex flex-col overflow-hidden">
-          <SelectedLayerProperties />
+          {selectedTab === "layers" && <SelectedLayerProperties />}
         </div>
-        <LayersList />
+        <Tabs
+          className="flex flex-shrink-0 select-none flex-col overflow-hidden"
+          selectedKey={selectedTab}
+          onSelectionChange={(key) => setSelectedTab(key)}
+        >
+          <TabList className="flex items-center border-y border-neutral-600 text-sm font-semibold">
+            <Tab
+              className="px-3 py-2 hover:bg-neutral-700 [&[data-selected]]:bg-neutral-600"
+              id="layers"
+            >
+              Layers
+            </Tab>
+            <Tab
+              className="px-3 py-2 hover:bg-neutral-700 [&[data-selected]]:bg-neutral-600"
+              id="ranges"
+            >
+              Ranges
+            </Tab>
+          </TabList>
+          <TabPanel id="layers" className="flex flex-grow flex-col">
+            <LayersList />
+          </TabPanel>
+          <TabPanel id="ranges" className="flex flex-grow flex-col">
+            <FrequencyRangesList />
+          </TabPanel>
+        </Tabs>
       </div>
     </div>
   );

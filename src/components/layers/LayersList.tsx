@@ -77,10 +77,7 @@ function LayersList() {
   });
 
   return (
-    <div className="flex flex-shrink-0 select-none flex-col overflow-hidden">
-      <div className="border-y border-neutral-600 px-3 py-2 text-sm font-semibold">
-        Layers
-      </div>
+    <>
       <div className="min-h-0 flex-grow overflow-auto">
         <ListBox
           className="w-full overflow-hidden py-px"
@@ -127,10 +124,6 @@ function LayersList() {
                   addAndSelectImageLayer();
                 } else if (key === "add-gradient") {
                   useLayerStore.getState().addGradientLayer();
-                } else if (key === "add-waveform") {
-                  useLayerStore.getState().addWaveformLayer();
-                } else if (key === "add-iris-visualizer") {
-                  useLayerStore.getState().addIrisVisualizerLayer();
                 }
               }}
             >
@@ -152,20 +145,6 @@ function LayersList() {
                   <GradientIcon className="h-4 w-4" />
                   Gradient
                 </MenuItem>
-                <MenuItem
-                  className="flex items-center gap-2 rounded px-2.5 py-1.5 text-sm outline-none data-[focused]:bg-neutral-900"
-                  id="add-waveform"
-                >
-                  <GradientIcon className="h-4 w-4" />
-                  Waveform
-                </MenuItem>
-                <MenuItem
-                  className="flex items-center gap-2 rounded px-2.5 py-1.5 text-sm outline-none data-[focused]:bg-neutral-900"
-                  id="add-iris-visualizer"
-                >
-                  <GradientIcon className="h-4 w-4" />
-                  Iris Visualizer
-                </MenuItem>
               </Section>
             </Menu>
           </Popover>
@@ -181,7 +160,7 @@ function LayersList() {
           <Tooltip offset={4}>Delete selected layer</Tooltip>
         </TooltipTrigger>
       </div>
-    </div>
+    </>
   );
 }
 
