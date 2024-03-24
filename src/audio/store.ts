@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { nanoid } from "nanoid";
-import { isAudioPaused } from "./context";
+import { isAudioPaused, setAudioSrc } from "./context";
 import { analyze, getEnergyForFreqs } from "./analyzer";
 import { getAudioLevel } from "./amplitude";
 
@@ -39,6 +39,9 @@ export type FrequencyRange = {
 };
 
 export const store = create<{
+  audioFile: File | null;
+  setAudioFile: (file: File | null) => void;
+
   ranges: FrequencyRange[];
   addNewRange: (preset?: PresetFrequencyRange) => string;
   updateRange: (id: string, range: Partial<FrequencyRange>) => void;
@@ -50,6 +53,12 @@ export const store = create<{
   level: number;
   setLevel: (level: number) => void;
 }>((set, get) => ({
+  audioFile: null,
+  setAudioFile: (audioFile) => {
+    set({ audioFile });
+    setAudioSrc(audioFile ? URL.createObjectURL(audioFile) : "");
+  },
+
   ranges: [],
   addNewRange: (preset?: PresetFrequencyRange) => {
     const id = nanoid();

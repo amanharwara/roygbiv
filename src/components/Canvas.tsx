@@ -11,8 +11,6 @@ import {
 } from "../stores/layers";
 import NumberField from "./ui/NumberField";
 import { GradientTexture } from "../three/GradientTexture";
-import { WaveformTexture } from "../three/WaveformTexture";
-import { IrisVisualizer } from "../three/IrisVisualizer";
 import { Image, useAspect } from "@react-three/drei";
 
 function ImageLayerMesh({
@@ -79,34 +77,6 @@ function GradientLayerMesh({
   );
 }
 
-function WaveformLayerMesh({
-  layer,
-  index,
-}: {
-  layer: WaveformLayer;
-  index: number;
-}) {
-  const { width, height, scale, opacity, x, y, color } = layer;
-
-  return (
-    <mesh
-      scale={useAspect(width, height, scale)}
-      position={[x, y, index]}
-      frustumCulled={false}
-    >
-      <planeGeometry args={[1, 1, 1, 1]} />
-      <meshBasicMaterial
-        depthTest={false}
-        depthWrite={false}
-        transparent
-        opacity={opacity}
-      >
-        <WaveformTexture color={color} />
-      </meshBasicMaterial>
-    </mesh>
-  );
-}
-
 export function SizedCanvas() {
   const { width, height } = useCanvasStore();
   const layers = useLayerStore((state) => state.layers);
@@ -127,10 +97,6 @@ export function SizedCanvas() {
               <ImageLayerMesh key={layer.id} layer={layer} index={index} />
             ) : layer.type === "gradient" ? (
               <GradientLayerMesh key={layer.id} layer={layer} index={index} />
-            ) : layer.type === "waveform" ? (
-              <WaveformLayerMesh key={layer.id} layer={layer} index={index} />
-            ) : layer.type === "irisVisualizer" ? (
-              <IrisVisualizer key={layer.id} layer={layer} index={index} />
             ) : null,
           )}
       </Canvas>

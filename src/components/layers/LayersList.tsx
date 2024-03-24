@@ -5,8 +5,8 @@ import {
   TooltipTrigger,
   Button,
   Popover,
-  Item,
   Menu,
+  MenuItem,
   useDragAndDrop,
   Header,
   Section,
@@ -21,7 +21,7 @@ import GradientIcon from "../../icons/GradientIcon";
 
 function LayerListItem({ layer }: { layer: Layer }) {
   return (
-    <Item
+    <MenuItem
       className="flex w-full items-center gap-2 overflow-hidden bg-neutral-900 px-3 py-1.5 text-sm outline-none aria-selected:bg-neutral-700 aria-selected:font-medium data-[dragging]:opacity-75"
       id={layer.id}
       textValue={layer.name}
@@ -33,7 +33,7 @@ function LayerListItem({ layer }: { layer: Layer }) {
         <GradientIcon className="h-4 w-4 flex-shrink-0" />
       )}
       <div className="overflow-hidden text-ellipsis">{layer.name}</div>
-    </Item>
+    </MenuItem>
   );
 }
 
@@ -138,34 +138,34 @@ function LayersList() {
                 <Header className="px-1.5 pb-1 text-sm font-semibold">
                   Objects
                 </Header>
-                <Item
+                <MenuItem
                   className="flex items-center gap-2 rounded px-2.5 py-1.5 text-sm outline-none data-[focused]:bg-neutral-900"
                   id="add-image"
                 >
                   <ImageIcon className="h-4 w-4" />
                   Image
-                </Item>
-                <Item
+                </MenuItem>
+                <MenuItem
                   className="flex items-center gap-2 rounded px-2.5 py-1.5 text-sm outline-none data-[focused]:bg-neutral-900"
                   id="add-gradient"
                 >
                   <GradientIcon className="h-4 w-4" />
                   Gradient
-                </Item>
-                <Item
+                </MenuItem>
+                <MenuItem
                   className="flex items-center gap-2 rounded px-2.5 py-1.5 text-sm outline-none data-[focused]:bg-neutral-900"
                   id="add-waveform"
                 >
                   <GradientIcon className="h-4 w-4" />
                   Waveform
-                </Item>
-                <Item
+                </MenuItem>
+                <MenuItem
                   className="flex items-center gap-2 rounded px-2.5 py-1.5 text-sm outline-none data-[focused]:bg-neutral-900"
                   id="add-iris-visualizer"
                 >
                   <GradientIcon className="h-4 w-4" />
                   Iris Visualizer
-                </Item>
+                </MenuItem>
               </Section>
             </Menu>
           </Popover>

@@ -1,11 +1,8 @@
 import { twJoin } from "tailwind-merge";
 import { Button, DropZone, FileTrigger, Text } from "react-aria-components";
+import { store } from "../../audio/store";
 
-function AudioFileDropZone({
-  setAudioFile,
-}: {
-  setAudioFile: (file: File) => void;
-}) {
+function AudioFileDropZone() {
   return (
     <div className="h-full w-full p-4">
       <DropZone
@@ -22,7 +19,7 @@ function AudioFileDropZone({
           if (item.kind !== "file") return;
           if (!item.type.startsWith("audio")) return;
           const file = await item.getFile();
-          setAudioFile(file);
+          store.getState().setAudioFile(file);
         }}
         className={({ isDropTarget }) =>
           twJoin(
@@ -36,11 +33,11 @@ function AudioFileDropZone({
         </Text>
         <FileTrigger
           acceptedFileTypes={["audio/*"]}
-          onChange={(files) => {
+          onSelect={(files) => {
             if (!files) return;
             const file = files[0];
             if (!file) return;
-            setAudioFile(file);
+            store.getState().setAudioFile(file);
           }}
         >
           <Button className="rounded border border-neutral-600 px-2 py-1 hover:bg-white hover:text-black">

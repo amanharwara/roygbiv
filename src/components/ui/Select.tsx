@@ -6,8 +6,8 @@ import {
   SelectValue,
   Popover,
   ListBox,
-  ItemProps,
-  Item,
+  ListBoxItemProps,
+  ListBoxItem,
   ListBoxProps,
 } from "react-aria-components";
 import { twMerge } from "tailwind-merge";
@@ -54,9 +54,9 @@ export function Select<T extends object>({
   );
 }
 
-export function SelectItem(props: ItemProps) {
+export function SelectItem(props: ListBoxItemProps) {
   return (
-    <Item
+    <ListBoxItem
       {...props}
       className="flex items-center gap-2 rounded px-2.5 py-1.5 text-sm outline-none data-[focused]:bg-neutral-900"
     />
