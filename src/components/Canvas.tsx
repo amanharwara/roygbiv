@@ -2,14 +2,20 @@ import { Canvas, Viewport, useFrame, useThree } from "@react-three/fiber";
 import { useCallback, useRef } from "react";
 import { Dialog, Button, Popover } from "react-aria-components";
 import { useCanvasStore } from "../stores/canvas";
-import { Mesh } from "three";
-import { GradientLayer, ImageLayer, useLayerStore } from "../stores/layers";
+import { type Material, Mesh } from "three";
+import {
+  GradientLayer,
+  ImageLayer,
+  useLayerStore,
+  ComputedProperty,
+} from "../stores/layers";
 import NumberField from "./ui/NumberField";
 import { GradientTexture } from "../three/GradientTexture";
-import { Image, useAspect } from "@react-three/drei";
+import { Image } from "@react-three/drei";
 import { store } from "../audio/store";
-import { mapNumber } from "../utils/numbers";
+import { getRandomNumber, mapNumber } from "../utils/numbers";
 import { lerp } from "three/src/math/MathUtils";
+import { isAudioPaused } from "../audio/context";
 
 function aspect(
   width: number,
@@ -30,21 +36,31 @@ function aspect(
   return [adaptedWidth * factor, adaptedHeight * factor, 1];
 }
 
-function computedValue(value: string) {
+function computedValue(property: ComputedProperty) {
   try {
     const volume = store.getState().level;
     // Declaring map so that it can be used in eval
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const map = mapNumber;
-    return eval(value.replace(/volume/g, volume.toString()));
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const random = isAudioPaused() ? () => 0 : getRandomNumber;
+    let result = eval(property.value.replace(/volume/g, volume.toString()));
+    if (property.min !== undefined) {
+      result = Math.max(result, property.min);
+    }
+    if (property.max !== undefined) {
+      result = Math.min(result, property.max);
+    }
+    return result;
   } catch {
     /* empty */
   }
   try {
-    return parseFloat(value);
+    return parseFloat(property.value);
   } catch {
     /* empty */
   }
-  throw new Error("Invalid value");
+  return property.default;
 }
 
 function ImageLayerMesh({
@@ -56,9 +72,70 @@ function ImageLayerMesh({
 }) {
   const { image, width, height, zoom, scale, opacity, x, y } = layer;
 
-  // const computedScale = useComputedValue(scale);
+  const viewport = useThree((state) => state.viewport);
 
-  // const size = useAspect(width, height, computedScale);
+  const ref = useRef<Mesh>(null!);
+
+  useFrame(() => {
+    const computedScale = computedValue(scale);
+    const [wScale, hScale] = aspect(width, height, computedScale, viewport);
+    const currentScaleX = ref.current.scale.x;
+    const currentScaleY = ref.current.scale.y;
+    const wScaleLerp = lerp(
+      isNaN(currentScaleX) ? 1 : currentScaleX,
+      wScale,
+      0.2,
+    );
+    const hScaleLerp = lerp(
+      isNaN(currentScaleY) ? 1 : currentScaleY,
+      hScale,
+      0.2,
+    );
+    ref.current.scale.set(wScaleLerp, hScaleLerp, 1);
+
+    const computedOpacity = computedValue(opacity);
+    const currentOpacity = (ref.current.material as Material).opacity;
+    const opacityLerp = lerp(
+      isNaN(currentOpacity) ? 1 : currentOpacity,
+      computedOpacity,
+      0.05,
+    );
+    (ref.current.material as Material).opacity = opacityLerp;
+
+    const computedZoom = computedValue(zoom);
+    const currentZoom = ref.current.material.zoom;
+    const zoomLerp = lerp(
+      isNaN(currentZoom) ? 1 : currentZoom,
+      computedZoom,
+      0.05,
+    );
+    ref.current.material.zoom = zoomLerp;
+  });
+
+  return (
+    <group position={[x, y, index]}>
+      <Image
+        // scale={[size[0], size[1]]}
+        // zoom={zoom}
+        ref={ref}
+        url={image.src}
+        transparent
+        // opacity={opacity}
+      />
+    </group>
+  );
+}
+
+function GradientLayerMesh({
+  layer,
+  index,
+}: {
+  layer: GradientLayer;
+  index: number;
+}) {
+  const { width, height, scale, opacity, x, y, stops, colors, gradientType } =
+    layer;
+  const { size } = useThree();
 
   const viewport = useThree((state) => state.viewport);
 
@@ -80,46 +157,21 @@ function ImageLayerMesh({
       0.05,
     );
     ref.current.scale.set(wScaleLerp, hScaleLerp, 1);
+
+    const computedOpacity = Math.min(Math.max(computedValue(opacity), 0), 100);
+    const currentOpacity = (ref.current.material as Material).opacity;
+    const opacityLerp = lerp(
+      isNaN(currentOpacity) ? 1 : currentOpacity,
+      computedOpacity,
+      0.05,
+    );
+    (ref.current.material as Material).opacity = opacityLerp;
   });
 
   return (
-    <group position={[x, y, index]}>
-      <Image
-        // scale={[size[0], size[1]]}
-        zoom={zoom}
-        ref={ref}
-        url={image.src}
-        transparent
-        opacity={opacity}
-      />
-    </group>
-  );
-}
-
-function GradientLayerMesh({
-  layer,
-  index,
-}: {
-  layer: GradientLayer;
-  index: number;
-}) {
-  const { width, height, scale, opacity, x, y, stops, colors, gradientType } =
-    layer;
-  const { size } = useThree();
-
-  return (
-    <mesh
-      scale={useAspect(width, height, scale)}
-      position={[x, y, index]}
-      frustumCulled={false}
-    >
+    <mesh position={[x, y, index]} frustumCulled={false} ref={ref}>
       <planeGeometry args={[1, 1, 1, 1]} />
-      <meshBasicMaterial
-        depthTest={false}
-        depthWrite={false}
-        transparent
-        opacity={opacity}
-      >
+      <meshBasicMaterial depthTest={false} depthWrite={false} transparent>
         <GradientTexture
           stops={stops}
           colors={colors}

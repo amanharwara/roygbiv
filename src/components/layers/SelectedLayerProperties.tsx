@@ -3,6 +3,7 @@ import {
   CommonPlaneObjectProps,
   GradientLayer,
   ImageLayer,
+  Layer,
   PlaneLayer,
   useLayerStore,
 } from "../../stores/layers";
@@ -29,14 +30,14 @@ import CloseIcon from "../../icons/CloseIcon";
 import ColorSlider from "../ui/ColorSlider";
 import { Color, parseColor } from "@react-stately/color";
 import { getRandomColor } from "../../utils/gradientUtils";
-import TextField from "../ui/TextField";
+import ComputedProperty from "./ComputedProperty";
 
 function CommonPlaneLayerProperties({
   layer,
 }: {
   layer: CommonPlaneObjectProps & { id: string };
 }) {
-  const { width, height, scale, opacity, x, y } = layer;
+  const { width, height, x, y } = layer;
   const defaultWidth = useRef(width);
   const defaultHeight = useRef(height);
   const updateLayer = useLayerStore((state) => state.updateLayer<PlaneLayer>);
@@ -72,35 +73,10 @@ function CommonPlaneLayerProperties({
         />
       </div>
       <div className="px-3 text-sm">
-        <TextField
-          label="Scale:"
-          className="w-full"
-          value={scale}
-          onChange={(scale) => {
-            updateLayer(layer.id, {
-              scale,
-            });
-          }}
-        />
+        <ComputedProperty id="scale" name="Scale" layer={layer as Layer} />
       </div>
       <div className="px-3 text-sm">
-        <NumberField
-          label="Opacity:"
-          defaultValue={1}
-          maxValue={1}
-          value={opacity}
-          name="opacity"
-          groupClassName="w-full"
-          onChange={(opacity) => {
-            updateLayer(layer.id, {
-              opacity,
-            });
-          }}
-          step={0.05}
-          formatOptions={{
-            style: "percent",
-          }}
-        />
+        <ComputedProperty id="opacity" name="Opacity" layer={layer as Layer} />
       </div>
       <div className="px-3 text-sm">
         <NumberField
@@ -137,8 +113,7 @@ function CommonPlaneLayerProperties({
 }
 
 function ImageLayerProperties({ layer }: { layer: ImageLayer }) {
-  const { name, zoom, image } = layer;
-  const updateLayer = useLayerStore((state) => state.updateLayer<ImageLayer>);
+  const { name, image } = layer;
 
   return (
     <>
@@ -150,22 +125,7 @@ function ImageLayerProperties({ layer }: { layer: ImageLayer }) {
       </div>
       <CommonPlaneLayerProperties layer={layer} />
       <div className="px-3 text-sm">
-        <NumberField
-          label="Zoom:"
-          defaultValue={1}
-          value={zoom}
-          name="zoom"
-          groupClassName="w-full"
-          onChange={(zoom) => {
-            updateLayer(layer.id, {
-              zoom,
-            });
-          }}
-          step={0.05}
-          formatOptions={{
-            style: "percent",
-          }}
-        />
+        <ComputedProperty id="zoom" name="Zoom" layer={layer as Layer} />
       </div>
     </>
   );

@@ -9,6 +9,22 @@ import {
   getStopsForGradientColors,
 } from "../utils/gradientUtils";
 
+export type ComputedProperty = {
+  default: number;
+  value: string;
+  min?: number;
+  max?: number;
+};
+
+export function isComputedProperty(value: unknown): value is ComputedProperty {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "default" in value &&
+    "value" in value
+  );
+}
+
 type CommonLayerProps = {
   id: string;
   name: string;
@@ -19,15 +35,15 @@ export type CommonPlaneObjectProps = {
   y: number;
   width: number;
   height: number;
-  scale: string;
-  opacity: number;
+  scale: ComputedProperty;
+  opacity: ComputedProperty;
 };
 
 export type ImageLayer = CommonLayerProps &
   CommonPlaneObjectProps & {
     type: "image";
     image: HTMLImageElement;
-    zoom: number;
+    zoom: ComputedProperty;
   };
 
 export type GradientLayer = CommonLayerProps &
@@ -45,8 +61,10 @@ export type Layer = ImageLayer | GradientLayer;
 type LayerStore = {
   selectedLayerId: string | null;
   setSelectedLayerId: (selectedLayerId: string | null) => void;
+
   layers: Layer[];
   setLayers: (layers: Layer[]) => void;
+
   removeLayer: (layerId: string) => void;
   moveLayer: (
     position: DropPosition,
@@ -57,8 +75,16 @@ type LayerStore = {
     layerId: string,
     layer: Partial<_Layer>,
   ) => void;
+  updateLayerComputedProperty: (
+    layerId: string,
+    key: string,
+    value: string,
+  ) => void;
+
   removeSelectedLayer: () => void;
+
   addImageLayer: (image: HTMLImageElement, name: string) => void;
+
   addGradientLayer: () => void;
   addColorToGradientLayer: (layerId: string, color: string) => void;
   updateColorInGradientLayer: (
@@ -159,6 +185,27 @@ export const useLayerStore = create<LayerStore>()((set) => ({
       }),
     );
   },
+  updateLayerComputedProperty: (
+    layerId: string,
+    key: string,
+    value: string,
+  ) => {
+    set(
+      produce((state: LayerStore) => {
+        const index = state.layers.findIndex((layer) => layer.id === layerId);
+        if (index === -1) {
+          return;
+        }
+        const currentLayer = state.layers[index]!;
+        const property = currentLayer[key as keyof Layer];
+        if (!isComputedProperty(property)) {
+          console.error("Tried to update a non-computed property as computed");
+          return;
+        }
+        property.value = value;
+      }),
+    );
+  },
   addColorToGradientLayer: (layerId: string, color: string) => {
     set(
       produce((state: LayerStore) => {
@@ -246,9 +293,23 @@ const createImageLayer = (
     y: 0,
     width: image.naturalWidth,
     height: image.naturalHeight,
-    zoom: 1,
-    scale: "1",
-    opacity: 1,
+    zoom: {
+      default: 1,
+      value: "1",
+      min: 0,
+      max: 5,
+    },
+    scale: {
+      default: 1,
+      value: "1",
+      min: 0,
+    },
+    opacity: {
+      default: 1,
+      value: "1",
+      min: 0,
+      max: 1,
+    },
     name,
     id: nanoid(),
   };
@@ -262,8 +323,18 @@ const createGradientLayer = (): GradientLayer => {
     y: 0,
     width: useCanvasStore.getState().width,
     height: useCanvasStore.getState().height,
-    scale: "1",
-    opacity: 1,
+    scale: {
+      default: 1,
+      value: "1",
+      min: 0,
+      max: 1,
+    },
+    opacity: {
+      default: 1,
+      value: "1",
+      min: 0,
+      max: 1,
+    },
     stops: [0, 1],
     colors: getRandomColors(2),
     name: "Gradient",

@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import {
   TextField as RacTextField,
   TextFieldProps,
@@ -7,7 +8,7 @@ import {
 import { twMerge } from "tailwind-merge";
 
 interface Props extends TextFieldProps {
-  label: string;
+  label: NonNullable<ReactNode>;
   className?: string;
 }
 
