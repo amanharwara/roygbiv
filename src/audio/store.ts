@@ -30,7 +30,6 @@ export const PresetFrequencyRanges = {
 export type PresetFrequencyRange = keyof typeof PresetFrequencyRanges;
 
 export type FrequencyRange = {
-  id: number;
   name: string;
   min: number;
   max: number;
@@ -42,13 +41,13 @@ export const audioStore = create<{
   audioFile: File | null;
   setAudioFile: (file: File | null) => void;
 
-  selectedRangeId: number | null;
-  setSelectedRangeId: (id: number | null) => void;
+  selectedRange: string | null;
+  setSelectedRange: (name: string | null) => void;
 
   ranges: FrequencyRange[];
-  addNewRange: (preset?: PresetFrequencyRange) => number;
-  updateRange: (id: number, range: Partial<FrequencyRange>) => void;
-  removeRange: (id: number) => void;
+  addNewRange: (preset?: PresetFrequencyRange) => string;
+  updateRange: (name: string, range: Partial<FrequencyRange>) => void;
+  removeRange: (name: string) => void;
 
   value: number;
   setValue: (value: number) => void;
@@ -62,18 +61,18 @@ export const audioStore = create<{
     setAudioSrc(audioFile ? URL.createObjectURL(audioFile) : "");
   },
 
-  selectedRangeId: null,
-  setSelectedRangeId: (selectedRangeId) => set({ selectedRangeId }),
+  selectedRange: null,
+  setSelectedRange: (selectedRangeId) =>
+    set({ selectedRange: selectedRangeId }),
 
   ranges: [],
   addNewRange: (preset?: PresetFrequencyRange) => {
-    const id = get().ranges.length;
+    const name = preset ? preset : nanoid(5);
     set((state) => ({
       ranges: [
         ...state.ranges,
         {
-          id,
-          name: preset ?? "mid",
+          name,
           min: preset
             ? PresetFrequencyRanges[preset].min
             : PresetFrequencyRanges.mid.min,
@@ -85,16 +84,18 @@ export const audioStore = create<{
         },
       ],
     }));
-    return id;
+    return name;
   },
-  updateRange: (id: number, range: Partial<FrequencyRange>) => {
+  updateRange: (name: string, range: Partial<FrequencyRange>) => {
     set((state) => ({
-      ranges: state.ranges.map((r) => (r.id === id ? { ...r, ...range } : r)),
+      ranges: state.ranges.map((r) =>
+        r.name === name ? { ...r, ...range } : r,
+      ),
     }));
   },
-  removeRange: (id: number) => {
+  removeRange: (name: string) => {
     set((state) => ({
-      ranges: state.ranges.filter((r) => r.id !== id),
+      ranges: state.ranges.filter((r) => r.name !== name),
     }));
   },
 
@@ -109,8 +110,8 @@ export const audioStore = create<{
   },
 }));
 
-export function getRangeValue(id: number) {
-  return audioStore.getState().ranges.find((r) => r.id === id)?.value ?? 0;
+export function getRangeValue(name: string) {
+  return audioStore.getState().ranges.find((r) => r.name === name)?.value ?? 0;
 }
 
 function update() {
@@ -129,7 +130,7 @@ function update() {
 
   for (const range of ranges) {
     const value = Math.floor(getEnergyForFreqs(range.min, range.max));
-    audioStore.getState().updateRange(range.id, { value });
+    audioStore.getState().updateRange(range.name, { value });
   }
 }
 

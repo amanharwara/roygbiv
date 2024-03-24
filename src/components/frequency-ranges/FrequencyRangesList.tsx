@@ -23,12 +23,10 @@ function RangeListItem({ range }: { range: FrequencyRange }) {
   return (
     <ListBoxItem
       className="flex w-full items-center gap-2 overflow-hidden bg-neutral-900 px-3 py-1.5 text-sm outline-none aria-selected:bg-neutral-700 aria-selected:font-medium data-[dragging]:opacity-75"
-      id={range.id}
+      id={range.name}
       textValue={range.name}
     >
-      <div className="overflow-hidden text-ellipsis">
-        {range.name} ({range.id})
-      </div>
+      <div className="overflow-hidden text-ellipsis">{range.name}</div>
     </ListBoxItem>
   );
 }
@@ -36,8 +34,8 @@ function RangeListItem({ range }: { range: FrequencyRange }) {
 function FrequencyRangesList() {
   const ranges = audioStore((state) => state.ranges);
 
-  const selectedRangeId = audioStore((state) => state.selectedRangeId);
-  const setSelectedRangeId = audioStore((state) => state.setSelectedRangeId);
+  const selectedRange = audioStore((state) => state.selectedRange);
+  const setSelectedRange = audioStore((state) => state.setSelectedRange);
 
   return (
     <>
@@ -46,22 +44,22 @@ function FrequencyRangesList() {
           className="w-full overflow-hidden py-px"
           aria-label="Layers"
           items={ranges}
-          selectedKeys={selectedRangeId ? [selectedRangeId] : []}
+          selectedKeys={selectedRange ? [selectedRange] : []}
           selectionMode="single"
           selectionBehavior="replace"
           onSelectionChange={(keys) => {
             if (keys !== "all") {
               keys.forEach((key) => {
-                if (!(typeof key === "number")) {
+                if (!(typeof key === "string")) {
                   return;
                 }
-                setSelectedRangeId(key);
+                setSelectedRange(key);
               });
             }
           }}
         >
           {ranges.map((range) => (
-            <RangeListItem key={range.id} range={range} />
+            <RangeListItem key={range.name} range={range} />
           ))}
         </ListBox>
       </div>
@@ -82,7 +80,7 @@ function FrequencyRangesList() {
               shouldFocusWrap
               className="max-h-[inherit] min-w-[12rem] select-none space-y-2 overflow-auto px-1.5 pb-1.5 pt-2 outline-none"
               onAction={(key) => {
-                let id: number;
+                let id: string;
                 if (key === "custom") {
                   id = audioStore.getState().addNewRange();
                 } else {
@@ -90,7 +88,7 @@ function FrequencyRangesList() {
                     .getState()
                     .addNewRange(key as keyof typeof PresetFrequencyRanges);
                 }
-                setSelectedRangeId(id);
+                setSelectedRange(id);
               }}
             >
               <Section>
