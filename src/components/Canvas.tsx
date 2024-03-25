@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Canvas, Viewport, useFrame, useThree } from "@react-three/fiber";
 import { useCallback, useRef } from "react";
 import { Dialog, Button, Popover } from "react-aria-components";
@@ -15,7 +16,7 @@ import { Image } from "@react-three/drei";
 import { audioStore, getRangeValue } from "../audio/store";
 import { getRandomNumber, mapNumber } from "../utils/numbers";
 import { lerp } from "three/src/math/MathUtils";
-import { isAudioPaused } from "../audio/context";
+import { audioElement, isAudioPaused } from "../audio/context";
 
 function aspect(
   width: number,
@@ -38,15 +39,13 @@ function aspect(
 
 function computedValue(property: ComputedProperty) {
   try {
+    // Declaring variables so they can be used in eval
     const volume = audioStore.getState().level;
-    // Declaring utils so they can be used in eval
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const time = audioElement.currentTime;
     const map = mapNumber;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const random = isAudioPaused() ? () => 0 : getRandomNumber;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const fRange = getRangeValue;
-    let result = eval(property.value.replace(/volume/g, volume.toString()));
+    let result = eval(property.value);
     if (property.min !== undefined) {
       result = Math.max(result, property.min);
     }
