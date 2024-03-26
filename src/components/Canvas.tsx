@@ -37,7 +37,7 @@ function aspect(
   return [adaptedWidth * factor, adaptedHeight * factor, 1];
 }
 
-function computedValue(property: ComputedProperty) {
+function computedValue(property: ComputedProperty, viewport: Viewport) {
   try {
     // Declaring variables so they can be used in eval
     const volume = audioStore.getState().level;
@@ -45,6 +45,10 @@ function computedValue(property: ComputedProperty) {
     const map = mapNumber;
     const random = isAudioPaused() ? () => 0 : getRandomNumber;
     const fRange = getRangeValue;
+    const canvas = {
+      width: viewport.width,
+      height: viewport.height,
+    };
     let result = eval(property.value);
     if (property.min !== undefined) {
       result = Math.max(result, property.min);
@@ -73,7 +77,7 @@ function ImageLayerMesh({
   const ref = useRef<Mesh>(null!);
 
   useFrame(() => {
-    const computedScale = computedValue(scale);
+    const computedScale = computedValue(scale, viewport);
     const [wScale, hScale] = aspect(width, height, computedScale, viewport);
     const currentScaleX = ref.current.scale.x;
     const currentScaleY = ref.current.scale.y;
@@ -89,7 +93,7 @@ function ImageLayerMesh({
     );
     ref.current.scale.set(wScaleLerp, hScaleLerp, 1);
 
-    const computedOpacity = computedValue(opacity);
+    const computedOpacity = computedValue(opacity, viewport);
     const currentOpacity = (ref.current.material as Material).opacity;
     const opacityLerp = lerp(
       isNaN(currentOpacity) ? 1 : currentOpacity,
@@ -98,7 +102,7 @@ function ImageLayerMesh({
     );
     (ref.current.material as Material).opacity = opacityLerp;
 
-    const computedZoom = computedValue(zoom);
+    const computedZoom = computedValue(zoom, viewport);
     const currentZoom = ref.current.material.zoom;
     const zoomLerp = lerp(
       isNaN(currentZoom) ? 1 : currentZoom,
@@ -138,7 +142,7 @@ function GradientLayerMesh({
   const ref = useRef<Mesh>(null!);
 
   useFrame(() => {
-    const computedScale = computedValue(scale);
+    const computedScale = computedValue(scale, viewport);
     const [wScale, hScale] = aspect(width, height, computedScale, viewport);
     const currentScaleX = ref.current.scale.x;
     const currentScaleY = ref.current.scale.y;
@@ -154,7 +158,7 @@ function GradientLayerMesh({
     );
     ref.current.scale.set(wScaleLerp, hScaleLerp, 1);
 
-    const computedOpacity = Math.min(Math.max(computedValue(opacity), 0), 100);
+    const computedOpacity = computedValue(opacity, viewport);
     const currentOpacity = (ref.current.material as Material).opacity;
     const opacityLerp = lerp(
       isNaN(currentOpacity) ? 1 : currentOpacity,

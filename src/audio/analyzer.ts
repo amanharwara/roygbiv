@@ -1,3 +1,8 @@
+/**
+ * Some of the utility functions have been taken from audioMotion-analyzer
+ * https://github.com/hvianna/audioMotion-analyzer/blob/master/src/audioMotion-analyzer.js
+ */
+
 import { constrainNumber } from "../utils/numbers";
 import { analyserNode, audioContext } from "./context";
 
