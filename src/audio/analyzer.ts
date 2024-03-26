@@ -1,32 +1,44 @@
+import { constrainNumber } from "../utils/numbers";
 import { analyserNode, audioContext } from "./context";
 
-export const frequencyData = new Uint8Array(analyserNode.frequencyBinCount);
-export const timeDomainData = new Uint8Array(analyserNode.frequencyBinCount);
+export const frequencyData = new Float32Array(analyserNode.frequencyBinCount);
+export const timeDomainData = new Float32Array(analyserNode.frequencyBinCount);
 
 export function analyze() {
-  analyserNode.getByteFrequencyData(frequencyData);
-  analyserNode.getByteTimeDomainData(timeDomainData);
+  analyserNode.getFloatFrequencyData(frequencyData);
+  analyserNode.getFloatTimeDomainData(timeDomainData);
 }
 
+function getFFTBinForFreq(freq: number) {
+  const max = analyserNode.frequencyBinCount - 1;
+  const bin = Math.round(
+    (freq * analyserNode.fftSize) / audioContext.sampleRate,
+  );
+  return Math.min(bin, max);
+}
+
+/**
+ * @returns Normalized value between 0 and 1
+ */
+function normalizeDB(dB: number) {
+  const minValue = analyserNode.minDecibels;
+  const maxValue = analyserNode.maxDecibels;
+
+  return constrainNumber((dB - minValue) / (maxValue - minValue), 0, 1);
+}
+
+/**
+ * @returns Energy value for the given frequency range between 0 and 1
+ */
 export function getEnergyForFreqs(minFrequency: number, maxFrequency: number) {
-  const nyquist = audioContext.sampleRate / 2;
+  const startBin = getFFTBinForFreq(minFrequency);
+  const endBin = getFFTBinForFreq(maxFrequency);
 
-  if (minFrequency > maxFrequency) {
-    const swap = minFrequency;
-    minFrequency = maxFrequency;
-    maxFrequency = swap;
+  let energy = 0;
+  for (let i = startBin; i <= endBin; i++) {
+    const dB = frequencyData[i]!;
+    energy += normalizeDB(dB);
   }
 
-  const lowIndex = Math.round((minFrequency / nyquist) * frequencyData.length);
-  const highIndex = Math.round((maxFrequency / nyquist) * frequencyData.length);
-
-  let total = 0;
-  let numberOfFrequencies = 0;
-
-  for (let i = lowIndex; i <= highIndex; i++) {
-    total += frequencyData[i]!;
-    numberOfFrequencies += 1;
-  }
-
-  return total / numberOfFrequencies;
+  return energy / (endBin - startBin + 1);
 }

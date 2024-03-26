@@ -17,7 +17,8 @@ import LayersList from "./components/layers/LayersList";
 import SelectedLayerProperties from "./components/layers/SelectedLayerProperties";
 import { audioStore } from "./audio/store";
 import { useState } from "react";
-import FrequencyRangesList from "./components/frequency-ranges/FrequencyRangesList";
+import FrequencyRangesList from "./components/frequencyRanges/FrequencyRangesList";
+import SelectedFrequencyRangeOptions from "./components/frequencyRanges/SelectedFrequencyRangeOptions";
 
 export default function App() {
   const file = audioStore((state) => state.audioFile);
@@ -48,6 +49,7 @@ export default function App() {
       <div className="grid h-full grid-rows-[60%_40%] overflow-hidden border-l border-neutral-600 [grid-column:2]">
         <div className="flex flex-col overflow-hidden">
           {selectedTab === "layers" && <SelectedLayerProperties />}
+          {selectedTab === "ranges" && <SelectedFrequencyRangeOptions />}
         </div>
         <Tabs
           className="flex flex-shrink-0 select-none flex-col overflow-hidden"

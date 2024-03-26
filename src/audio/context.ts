@@ -28,6 +28,8 @@ export const sourceNode = audioContext.createMediaElementSource(audioElement);
 
 export const analyserNode = audioContext.createAnalyser();
 analyserNode.fftSize = 4096;
+analyserNode.smoothingTimeConstant = 0.5;
+analyserNode.minDecibels = -85;
+analyserNode.maxDecibels = -25;
 analyserNode.connect(audioContext.destination);
-analyserNode.smoothingTimeConstant = 0.8;
 sourceNode.connect(analyserNode);

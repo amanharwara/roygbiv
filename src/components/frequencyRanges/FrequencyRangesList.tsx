@@ -122,9 +122,13 @@ function FrequencyRangesList() {
         </MenuTrigger>
         <TooltipTrigger delay={150} closeDelay={0}>
           <Button
-            // onPress={removeSelectedLayer}
+            onPress={() => {
+              if (!selectedRange) return;
+              audioStore.getState().removeRange(selectedRange);
+              setSelectedRange(null);
+            }}
             className="flex items-center justify-center rounded p-1 hover:bg-neutral-600 disabled:opacity-70"
-            isDisabled={true}
+            isDisabled={!selectedRange}
           >
             <DeleteIcon className="h-4 w-4" />
           </Button>

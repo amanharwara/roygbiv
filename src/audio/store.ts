@@ -129,7 +129,7 @@ function update() {
   audioStore.getState().setLevel(audioLevel);
 
   for (const range of ranges) {
-    const value = Math.floor(getEnergyForFreqs(range.min, range.max));
+    const value = getEnergyForFreqs(range.min, range.max);
     audioStore.getState().updateRange(range.name, { value });
   }
 }
