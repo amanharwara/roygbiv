@@ -31,6 +31,10 @@ import ColorSlider from "../ui/ColorSlider";
 import { Color, parseColor } from "@react-stately/color";
 import { getRandomColor } from "../../utils/gradientUtils";
 import ComputedProperty from "./ComputedProperty";
+import Switch from "../ui/Switch";
+import TextField from "../ui/TextField";
+
+// TODO: All the components here re-render when any property of the layer changes.
 
 function CommonPlaneLayerProperties({
   layer,
@@ -113,7 +117,9 @@ function CommonPlaneLayerProperties({
 }
 
 function ImageLayerProperties({ layer }: { layer: ImageLayer }) {
-  const { name, image } = layer;
+  const { name, image, effects } = layer;
+  const { noise, pixelate, scanlines } = effects;
+  const updateLayer = useLayerStore((state) => state.updateLayer<ImageLayer>);
 
   return (
     <>
@@ -126,6 +132,152 @@ function ImageLayerProperties({ layer }: { layer: ImageLayer }) {
       <CommonPlaneLayerProperties layer={layer} />
       <div className="px-3 text-sm">
         <ComputedProperty id="zoom" name="Zoom" layer={layer as Layer} />
+      </div>
+      <div className="flex flex-col gap-3 border-t border-neutral-600 px-3 pt-3 text-sm">
+        <div className="font-medium">Noise (effect)</div>
+        <Switch
+          isSelected={noise.enabled}
+          onChange={(enabled) => {
+            updateLayer(layer.id, {
+              effects: {
+                ...effects,
+                noise: {
+                  ...noise,
+                  enabled,
+                },
+              },
+            });
+          }}
+          className="flex-row-reverse justify-end"
+        >
+          Enabled:
+        </Switch>
+        {noise.enabled && (
+          <div className="flex flex-col items-start gap-3">
+            <Switch
+              isSelected={noise.premultiply}
+              onChange={(premultiply) => {
+                updateLayer(layer.id, {
+                  effects: {
+                    ...effects,
+                    noise: {
+                      ...noise,
+                      premultiply,
+                    },
+                  },
+                });
+              }}
+              className="flex-row-reverse justify-end"
+            >
+              Premultiply:
+            </Switch>
+            <TextField
+              label="Opacity:"
+              className="w-full"
+              value={noise.opacity.value}
+              onChange={(value) => {
+                updateLayer(layer.id, {
+                  effects: {
+                    ...effects,
+                    noise: {
+                      ...noise,
+                      opacity: {
+                        ...noise.opacity,
+                        value,
+                      },
+                    },
+                  },
+                });
+              }}
+            />
+          </div>
+        )}
+      </div>
+      <div className="flex flex-col gap-3 border-t border-neutral-600 px-3 pt-3 text-sm">
+        <div className="font-medium">Pixelate (effect)</div>
+        <Switch
+          isSelected={pixelate.enabled}
+          onChange={(enabled) => {
+            updateLayer(layer.id, {
+              effects: {
+                ...effects,
+                pixelate: {
+                  ...pixelate,
+                  enabled,
+                },
+              },
+            });
+          }}
+          className="flex-row-reverse justify-end"
+        >
+          Enabled:
+        </Switch>
+        {pixelate.enabled && (
+          <div className="flex flex-col items-start gap-3">
+            <TextField
+              label="Granularity:"
+              className="w-full"
+              value={pixelate.granularity.value}
+              onChange={(value) => {
+                updateLayer(layer.id, {
+                  effects: {
+                    ...effects,
+                    pixelate: {
+                      ...pixelate,
+                      granularity: {
+                        ...pixelate.granularity,
+                        value,
+                      },
+                    },
+                  },
+                });
+              }}
+            />
+          </div>
+        )}
+      </div>
+      <div className="flex flex-col gap-3 border-t border-neutral-600 px-3 pt-3 text-sm">
+        <div className="font-medium">Scanlines (effect)</div>
+        <Switch
+          isSelected={scanlines.enabled}
+          onChange={(enabled) => {
+            updateLayer(layer.id, {
+              effects: {
+                ...effects,
+                scanlines: {
+                  ...scanlines,
+                  enabled,
+                },
+              },
+            });
+          }}
+          className="flex-row-reverse justify-end"
+        >
+          Enabled:
+        </Switch>
+        {scanlines.enabled && (
+          <div className="flex flex-col items-start gap-3">
+            <TextField
+              label="Density:"
+              className="w-full"
+              value={scanlines.density.value}
+              onChange={(value) => {
+                updateLayer(layer.id, {
+                  effects: {
+                    ...effects,
+                    scanlines: {
+                      ...scanlines,
+                      density: {
+                        ...scanlines.density,
+                        value,
+                      },
+                    },
+                  },
+                });
+              }}
+            />
+          </div>
+        )}
       </div>
     </>
   );

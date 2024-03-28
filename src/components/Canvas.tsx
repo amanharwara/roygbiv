@@ -17,6 +17,13 @@ import { audioStore, getRangeValue } from "../audio/store";
 import { getRandomNumber, mapNumber } from "../utils/numbers";
 import { lerp } from "three/src/math/MathUtils";
 import { audioElement, isAudioPaused } from "../audio/context";
+import {
+  EffectComposer,
+  Noise,
+  Pixelation,
+  Scanline,
+} from "@react-three/postprocessing";
+import { NoiseEffect, PixelationEffect, ScanlineEffect } from "postprocessing";
 
 function aspect(
   width: number,
@@ -70,11 +77,18 @@ function ImageLayerMesh({
   layer: ImageLayer;
   index: number;
 }) {
-  const { image, width, height, zoom, scale, opacity, x, y } = layer;
+  const { image, width, height, zoom, scale, opacity, x, y, effects } = layer;
+  const { noise } = effects;
 
   const viewport = useThree((state) => state.viewport);
 
+  const scene = useThree((state) => state.scene);
+
   const ref = useRef<Mesh>(null!);
+
+  const noiseEffect = useRef<typeof NoiseEffect>(null!);
+  const pixelationEffect = useRef<PixelationEffect>(null!);
+  const scanlineEffect = useRef<typeof ScanlineEffect>(null!);
 
   useFrame(() => {
     const computedScale = computedValue(scale, viewport);
@@ -110,19 +124,36 @@ function ImageLayerMesh({
       0.05,
     );
     ref.current.material.zoom = zoomLerp;
+
+    if (noise.enabled) {
+      (noiseEffect.current as unknown as NoiseEffect).blendMode.opacity.value =
+        computedValue(noise.opacity, viewport);
+    }
+
+    if (effects.pixelate.enabled) {
+      pixelationEffect.current.granularity = computedValue(
+        effects.pixelate.granularity,
+        viewport,
+      );
+    }
+
+    if (effects.scanlines.enabled) {
+      (scanlineEffect.current as unknown as ScanlineEffect).density =
+        computedValue(effects.scanlines.density, viewport);
+    }
   });
 
   return (
-    <group position={[x, y, index]}>
-      <Image
-        // scale={[size[0], size[1]]}
-        // zoom={zoom}
-        ref={ref}
-        url={image.src}
-        transparent
-        // opacity={opacity}
-      />
-    </group>
+    <>
+      <group position={[x, y, index]}>
+        <Image ref={ref} url={image.src} transparent />
+      </group>
+      <EffectComposer scene={scene}>
+        <>{noise.enabled && <Noise ref={noiseEffect} />}</>
+        <>{effects.pixelate.enabled && <Pixelation ref={pixelationEffect} />}</>
+        <>{effects.scanlines.enabled && <Scanline ref={scanlineEffect} />}</>
+      </EffectComposer>
+    </>
   );
 }
 

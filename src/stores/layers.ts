@@ -44,6 +44,21 @@ export type ImageLayer = CommonLayerProps &
     type: "image";
     image: HTMLImageElement;
     zoom: ComputedProperty;
+    effects: {
+      noise: {
+        enabled: boolean;
+        premultiply: boolean;
+        opacity: ComputedProperty;
+      };
+      pixelate: {
+        enabled: boolean;
+        granularity: ComputedProperty;
+      };
+      scanlines: {
+        enabled: boolean;
+        density: ComputedProperty;
+      };
+    };
   };
 
 export type GradientLayer = CommonLayerProps &
@@ -312,6 +327,36 @@ const createImageLayer = (
     },
     name,
     id: nanoid(),
+    effects: {
+      noise: {
+        enabled: false,
+        premultiply: false,
+        opacity: {
+          default: 0.5,
+          value: "0.5",
+          min: 0,
+          max: 1,
+        },
+      },
+      pixelate: {
+        enabled: false,
+        granularity: {
+          default: 30,
+          value: "30",
+          min: 1,
+          max: 100,
+        },
+      },
+      scanlines: {
+        enabled: false,
+        density: {
+          default: 1.25,
+          value: "1.25",
+          min: 0,
+          max: 2,
+        },
+      },
+    },
   };
 };
 
