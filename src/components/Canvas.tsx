@@ -25,25 +25,6 @@ import {
 } from "@react-three/postprocessing";
 import { NoiseEffect, PixelationEffect, ScanlineEffect } from "postprocessing";
 
-function aspect(
-  width: number,
-  height: number,
-  factor: number = 1,
-  viewport: Viewport,
-): [number, number, number] {
-  const adaptedHeight =
-    height *
-    (viewport.aspect > width / height
-      ? viewport.width / width
-      : viewport.height / height);
-  const adaptedWidth =
-    width *
-    (viewport.aspect > width / height
-      ? viewport.width / width
-      : viewport.height / height);
-  return [adaptedWidth * factor, adaptedHeight * factor, 1];
-}
-
 function computedValue(property: ComputedProperty, viewport: Viewport) {
   try {
     // Declaring variables so they can be used in eval
@@ -92,20 +73,21 @@ function ImageLayerMesh({
 
   useFrame(() => {
     const computedScale = computedValue(scale, viewport);
-    const [wScale, hScale] = aspect(width, height, computedScale, viewport);
     const currentScaleX = ref.current.scale.x;
+    const newScaleX = width * computedScale;
     const currentScaleY = ref.current.scale.y;
-    const wScaleLerp = lerp(
+    const newScaleY = height * computedScale;
+    const scaleXLerp = lerp(
       isNaN(currentScaleX) ? 1 : currentScaleX,
-      wScale,
+      newScaleX,
       0.2,
     );
-    const hScaleLerp = lerp(
+    const scaleYLerp = lerp(
       isNaN(currentScaleY) ? 1 : currentScaleY,
-      hScale,
+      newScaleY,
       0.2,
     );
-    ref.current.scale.set(wScaleLerp, hScaleLerp, 1);
+    ref.current.scale.set(scaleXLerp, scaleYLerp, 1);
 
     const computedOpacity = computedValue(opacity, viewport);
     const currentOpacity = (ref.current.material as Material).opacity;
