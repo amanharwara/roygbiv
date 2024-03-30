@@ -210,7 +210,7 @@ export function SizedCanvas() {
         height,
       }}
     >
-      <Canvas orthographic>
+      <Canvas orthographic gl={{ autoClear: true }}>
         {layers
           .toReversed()
           .map((layer, index) =>
