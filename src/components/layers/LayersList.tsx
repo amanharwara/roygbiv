@@ -11,13 +11,13 @@ import {
   Header,
   Section,
 } from "react-aria-components";
-import AddIcon from "../../icons/AddIcon";
-import DeleteIcon from "../../icons/DeleteIcon";
-import ImageIcon from "../../icons/ImageIcon";
+import { Plus as AddIcon } from "lucide-react";
+import { Trash as DeleteIcon } from "lucide-react";
+import { Image as ImageIcon } from "lucide-react";
+import { SwatchBook as GradientIcon } from "lucide-react";
 import { useLayerStore, Layer } from "../../stores/layers";
 import { readFileAsImage } from "../../utils/readFile";
 import Tooltip from "../ui/Tooltip";
-import GradientIcon from "../../icons/GradientIcon";
 
 function LayerListItem({ layer }: { layer: Layer }) {
   return (

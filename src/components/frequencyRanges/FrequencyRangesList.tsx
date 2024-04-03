@@ -10,8 +10,8 @@ import {
   Popover,
   Section,
 } from "react-aria-components";
-import AddIcon from "../../icons/AddIcon";
-import DeleteIcon from "../../icons/DeleteIcon";
+import { Plus as AddIcon } from "lucide-react";
+import { Trash as DeleteIcon } from "lucide-react";
 import {
   FrequencyRange,
   PresetFrequencyRanges,

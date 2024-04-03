@@ -1,6 +1,5 @@
 import { audioElement } from "../../audio/context";
 import { Button } from "react-aria-components";
-import DeleteIcon from "../../icons/DeleteIcon";
 import { useCallback } from "react";
 import { audioStore } from "../../audio/store";
 
@@ -27,7 +26,6 @@ export function SelectedAudio() {
             audioStore.getState().setAudioFile(null);
           }}
         >
-          <DeleteIcon className="h-4 w-4" />
           Remove audio
         </Button>
       </div>

@@ -9,7 +9,7 @@ import {
   Tabs,
   TooltipTrigger,
 } from "react-aria-components";
-import SettingsIcon from "./icons/SettingsIcon";
+import { Settings2 as SettingsIcon } from "lucide-react";
 import { CanvasSettingsModal } from "./components/Canvas";
 import { SelectedAudio } from "./components/audio/SelectedAudio";
 import Tooltip from "./components/ui/Tooltip";

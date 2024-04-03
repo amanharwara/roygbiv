@@ -18,21 +18,23 @@ import {
   DialogTrigger,
   Dialog,
   Popover,
+  ToggleButton,
 } from "react-aria-components";
 import { useCallback, useRef, useState } from "react";
 import { Select, SelectItem } from "../ui/Select";
 import { GradientType } from "@react-three/drei";
-import EditIcon from "../../icons/EditIcon";
-import DeleteIcon from "../../icons/DeleteIcon";
-import AddIcon from "../../icons/AddIcon";
+import { Edit2 as EditIcon } from "lucide-react";
+import { Trash as DeleteIcon } from "lucide-react";
+import { Plus as AddIcon } from "lucide-react";
+import { X as CloseIcon } from "lucide-react";
 import Tooltip from "../ui/Tooltip";
-import CloseIcon from "../../icons/CloseIcon";
 import ColorSlider from "../ui/ColorSlider";
 import { Color, parseColor } from "@react-stately/color";
 import { getRandomColor } from "../../utils/gradientUtils";
 import ComputedProperty from "./ComputedProperty";
 import Switch from "../ui/Switch";
-import TextField from "../ui/TextField";
+import { Link, Unlink } from "lucide-react";
+import { twMerge } from "tailwind-merge";
 
 // TODO: All the components here re-render when any property of the layer changes.
 
@@ -41,40 +43,70 @@ function CommonPlaneLayerProperties({
 }: {
   layer: CommonPlaneObjectProps & { id: string };
 }) {
-  const { width, height, x, y } = layer;
+  const { width, height, x, y, maintainAspect } = layer;
   const defaultWidth = useRef(width);
   const defaultHeight = useRef(height);
   const updateLayer = useLayerStore((state) => state.updateLayer<PlaneLayer>);
 
   return (
     <>
-      <div className="px-3 text-sm">
-        <NumberField
-          label="Width:"
-          defaultValue={defaultWidth.current}
-          value={width}
-          name="width"
-          groupClassName="w-full"
-          onChange={(width) => {
-            updateLayer(layer.id, {
-              width,
-            });
-          }}
-        />
-      </div>
-      <div className="px-3 text-sm">
-        <NumberField
-          label="Height:"
-          defaultValue={defaultHeight.current}
-          value={height}
-          name="height"
-          groupClassName="w-full"
-          onChange={(height) => {
-            updateLayer(layer.id, {
-              height,
-            });
-          }}
-        />
+      <div className="relative z-0 flex items-center gap-3 pr-3 text-sm">
+        <TooltipTrigger delay={150} closeDelay={0}>
+          <ToggleButton
+            isSelected={maintainAspect}
+            onChange={(maintainAspect) => {
+              updateLayer(layer.id, {
+                maintainAspect,
+              });
+            }}
+            className={twMerge(
+              "ml-2 flex-shrink-0 select-none rounded border border-neutral-600 bg-neutral-700 p-1 outline-none hover:bg-neutral-600 focus:border-slate-400",
+              "before:absolute before:top-1/2 before:z-[-1] before:h-[75%] before:w-3.5 before:-translate-y-1/2 before:rounded-lg before:rounded-br-none before:rounded-tr-none before:border before:border-r-0 before:border-neutral-700",
+            )}
+          >
+            {maintainAspect ? (
+              <Unlink className="h-3 w-3" />
+            ) : (
+              <Link className="h-3 w-3" />
+            )}
+          </ToggleButton>
+          <Tooltip placement="top" offset={8}>
+            {maintainAspect ? "Unlink aspect ratio" : "Link aspect ratio"}
+          </Tooltip>
+        </TooltipTrigger>
+        <div className="flex-grow">
+          <NumberField
+            label="Width:"
+            defaultValue={defaultWidth.current}
+            value={width}
+            name="width"
+            groupClassName="w-full"
+            onChange={(width) => {
+              updateLayer(layer.id, {
+                width,
+                height: maintainAspect
+                  ? (width / defaultWidth.current) * defaultHeight.current
+                  : height,
+              });
+            }}
+          />
+          <div className="py-1.5"></div>
+          <NumberField
+            label="Height:"
+            defaultValue={defaultHeight.current}
+            value={height}
+            name="height"
+            groupClassName="w-full"
+            onChange={(height) => {
+              updateLayer(layer.id, {
+                width: maintainAspect
+                  ? (height / defaultHeight.current) * defaultWidth.current
+                  : width,
+                height,
+              });
+            }}
+          />
+        </div>
       </div>
       <div className="px-3 text-sm">
         <ComputedProperty id="scale" name="Scale" layer={layer as Layer} />
@@ -130,9 +162,7 @@ function CommonPlaneLayerProperties({
 }
 
 function ImageLayerProperties({ layer }: { layer: ImageLayer }) {
-  const { name, image, effects } = layer;
-  const { noise, pixelate, scanlines } = effects;
-  const updateLayer = useLayerStore((state) => state.updateLayer<ImageLayer>);
+  const { name, image } = layer;
 
   return (
     <>
@@ -143,155 +173,6 @@ function ImageLayerProperties({ layer }: { layer: ImageLayer }) {
         </div>
       </div>
       <CommonPlaneLayerProperties layer={layer} />
-      <div className="px-3 text-sm">
-        <ComputedProperty id="zoom" name="Zoom" layer={layer as Layer} />
-      </div>
-      <div className="flex flex-col gap-3 border-t border-neutral-600 px-3 pt-3 text-sm">
-        <div className="font-medium">Noise (effect)</div>
-        <Switch
-          isSelected={noise.enabled}
-          onChange={(enabled) => {
-            updateLayer(layer.id, {
-              effects: {
-                ...effects,
-                noise: {
-                  ...noise,
-                  enabled,
-                },
-              },
-            });
-          }}
-          className="flex-row-reverse justify-end"
-        >
-          Enabled:
-        </Switch>
-        {noise.enabled && (
-          <div className="flex flex-col items-start gap-3">
-            <Switch
-              isSelected={noise.premultiply}
-              onChange={(premultiply) => {
-                updateLayer(layer.id, {
-                  effects: {
-                    ...effects,
-                    noise: {
-                      ...noise,
-                      premultiply,
-                    },
-                  },
-                });
-              }}
-              className="flex-row-reverse justify-end"
-            >
-              Premultiply:
-            </Switch>
-            <TextField
-              label="Opacity:"
-              className="w-full"
-              value={noise.opacity.value}
-              onChange={(value) => {
-                updateLayer(layer.id, {
-                  effects: {
-                    ...effects,
-                    noise: {
-                      ...noise,
-                      opacity: {
-                        ...noise.opacity,
-                        value,
-                      },
-                    },
-                  },
-                });
-              }}
-            />
-          </div>
-        )}
-      </div>
-      <div className="flex flex-col gap-3 border-t border-neutral-600 px-3 pt-3 text-sm">
-        <div className="font-medium">Pixelate (effect)</div>
-        <Switch
-          isSelected={pixelate.enabled}
-          onChange={(enabled) => {
-            updateLayer(layer.id, {
-              effects: {
-                ...effects,
-                pixelate: {
-                  ...pixelate,
-                  enabled,
-                },
-              },
-            });
-          }}
-          className="flex-row-reverse justify-end"
-        >
-          Enabled:
-        </Switch>
-        {pixelate.enabled && (
-          <div className="flex flex-col items-start gap-3">
-            <TextField
-              label="Granularity:"
-              className="w-full"
-              value={pixelate.granularity.value}
-              onChange={(value) => {
-                updateLayer(layer.id, {
-                  effects: {
-                    ...effects,
-                    pixelate: {
-                      ...pixelate,
-                      granularity: {
-                        ...pixelate.granularity,
-                        value,
-                      },
-                    },
-                  },
-                });
-              }}
-            />
-          </div>
-        )}
-      </div>
-      <div className="flex flex-col gap-3 border-t border-neutral-600 px-3 pt-3 text-sm">
-        <div className="font-medium">Scanlines (effect)</div>
-        <Switch
-          isSelected={scanlines.enabled}
-          onChange={(enabled) => {
-            updateLayer(layer.id, {
-              effects: {
-                ...effects,
-                scanlines: {
-                  ...scanlines,
-                  enabled,
-                },
-              },
-            });
-          }}
-          className="flex-row-reverse justify-end"
-        >
-          Enabled:
-        </Switch>
-        {scanlines.enabled && (
-          <div className="flex flex-col items-start gap-3">
-            <TextField
-              label="Density:"
-              className="w-full"
-              value={scanlines.density.value}
-              onChange={(value) => {
-                updateLayer(layer.id, {
-                  effects: {
-                    ...effects,
-                    scanlines: {
-                      ...scanlines,
-                      density: {
-                        ...scanlines.density,
-                        value,
-                      },
-                    },
-                  },
-                });
-              }}
-            />
-          </div>
-        )}
-      </div>
     </>
   );
 }
