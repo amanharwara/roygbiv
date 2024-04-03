@@ -42,6 +42,7 @@
     "typescript": "^5.4.3"
   },
   "dependencies": {
+    "@pixi/react": "^7.1.2",
     "@react-aria/color": "^3.0.0-beta.31",
     "@react-stately/color": "^3.5.3",
     "@react-three/drei": "^9.102.6",
@@ -54,6 +55,7 @@
     "electron-squirrel-startup": "^1.0.0",
     "immer": "^10.0.4",
     "nanoid": "^5.0.6",
+    "pixi.js": "^7.0.0",
     "postprocessing": "^6.35.2",
     "react": "^18.2.0",
     "react-aria-components": "^1.1.1",

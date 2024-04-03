@@ -83,8 +83,21 @@ function CommonPlaneLayerProperties({
         <ComputedProperty id="opacity" name="Opacity" layer={layer as Layer} />
       </div>
       <div className="px-3 text-sm">
+        <Switch
+          isSelected={layer.centered}
+          onChange={(centered) => {
+            updateLayer(layer.id, {
+              centered,
+            });
+          }}
+          className="flex-row-reverse justify-end"
+        >
+          Centered:
+        </Switch>
+      </div>
+      <div className="px-3 text-sm">
         <NumberField
-          label="x:"
+          label="x-offset:"
           minValue={undefined}
           defaultValue={0}
           value={x}
@@ -99,7 +112,7 @@ function CommonPlaneLayerProperties({
       </div>
       <div className="px-3 text-sm">
         <NumberField
-          label="y:"
+          label="y-offset:"
           minValue={undefined}
           defaultValue={0}
           value={y}

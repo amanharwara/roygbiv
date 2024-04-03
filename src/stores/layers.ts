@@ -37,6 +37,7 @@ export type CommonPlaneObjectProps = {
   height: number;
   scale: ComputedProperty;
   opacity: ComputedProperty;
+  centered: boolean;
 };
 
 export type ImageLayer = CommonLayerProps &
@@ -308,6 +309,7 @@ const createImageLayer = (
     y: 0,
     width: image.naturalWidth,
     height: image.naturalHeight,
+    centered: true,
     zoom: {
       default: 1,
       value: "1",
@@ -368,6 +370,7 @@ const createGradientLayer = (): GradientLayer => {
     y: 0,
     width: useCanvasStore.getState().width,
     height: useCanvasStore.getState().height,
+    centered: true,
     scale: {
       default: 1,
       value: "1",
