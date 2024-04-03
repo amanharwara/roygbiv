@@ -40,10 +40,13 @@ function LayerListItem({ layer }: { layer: Layer }) {
 function LayersList() {
   const layers = useLayerStore((state) => state.layers);
   const moveLayer = useLayerStore((state) => state.moveLayer);
-  const selectedLayerId = useLayerStore((state) => state.selectedLayerId);
-  const setSelectedLayerId = useLayerStore((state) => state.setSelectedLayerId);
-  const removeSelectedLayer = useLayerStore(
-    (state) => state.removeSelectedLayer,
+  const selectedLayerIDs = useLayerStore((state) => state.selectedLayerIDs);
+  const setSelectedLayerId = useLayerStore(
+    (state) => state.setSelectedLayerIDs,
+  );
+  const selectAllLayers = useLayerStore((state) => state.selectAllLayers);
+  const removeSelectedLayers = useLayerStore(
+    (state) => state.removeSelectedLayers,
   );
 
   const addAndSelectImageLayer = useCallback(async () => {
@@ -83,17 +86,14 @@ function LayersList() {
           className="w-full overflow-hidden py-px"
           aria-label="Layers"
           items={layers}
-          selectedKeys={selectedLayerId ? [selectedLayerId] : []}
-          selectionMode="single"
+          selectedKeys={selectedLayerIDs}
+          selectionMode="multiple"
           selectionBehavior="replace"
-          onSelectionChange={(keys) => {
-            if (keys !== "all") {
-              keys.forEach((key) => {
-                if (!(typeof key === "string")) {
-                  return;
-                }
-                setSelectedLayerId(key);
-              });
+          onSelectionChange={(selection) => {
+            if (selection === "all") {
+              selectAllLayers();
+            } else {
+              setSelectedLayerId([...selection]);
             }
           }}
           dragAndDropHooks={dragAndDropHooks}
@@ -151,13 +151,13 @@ function LayersList() {
         </MenuTrigger>
         <TooltipTrigger delay={150} closeDelay={0}>
           <Button
-            onPress={removeSelectedLayer}
+            onPress={removeSelectedLayers}
             className="flex items-center justify-center rounded p-1 hover:bg-neutral-600 disabled:opacity-70"
-            isDisabled={!selectedLayerId}
+            isDisabled={!selectedLayerIDs}
           >
             <DeleteIcon className="h-4 w-4" />
           </Button>
-          <Tooltip offset={4}>Delete selected layer</Tooltip>
+          <Tooltip offset={4}>Delete selected layers</Tooltip>
         </TooltipTrigger>
       </div>
     </>

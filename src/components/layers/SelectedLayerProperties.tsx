@@ -512,9 +512,18 @@ function GradientLayerProperties({ layer }: { layer: GradientLayer }) {
 }
 
 function SelectedLayerProperties() {
-  const selectedLayerId = useLayerStore((state) => state.selectedLayerId);
+  const selectedLayerIDs = useLayerStore((state) => state.selectedLayerIDs);
   const layers = useLayerStore((state) => state.layers);
-  const layer = layers.find((layer) => layer.id === selectedLayerId);
+
+  if (selectedLayerIDs.length > 1) {
+    return (
+      <div className="mx-auto my-auto flex text-sm text-neutral-400">
+        Multiple layers selected
+      </div>
+    );
+  }
+
+  const layer = layers.find((layer) => layer.id === selectedLayerIDs[0]);
 
   if (!layer) {
     return (

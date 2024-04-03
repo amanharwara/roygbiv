@@ -1,6 +1,6 @@
 import { produce } from "immer";
 import { nanoid } from "nanoid";
-import { DropPosition } from "react-aria-components";
+import { DropPosition, Key } from "react-aria-components";
 import { create } from "zustand";
 import { useCanvasStore } from "./canvas";
 import { GradientType } from "@react-three/drei";
@@ -75,8 +75,9 @@ export type PlaneLayer = ImageLayer | GradientLayer;
 export type Layer = ImageLayer | GradientLayer;
 
 type LayerStore = {
-  selectedLayerId: string | null;
-  setSelectedLayerId: (selectedLayerId: string | null) => void;
+  selectedLayerIDs: Key[];
+  setSelectedLayerIDs: (selectedLayerIDs: Key[]) => void;
+  selectAllLayers: () => void;
 
   layers: Layer[];
   setLayers: (layers: Layer[]) => void;
@@ -97,7 +98,7 @@ type LayerStore = {
     value: string,
   ) => void;
 
-  removeSelectedLayer: () => void;
+  removeSelectedLayers: () => void;
 
   addImageLayer: (image: HTMLImageElement, name: string) => void;
 
@@ -111,20 +112,29 @@ type LayerStore = {
   removeColorFromGradientLayer: (layerId: string, index: number) => void;
 };
 export const useLayerStore = create<LayerStore>()((set) => ({
-  selectedLayerId: null,
-  setSelectedLayerId: (selectedLayerId: string | null) => {
-    set({ selectedLayerId });
+  selectedLayerIDs: [],
+  setSelectedLayerIDs: (selectedLayerIDs: Key[]) => {
+    set({ selectedLayerIDs });
   },
+  selectAllLayers: () => {
+    set(
+      produce((state: LayerStore) => {
+        state.selectedLayerIDs = state.layers.map((layer) => layer.id);
+      }),
+    );
+  },
+
   layers: [],
   setLayers: (layers: Layer[]) => {
     set({ layers });
   },
+
   addImageLayer: (image: HTMLImageElement, name: string) => {
     set(
       produce((state: LayerStore) => {
         const imageLayer = createImageLayer(image, name);
         state.layers.unshift(imageLayer);
-        state.selectedLayerId = imageLayer.id;
+        state.selectedLayerIDs = [imageLayer.id];
       }),
     );
   },
@@ -133,7 +143,7 @@ export const useLayerStore = create<LayerStore>()((set) => ({
       produce((state: LayerStore) => {
         const gradientLayer = createGradientLayer();
         state.layers.unshift(gradientLayer);
-        state.selectedLayerId = gradientLayer.id;
+        state.selectedLayerIDs = [gradientLayer.id];
       }),
     );
   },
@@ -144,21 +154,17 @@ export const useLayerStore = create<LayerStore>()((set) => ({
       }),
     );
   },
-  removeSelectedLayer: () => {
+  removeSelectedLayers: () => {
     set(
       produce((state: LayerStore) => {
-        const selectedLayerIndex = state.layers.findIndex(
-          (layer) => layer.id === state.selectedLayerId,
+        state.layers = state.layers.filter(
+          (layer) => !state.selectedLayerIDs.includes(layer.id),
         );
-        if (selectedLayerIndex === -1) {
-          return;
-        }
-        state.layers.splice(selectedLayerIndex, 1);
-        const previousLayer = state.layers[Math.max(selectedLayerIndex - 1, 0)];
-        if (previousLayer) {
-          state.selectedLayerId = previousLayer.id;
+        const firstLayer = state.layers[0];
+        if (firstLayer) {
+          state.selectedLayerIDs = [firstLayer.id];
         } else {
-          state.selectedLayerId = null;
+          state.selectedLayerIDs = [];
         }
       }),
     );
