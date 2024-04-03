@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Stage, Sprite, useTick, useApp, Graphics } from "@pixi/react";
-import { Sprite as PSprite } from "pixi.js";
+import { Sprite as PSprite, Graphics as PGraphics } from "pixi.js";
 import { useCanvasStore } from "../stores/canvas";
 import {
   ComputedProperty,
@@ -12,6 +12,7 @@ import { audioElement, isAudioPaused } from "../audio/context";
 import { audioStore, getRangeValue } from "../audio/store";
 import { mapNumber, getRandomNumber } from "../utils/numbers";
 import { ComponentProps, useCallback, useRef } from "react";
+import { GradientTexture } from "../three/PixiGradientTexture";
 
 type GraphicsDrawCallback = NonNullable<
   ComponentProps<typeof Graphics>["draw"]
@@ -39,7 +40,7 @@ function computedValue(property: ComputedProperty) {
   return property.default;
 }
 
-// TODO: Zoom, effects
+// TODO: effects
 function ImageLayer({ layer }: { layer: TImageLayer }) {
   const pixiApp = useApp();
   const { screen } = pixiApp;
@@ -74,11 +75,50 @@ function GradientLayer({ layer }: { layer: TGradientLayer }) {
   const pixiApp = useApp();
   const { screen } = pixiApp;
 
-  const { gradientType, stops, colors } = layer;
+  const { gradientType, scale, stops, colors, centered } = layer;
 
-  const draw = useCallback<GraphicsDrawCallback>((g) => {}, []);
+  const graphicsRef = useRef<PGraphics>(null);
 
-  return <Graphics width={screen.width} height={screen.height} />;
+  useTick(() => {
+    const graphics = graphicsRef.current;
+    if (!graphics) return;
+
+    const finalX = centered ? screen.width / 2 - graphics.width / 2 : 0;
+    const finalY = centered ? screen.height / 2 - graphics.height / 2 : 0;
+    graphics.position.set(finalX, finalY);
+
+    const computedScale = computedValue(scale);
+    graphics.scale.set(computedScale, computedScale);
+
+    const opacity = computedValue(layer.opacity);
+    graphics.alpha = opacity;
+  });
+
+  const draw = useCallback<GraphicsDrawCallback>(
+    (g) => {
+      g.clear();
+      g.beginTextureFill({
+        texture: GradientTexture({
+          stops,
+          colors,
+          type: gradientType,
+          width: screen.width,
+          height: screen.height,
+        }),
+      });
+      g.drawRect(0, 0, screen.width, screen.height);
+    },
+    [colors, gradientType, screen.height, screen.width, stops],
+  );
+
+  return (
+    <Graphics
+      ref={graphicsRef}
+      width={screen.width}
+      height={screen.height}
+      draw={draw}
+    />
+  );
 }
 
 export function PixiCanvas() {
