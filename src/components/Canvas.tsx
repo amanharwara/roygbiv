@@ -25,6 +25,25 @@ import {
 } from "@react-three/postprocessing";
 import { NoiseEffect, PixelationEffect, ScanlineEffect } from "postprocessing";
 
+function aspect(
+  width: number,
+  height: number,
+  factor: number = 1,
+  viewport: Viewport,
+): [number, number, number] {
+  const adaptedHeight =
+    height *
+    (viewport.aspect > width / height
+      ? viewport.width / width
+      : viewport.height / height);
+  const adaptedWidth =
+    width *
+    (viewport.aspect > width / height
+      ? viewport.width / width
+      : viewport.height / height);
+  return [adaptedWidth * factor, adaptedHeight * factor, 1];
+}
+
 function computedValue(property: ComputedProperty, viewport: Viewport) {
   try {
     // Declaring variables so they can be used in eval
