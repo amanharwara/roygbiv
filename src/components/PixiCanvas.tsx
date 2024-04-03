@@ -44,7 +44,7 @@ function ImageLayer({ layer }: { layer: TImageLayer }) {
   const pixiApp = useApp();
   const { screen } = pixiApp;
 
-  const { image, x, y, scale, opacity, centered } = layer;
+  const { image, width, height, x, y, scale, opacity, centered } = layer;
 
   const spriteRef = useRef<PSprite>(null);
 
@@ -52,8 +52,11 @@ function ImageLayer({ layer }: { layer: TImageLayer }) {
     const sprite = spriteRef.current;
     if (!sprite) return;
 
+    const wScale = width / image.width;
+    const hScale = height / image.height;
+
     const computedScale = computedValue(scale);
-    sprite.scale.set(computedScale, computedScale);
+    sprite.scale.set(computedScale * wScale, computedScale * hScale);
 
     const finalX = centered ? screen.width / 2 - sprite.width / 2 : 0;
     const finalY = centered ? screen.height / 2 - sprite.height / 2 : 0;
