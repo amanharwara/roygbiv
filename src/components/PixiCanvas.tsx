@@ -40,7 +40,7 @@ function computedValue(property: ComputedProperty) {
   return property.default;
 }
 
-// TODO: effects
+// TODO: effects + maybe zoom
 function ImageLayer({ layer }: { layer: TImageLayer }) {
   const pixiApp = useApp();
   const { screen } = pixiApp;
@@ -70,7 +70,7 @@ function ImageLayer({ layer }: { layer: TImageLayer }) {
   return <Sprite image={image.src} ref={spriteRef} />;
 }
 
-// TODO: Gradient
+// TODO: zoom, effects
 function GradientLayer({ layer }: { layer: TGradientLayer }) {
   const pixiApp = useApp();
   const { screen } = pixiApp;
@@ -83,12 +83,12 @@ function GradientLayer({ layer }: { layer: TGradientLayer }) {
     const graphics = graphicsRef.current;
     if (!graphics) return;
 
+    const computedScale = computedValue(scale);
+    graphics.scale.set(computedScale, computedScale);
+
     const finalX = centered ? screen.width / 2 - graphics.width / 2 : 0;
     const finalY = centered ? screen.height / 2 - graphics.height / 2 : 0;
     graphics.position.set(finalX, finalY);
-
-    const computedScale = computedValue(scale);
-    graphics.scale.set(computedScale, computedScale);
 
     const opacity = computedValue(layer.opacity);
     graphics.alpha = opacity;
