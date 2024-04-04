@@ -1,6 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Stage, Sprite, useTick, useApp, Graphics } from "@pixi/react";
-import { Sprite as PSprite, Graphics as PGraphics, NoiseFilter } from "pixi.js";
+import {
+  Sprite as PSprite,
+  Graphics as PGraphics,
+  NoiseFilter,
+  Filter,
+  Container,
+} from "pixi.js";
 import { AsciiFilter } from "pixi-filters";
 import { useCanvasStore } from "../stores/canvas";
 import {
@@ -8,11 +14,12 @@ import {
   useLayerStore,
   ImageLayer as TImageLayer,
   GradientLayer as TGradientLayer,
+  PlaneLayer,
 } from "../stores/layers";
 import { audioElement, isAudioPaused } from "../audio/context";
 import { audioStore, getRangeValue } from "../audio/store";
 import { mapNumber, getRandomNumber } from "../utils/numbers";
-import { ComponentProps, useCallback, useRef } from "react";
+import { ComponentProps, RefObject, useCallback, useRef } from "react";
 import { GradientTexture } from "../three/PixiGradientTexture";
 
 type GraphicsDrawCallback = NonNullable<
@@ -44,6 +51,42 @@ function computedValue(property: ComputedProperty) {
 // TODO REFACTOR: make property setting and effects more composable
 // so that the logic can be defined once and reused for both layers
 
+function useEffects({
+  containerRef,
+  effects,
+}: {
+  containerRef: RefObject<Container>;
+  effects: PlaneLayer["effects"];
+}) {
+  const { noise, ascii } = effects;
+
+  const noiseEffect = useRef(new NoiseFilter(noise.amount.default));
+  const asciiEffect = useRef(new AsciiFilter(ascii.size.default));
+
+  useTick(() => {
+    if (!containerRef.current) return;
+
+    noiseEffect.current.noise = computedValue(noise.amount);
+    asciiEffect.current.size = computedValue(ascii.size);
+
+    const filters: Filter[] = [];
+    if (noise.enabled) {
+      filters.push(noiseEffect.current);
+    } else {
+      const index = filters.indexOf(noiseEffect.current);
+      if (index !== -1) filters.splice(index, 1);
+    }
+    if (ascii.enabled) {
+      filters.push(asciiEffect.current);
+    } else {
+      const index = filters.indexOf(asciiEffect.current);
+      if (index !== -1) filters.splice(index, 1);
+    }
+
+    containerRef.current.filters = filters;
+  });
+}
+
 // TODO: effects + maybe zoom
 function ImageLayer({ layer }: { layer: TImageLayer }) {
   const pixiApp = useApp();
@@ -51,10 +94,6 @@ function ImageLayer({ layer }: { layer: TImageLayer }) {
 
   const { image, width, height, x, y, scale, opacity, centered, effects } =
     layer;
-  const { noise, ascii } = effects;
-
-  const noiseEffect = useRef(new NoiseFilter(noise.amount.default));
-  const asciiEffect = useRef(new AsciiFilter(ascii.size.default));
 
   const spriteRef = useRef<PSprite>(null);
 
@@ -74,21 +113,9 @@ function ImageLayer({ layer }: { layer: TImageLayer }) {
 
     const computedOpacity = computedValue(opacity);
     sprite.alpha = computedOpacity;
-
-    noiseEffect.current.noise = computedValue(noise.amount);
-    if (noise.enabled) {
-      sprite.filters = [noiseEffect.current];
-    } else {
-      sprite.filters = [];
-    }
-
-    asciiEffect.current.size = computedValue(ascii.size);
-    if (ascii.enabled) {
-      sprite.filters = [asciiEffect.current];
-    } else {
-      sprite.filters = [];
-    }
   });
+
+  useEffects({ containerRef: spriteRef, effects });
 
   return <Sprite image={image.src} ref={spriteRef} />;
 }
@@ -99,9 +126,6 @@ function GradientLayer({ layer }: { layer: TGradientLayer }) {
   const { screen } = pixiApp;
 
   const { gradientType, scale, stops, colors, centered, effects } = layer;
-  const { noise } = effects;
-
-  const noiseEffect = useRef(new NoiseFilter(noise.amount.default));
 
   const graphicsRef = useRef<PGraphics>(null);
 
@@ -118,15 +142,9 @@ function GradientLayer({ layer }: { layer: TGradientLayer }) {
 
     const opacity = computedValue(layer.opacity);
     graphics.alpha = opacity;
-
-    noiseEffect.current.noise = computedValue(noise.amount);
-
-    if (noise.enabled) {
-      graphics.filters = [noiseEffect.current];
-    } else {
-      graphics.filters = [];
-    }
   });
+
+  useEffects({ containerRef: graphicsRef, effects });
 
   const draw = useCallback<GraphicsDrawCallback>(
     (g) => {
