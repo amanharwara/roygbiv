@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Stage, Sprite, useTick, useApp, Graphics } from "@pixi/react";
-import { Sprite as PSprite, Graphics as PGraphics } from "pixi.js";
+import { Sprite as PSprite, Graphics as PGraphics, NoiseFilter } from "pixi.js";
+import { AsciiFilter } from "pixi-filters";
 import { useCanvasStore } from "../stores/canvas";
 import {
   ComputedProperty,
@@ -40,12 +41,20 @@ function computedValue(property: ComputedProperty) {
   return property.default;
 }
 
+// TODO REFACTOR: make property setting and effects more composable
+// so that the logic can be defined once and reused for both layers
+
 // TODO: effects + maybe zoom
 function ImageLayer({ layer }: { layer: TImageLayer }) {
   const pixiApp = useApp();
   const { screen } = pixiApp;
 
-  const { image, width, height, x, y, scale, opacity, centered } = layer;
+  const { image, width, height, x, y, scale, opacity, centered, effects } =
+    layer;
+  const { noise, ascii } = effects;
+
+  const noiseEffect = useRef(new NoiseFilter(noise.amount.default));
+  const asciiEffect = useRef(new AsciiFilter(ascii.size.default));
 
   const spriteRef = useRef<PSprite>(null);
 
@@ -65,6 +74,20 @@ function ImageLayer({ layer }: { layer: TImageLayer }) {
 
     const computedOpacity = computedValue(opacity);
     sprite.alpha = computedOpacity;
+
+    noiseEffect.current.noise = computedValue(noise.amount);
+    if (noise.enabled) {
+      sprite.filters = [noiseEffect.current];
+    } else {
+      sprite.filters = [];
+    }
+
+    asciiEffect.current.size = computedValue(ascii.size);
+    if (ascii.enabled) {
+      sprite.filters = [asciiEffect.current];
+    } else {
+      sprite.filters = [];
+    }
   });
 
   return <Sprite image={image.src} ref={spriteRef} />;
@@ -75,7 +98,10 @@ function GradientLayer({ layer }: { layer: TGradientLayer }) {
   const pixiApp = useApp();
   const { screen } = pixiApp;
 
-  const { gradientType, scale, stops, colors, centered } = layer;
+  const { gradientType, scale, stops, colors, centered, effects } = layer;
+  const { noise } = effects;
+
+  const noiseEffect = useRef(new NoiseFilter(noise.amount.default));
 
   const graphicsRef = useRef<PGraphics>(null);
 
@@ -92,6 +118,14 @@ function GradientLayer({ layer }: { layer: TGradientLayer }) {
 
     const opacity = computedValue(layer.opacity);
     graphics.alpha = opacity;
+
+    noiseEffect.current.noise = computedValue(noise.amount);
+
+    if (noise.enabled) {
+      graphics.filters = [noiseEffect.current];
+    } else {
+      graphics.filters = [];
+    }
   });
 
   const draw = useCallback<GraphicsDrawCallback>(

@@ -35,6 +35,7 @@ import ComputedProperty from "./ComputedProperty";
 import Switch from "../ui/Switch";
 import { Link, Unlink } from "lucide-react";
 import { twMerge } from "tailwind-merge";
+import TextField from "../ui/TextField";
 
 // TODO: All the components here re-render when any property of the layer changes.
 
@@ -43,7 +44,8 @@ function CommonPlaneLayerProperties({
 }: {
   layer: CommonPlaneObjectProps & { id: string };
 }) {
-  const { width, height, x, y, maintainAspect } = layer;
+  const { width, height, x, y, maintainAspect, effects } = layer;
+  const { noise, ascii } = effects;
   const defaultWidth = useRef(width);
   const defaultHeight = useRef(height);
   const updateLayer = useLayerStore((state) => state.updateLayer<PlaneLayer>);
@@ -156,6 +158,92 @@ function CommonPlaneLayerProperties({
             });
           }}
         />
+      </div>
+      <div className="flex flex-col gap-3 border-t border-neutral-600 px-3 pt-3 text-sm">
+        <div className="font-medium">ASCII (effect)</div>
+        <Switch
+          isSelected={ascii.enabled}
+          onChange={(enabled) => {
+            updateLayer(layer.id, {
+              effects: {
+                ...effects,
+                ascii: {
+                  ...ascii,
+                  enabled,
+                },
+              },
+            });
+          }}
+          className="flex-row-reverse justify-end"
+        >
+          Enabled:
+        </Switch>
+        {ascii.enabled && (
+          <div className="flex flex-col items-start gap-3">
+            <TextField
+              label="Amount:"
+              className="w-full"
+              value={ascii.size.value}
+              onChange={(value) => {
+                updateLayer(layer.id, {
+                  effects: {
+                    ...effects,
+                    ascii: {
+                      ...ascii,
+                      size: {
+                        ...ascii.size,
+                        value,
+                      },
+                    },
+                  },
+                });
+              }}
+            />
+          </div>
+        )}
+      </div>
+      <div className="flex flex-col gap-3 border-t border-neutral-600 px-3 pt-3 text-sm">
+        <div className="font-medium">Noise (effect)</div>
+        <Switch
+          isSelected={noise.enabled}
+          onChange={(enabled) => {
+            updateLayer(layer.id, {
+              effects: {
+                ...effects,
+                noise: {
+                  ...noise,
+                  enabled,
+                },
+              },
+            });
+          }}
+          className="flex-row-reverse justify-end"
+        >
+          Enabled:
+        </Switch>
+        {noise.enabled && (
+          <div className="flex flex-col items-start gap-3">
+            <TextField
+              label="Amount:"
+              className="w-full"
+              value={noise.amount.value}
+              onChange={(value) => {
+                updateLayer(layer.id, {
+                  effects: {
+                    ...effects,
+                    noise: {
+                      ...noise,
+                      amount: {
+                        ...noise.amount,
+                        value,
+                      },
+                    },
+                  },
+                });
+              }}
+            />
+          </div>
+        )}
       </div>
     </>
   );

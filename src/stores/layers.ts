@@ -30,6 +30,18 @@ type CommonLayerProps = {
   name: string;
 };
 
+type NoiseEffect = {
+  enabled: boolean;
+  amount: ComputedProperty;
+};
+
+type AsciiEffect = {
+  enabled: boolean;
+  size: ComputedProperty;
+  color: string;
+  replaceColor: boolean;
+};
+
 export type CommonPlaneObjectProps = {
   x: number;
   y: number;
@@ -39,6 +51,10 @@ export type CommonPlaneObjectProps = {
   scale: ComputedProperty;
   opacity: ComputedProperty;
   centered: boolean;
+  effects: {
+    noise: NoiseEffect;
+    ascii: AsciiEffect;
+  };
 };
 
 export type ImageLayer = CommonLayerProps &
@@ -289,6 +305,32 @@ export const useLayerStore = create<LayerStore>()((set) => ({
   },
 }));
 
+const createNoiseEffect = (): NoiseEffect => {
+  return {
+    enabled: false,
+    amount: {
+      default: 0.5,
+      value: "0.5",
+      min: 0,
+      max: 1,
+    },
+  };
+};
+
+const createAsciiEffect = (): AsciiEffect => {
+  return {
+    enabled: false,
+    size: {
+      default: 10,
+      value: "10",
+      min: 2,
+      max: 20,
+    },
+    color: "#ffffff",
+    replaceColor: false,
+  };
+};
+
 const createImageLayer = (
   image: HTMLImageElement,
   name: string,
@@ -315,6 +357,10 @@ const createImageLayer = (
     },
     name,
     id: nanoid(),
+    effects: {
+      noise: createNoiseEffect(),
+      ascii: createAsciiEffect(),
+    },
   };
 };
 
@@ -344,5 +390,9 @@ const createGradientLayer = (): GradientLayer => {
     colors: getRandomColors(2),
     name: "Gradient",
     id: nanoid(),
+    effects: {
+      noise: createNoiseEffect(),
+      ascii: createAsciiEffect(),
+    },
   };
 };
