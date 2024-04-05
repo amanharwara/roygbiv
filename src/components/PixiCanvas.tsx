@@ -18,7 +18,7 @@ import {
 } from "../stores/layers";
 import { audioElement, isAudioPaused } from "../audio/context";
 import { audioStore, getRangeValue } from "../audio/store";
-import { mapNumber, getRandomNumber } from "../utils/numbers";
+import { mapNumber, getRandomNumber, lerp as lerpUtil } from "../utils/numbers";
 import { ComponentProps, RefObject, useCallback, useRef } from "react";
 import { GradientTexture } from "../three/PixiGradientTexture";
 
@@ -26,7 +26,7 @@ type GraphicsDrawCallback = NonNullable<
   ComponentProps<typeof Graphics>["draw"]
 >;
 
-function computedValue(property: ComputedProperty) {
+function computedValue(property: ComputedProperty, prev?: number) {
   try {
     // Declaring variables so they can be used in eval
     const volume = audioStore.getState().level;
@@ -34,6 +34,8 @@ function computedValue(property: ComputedProperty) {
     const map = mapNumber;
     const random = isAudioPaused() ? () => 0 : getRandomNumber;
     const fRange = getRangeValue;
+    const lerp = (number: number, amount: number) =>
+      lerpUtil(number, prev ?? property.min ?? 0, amount);
     let result = eval(property.value);
     if (property.min !== undefined) {
       result = Math.max(result, property.min);
@@ -107,7 +109,7 @@ function ImageLayer({ layer }: { layer: TImageLayer }) {
     const wScale = width / image.width;
     const hScale = height / image.height;
 
-    const computedScale = computedValue(scale);
+    const computedScale = computedValue(scale, sprite.scale.x);
     sprite.scale.set(computedScale * wScale, computedScale * hScale);
 
     const finalX = centered ? screen.width / 2 - sprite.width / 2 : 0;
