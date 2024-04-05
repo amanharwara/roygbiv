@@ -1,50 +1,32 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Canvas, Viewport, useFrame, useThree } from "@react-three/fiber";
-import { useCallback, useRef } from "react";
-import { Dialog, Button, Popover } from "react-aria-components";
+import { Stage, Sprite, useTick, useApp, Graphics } from "@pixi/react";
+import {
+  Sprite as PSprite,
+  Graphics as PGraphics,
+  NoiseFilter,
+  Filter,
+  Container,
+} from "pixi.js";
+import { AsciiFilter } from "pixi-filters";
 import { useCanvasStore } from "../stores/canvas";
-import { type Material, Mesh } from "three";
 import {
-  GradientLayer,
-  ImageLayer,
-  useLayerStore,
   ComputedProperty,
+  useLayerStore,
+  ImageLayer as TImageLayer,
+  GradientLayer as TGradientLayer,
+  PlaneLayer,
 } from "../stores/layers";
-import NumberField from "./ui/NumberField";
-import { GradientTexture } from "../three/GradientTexture";
-import { Image } from "@react-three/drei";
-import { audioStore, getRangeValue } from "../audio/store";
-import { getRandomNumber, mapNumber } from "../utils/numbers";
-import { lerp } from "three/src/math/MathUtils";
 import { audioElement, isAudioPaused } from "../audio/context";
-import {
-  EffectComposer,
-  Noise,
-  Pixelation,
-  Scanline,
-} from "@react-three/postprocessing";
-import { NoiseEffect, PixelationEffect, ScanlineEffect } from "postprocessing";
+import { audioStore, getRangeValue } from "../audio/store";
+import { mapNumber, getRandomNumber, lerp as lerpUtil } from "../utils/numbers";
+import { ComponentProps, RefObject, useCallback, useRef } from "react";
+import { GradientTexture } from "../textures/GradientTexture";
 
-function aspect(
-  width: number,
-  height: number,
-  factor: number = 1,
-  viewport: Viewport,
-): [number, number, number] {
-  const adaptedHeight =
-    height *
-    (viewport.aspect > width / height
-      ? viewport.width / width
-      : viewport.height / height);
-  const adaptedWidth =
-    width *
-    (viewport.aspect > width / height
-      ? viewport.width / width
-      : viewport.height / height);
-  return [adaptedWidth * factor, adaptedHeight * factor, 1];
-}
+type GraphicsDrawCallback = NonNullable<
+  ComponentProps<typeof Graphics>["draw"]
+>;
 
-function computedValue(property: ComputedProperty, viewport: Viewport) {
+function computedValue(property: ComputedProperty, prev?: number) {
   try {
     // Declaring variables so they can be used in eval
     const volume = audioStore.getState().level;
@@ -52,10 +34,8 @@ function computedValue(property: ComputedProperty, viewport: Viewport) {
     const map = mapNumber;
     const random = isAudioPaused() ? () => 0 : getRandomNumber;
     const fRange = getRangeValue;
-    const canvas = {
-      width: viewport.width,
-      height: viewport.height,
-    };
+    const lerp = (number: number, amount: number) =>
+      lerpUtil(number, prev ?? property.min ?? 0, amount);
     let result = eval(property.value);
     if (property.min !== undefined) {
       result = Math.max(result, property.min);
@@ -70,235 +50,153 @@ function computedValue(property: ComputedProperty, viewport: Viewport) {
   return property.default;
 }
 
-function ImageLayerMesh({
-  layer,
-  index,
+// TODO REFACTOR: make property setting and effects more composable
+// so that the logic can be defined once and reused for both layers
+
+function useEffects({
+  containerRef,
+  effects,
 }: {
-  layer: ImageLayer;
-  index: number;
+  containerRef: RefObject<Container>;
+  effects: PlaneLayer["effects"];
 }) {
-  const { image, width, height, zoom, scale, opacity, x, y, effects } = layer;
-  const { noise } = effects;
+  const { noise, ascii } = effects;
 
-  const viewport = useThree((state) => state.viewport);
+  const noiseEffect = useRef(new NoiseFilter(noise.amount.default));
+  const asciiEffect = useRef(new AsciiFilter(ascii.size.default));
 
-  const scene = useThree((state) => state.scene);
+  const filters = useRef<Filter[]>([]);
 
-  const ref = useRef<Mesh>(null!);
+  useTick(() => {
+    if (!containerRef.current) return;
 
-  const noiseEffect = useRef<typeof NoiseEffect>(null!);
-  const pixelationEffect = useRef<PixelationEffect>(null!);
-  const scanlineEffect = useRef<typeof ScanlineEffect>(null!);
-
-  useFrame(() => {
-    const computedScale = computedValue(scale, viewport);
-    const currentScaleX = ref.current.scale.x;
-    const newScaleX = width * computedScale;
-    const currentScaleY = ref.current.scale.y;
-    const newScaleY = height * computedScale;
-    const scaleXLerp = lerp(
-      isNaN(currentScaleX) ? 1 : currentScaleX,
-      newScaleX,
-      0.2,
-    );
-    const scaleYLerp = lerp(
-      isNaN(currentScaleY) ? 1 : currentScaleY,
-      newScaleY,
-      0.2,
-    );
-    ref.current.scale.set(scaleXLerp, scaleYLerp, 1);
-
-    const computedOpacity = computedValue(opacity, viewport);
-    const currentOpacity = (ref.current.material as Material).opacity;
-    const opacityLerp = lerp(
-      isNaN(currentOpacity) ? 1 : currentOpacity,
-      computedOpacity,
-      0.05,
-    );
-    (ref.current.material as Material).opacity = opacityLerp;
-
-    const computedZoom = computedValue(zoom, viewport);
-    const currentZoom = ref.current.material.zoom;
-    const zoomLerp = lerp(
-      isNaN(currentZoom) ? 1 : currentZoom,
-      computedZoom,
-      0.05,
-    );
-    ref.current.material.zoom = zoomLerp;
+    noiseEffect.current.noise = computedValue(noise.amount);
+    asciiEffect.current.size = computedValue(ascii.size);
 
     if (noise.enabled) {
-      (noiseEffect.current as unknown as NoiseEffect).blendMode.opacity.value =
-        computedValue(noise.opacity, viewport);
+      if (!filters.current.includes(noiseEffect.current))
+        filters.current.push(noiseEffect.current);
+    } else {
+      const index = filters.current.indexOf(noiseEffect.current);
+      if (index !== -1) filters.current.splice(index, 1);
+    }
+    if (ascii.enabled) {
+      if (!filters.current.includes(asciiEffect.current))
+        filters.current.push(asciiEffect.current);
+    } else {
+      const index = filters.current.indexOf(asciiEffect.current);
+      if (index !== -1) filters.current.splice(index, 1);
     }
 
-    if (effects.pixelate.enabled) {
-      pixelationEffect.current.granularity = computedValue(
-        effects.pixelate.granularity,
-        viewport,
-      );
-    }
-
-    if (effects.scanlines.enabled) {
-      (scanlineEffect.current as unknown as ScanlineEffect).density =
-        computedValue(effects.scanlines.density, viewport);
-    }
+    containerRef.current.filters = filters.current;
   });
-
-  return (
-    <>
-      <group position={[x, y, index]}>
-        <Image ref={ref} url={image.src} transparent />
-      </group>
-      <EffectComposer scene={scene}>
-        <>{noise.enabled && <Noise ref={noiseEffect} />}</>
-        <>{effects.pixelate.enabled && <Pixelation ref={pixelationEffect} />}</>
-        <>{effects.scanlines.enabled && <Scanline ref={scanlineEffect} />}</>
-      </EffectComposer>
-    </>
-  );
 }
 
-function GradientLayerMesh({
-  layer,
-  index,
-}: {
-  layer: GradientLayer;
-  index: number;
-}) {
-  const { width, height, scale, opacity, x, y, stops, colors, gradientType } =
+// TODO: effects + maybe zoom
+function ImageLayer({ layer }: { layer: TImageLayer }) {
+  const pixiApp = useApp();
+  const { screen } = pixiApp;
+
+  const { image, width, height, x, y, scale, opacity, centered, effects } =
     layer;
-  const { size } = useThree();
 
-  const viewport = useThree((state) => state.viewport);
+  const spriteRef = useRef<PSprite>(null);
 
-  const ref = useRef<Mesh>(null!);
+  useTick(() => {
+    const sprite = spriteRef.current;
+    if (!sprite) return;
 
-  useFrame(() => {
-    const computedScale = computedValue(scale, viewport);
-    const [wScale, hScale] = aspect(width, height, computedScale, viewport);
-    const currentScaleX = ref.current.scale.x;
-    const currentScaleY = ref.current.scale.y;
-    const wScaleLerp = lerp(
-      isNaN(currentScaleX) ? 1 : currentScaleX,
-      wScale,
-      0.05,
-    );
-    const hScaleLerp = lerp(
-      isNaN(currentScaleY) ? 1 : currentScaleY,
-      hScale,
-      0.05,
-    );
-    ref.current.scale.set(wScaleLerp, hScaleLerp, 1);
+    const wScale = width / image.width;
+    const hScale = height / image.height;
 
-    const computedOpacity = computedValue(opacity, viewport);
-    const currentOpacity = (ref.current.material as Material).opacity;
-    const opacityLerp = lerp(
-      isNaN(currentOpacity) ? 1 : currentOpacity,
-      computedOpacity,
-      0.05,
-    );
-    (ref.current.material as Material).opacity = opacityLerp;
+    const computedScale = computedValue(scale, sprite.scale.x);
+    sprite.scale.set(computedScale * wScale, computedScale * hScale);
+
+    const finalX = centered ? screen.width / 2 - sprite.width / 2 : 0;
+    const finalY = centered ? screen.height / 2 - sprite.height / 2 : 0;
+    sprite.position.set(finalX + x, finalY + y);
+
+    const computedOpacity = computedValue(opacity);
+    sprite.alpha = computedOpacity;
   });
 
+  useEffects({ containerRef: spriteRef, effects });
+
+  return <Sprite image={image.src} ref={spriteRef} />;
+}
+
+// TODO: zoom, effects
+function GradientLayer({ layer }: { layer: TGradientLayer }) {
+  const pixiApp = useApp();
+  const { screen } = pixiApp;
+
+  const { gradientType, scale, stops, colors, centered, effects } = layer;
+
+  const graphicsRef = useRef<PGraphics>(null);
+
+  useTick(() => {
+    const graphics = graphicsRef.current;
+    if (!graphics) return;
+
+    const computedScale = computedValue(scale);
+    graphics.scale.set(computedScale, computedScale);
+
+    const finalX = centered ? screen.width / 2 - graphics.width / 2 : 0;
+    const finalY = centered ? screen.height / 2 - graphics.height / 2 : 0;
+    graphics.position.set(finalX, finalY);
+
+    const opacity = computedValue(layer.opacity);
+    graphics.alpha = opacity;
+  });
+
+  useEffects({ containerRef: graphicsRef, effects });
+
+  const draw = useCallback<GraphicsDrawCallback>(
+    (g) => {
+      g.clear();
+      g.beginTextureFill({
+        texture: GradientTexture({
+          stops,
+          colors,
+          type: gradientType,
+          width: screen.width,
+          height: screen.height,
+        }),
+      });
+      g.drawRect(0, 0, screen.width, screen.height);
+    },
+    [colors, gradientType, screen.height, screen.width, stops],
+  );
+
   return (
-    <mesh position={[x, y, index]} frustumCulled={false} ref={ref}>
-      <planeGeometry args={[1, 1, 1, 1]} />
-      <meshBasicMaterial depthTest={false} depthWrite={false} transparent>
-        <GradientTexture
-          stops={stops}
-          colors={colors}
-          /* @ts-expect-error - https://github.com/pmndrs/drei/blob/master/src/core/GradientTexture.tsx#L24 */
-          type={gradientType}
-          size={size.height}
-          width={size.width}
-        />
-      </meshBasicMaterial>
-    </mesh>
+    <Graphics
+      ref={graphicsRef}
+      width={screen.width}
+      height={screen.height}
+      draw={draw}
+    />
   );
 }
 
-export function SizedCanvas() {
+export function Canvas() {
   const { width, height } = useCanvasStore();
   const layers = useLayerStore((state) => state.layers);
 
   return (
-    <div
-      className="bg-black"
-      style={{
-        width,
-        height,
+    <Stage
+      width={width}
+      height={height}
+      options={{
+        background: 0x000000,
       }}
     >
-      <Canvas orthographic gl={{ autoClear: true }}>
-        {layers
-          .toReversed()
-          .map((layer, index) =>
-            layer.type === "image" ? (
-              <ImageLayerMesh key={layer.id} layer={layer} index={index} />
-            ) : layer.type === "gradient" ? (
-              <GradientLayerMesh key={layer.id} layer={layer} index={index} />
-            ) : null,
-          )}
-      </Canvas>
-    </div>
-  );
-}
-
-export function CanvasSettingsModal() {
-  const { width, height, setSize } = useCanvasStore();
-
-  const saveSettings = useCallback(
-    (event: React.FormEvent<HTMLFormElement>, close: () => void) => {
-      const formData = new FormData(event.currentTarget);
-      const width = Number(formData.get("width"));
-      const height = Number(formData.get("height"));
-      setSize(width, height);
-      close();
-    },
-    [setSize],
-  );
-
-  return (
-    <Popover
-      placement="bottom end"
-      className="rounded border border-neutral-700 bg-neutral-800 p-3 data-[entering]:animate-fade-in data-[exiting]:animate-fade-out "
-    >
-      <Dialog className="outline-none">
-        {({ close }) => (
-          <form
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                event.preventDefault();
-                saveSettings(event, close);
-              }
-            }}
-            onSubmit={(event) => {
-              event.preventDefault();
-              saveSettings(event, close);
-            }}
-          >
-            <div className="flex flex-col gap-3">
-              <NumberField
-                label="Width:"
-                defaultValue={width}
-                name="width"
-                autoFocus
-              />
-              <NumberField
-                label="Height:"
-                defaultValue={height}
-                name="height"
-              />
-              <Button
-                className="mt-1 rounded border border-neutral-600 bg-neutral-700 px-2 py-1.5 text-sm hover:bg-neutral-600"
-                type="submit"
-              >
-                Save
-              </Button>
-            </div>
-          </form>
-        )}
-      </Dialog>
-    </Popover>
+      {layers.toReversed().map((layer, index) => {
+        if (layer.type === "image")
+          return <ImageLayer key={index} layer={layer} />;
+        if (layer.type === "gradient")
+          return <GradientLayer key={index} layer={layer} />;
+        return null;
+      })}
+    </Stage>
   );
 }

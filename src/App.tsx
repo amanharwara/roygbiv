@@ -10,7 +10,7 @@ import {
   TooltipTrigger,
 } from "react-aria-components";
 import { Settings2 as SettingsIcon } from "lucide-react";
-import { CanvasSettingsModal } from "./components/Canvas";
+import { CanvasSettingsModal } from "./components/CanvasSettingsModal";
 import { SelectedAudio } from "./components/audio/SelectedAudio";
 import Tooltip from "./components/ui/Tooltip";
 import LayersList from "./components/layers/LayersList";
@@ -19,7 +19,7 @@ import { audioStore } from "./audio/store";
 import { useState } from "react";
 import FrequencyRangesList from "./components/frequencyRanges/FrequencyRangesList";
 import SelectedFrequencyRangeOptions from "./components/frequencyRanges/SelectedFrequencyRangeOptions";
-import { PixiCanvas } from "./components/PixiCanvas";
+import { Canvas } from "./components/Canvas";
 
 export default function App() {
   const file = audioStore((state) => state.audioFile);
@@ -31,8 +31,7 @@ export default function App() {
       <div className="flex flex-grow flex-col overflow-hidden">
         <div className="relative flex min-h-0 flex-grow items-center justify-center overflow-hidden">
           <div className="h-full w-full overflow-auto p-8">
-            {/* <SizedCanvas /> */}
-            <PixiCanvas />
+            <Canvas />
           </div>
           <DialogTrigger>
             <TooltipTrigger delay={150} closeDelay={0}>
