@@ -34,8 +34,14 @@ function computedValue(property: ComputedProperty, prev?: number) {
     const map = mapNumber;
     const random = isAudioPaused() ? () => 0 : getRandomNumber;
     const fRange = getRangeValue;
-    const lerp = (number: number, amount: number) =>
-      lerpUtil(number, prev ?? property.min ?? 0, amount);
+    const lerp = (number: number, amount: number) => {
+      let number2 = prev;
+      if (number2 === undefined || isNaN(number2)) {
+        number2 = property.min ?? 0;
+      }
+      const value = lerpUtil(number, number2, amount);
+      return value;
+    };
     let result = eval(property.value);
     if (property.min !== undefined) {
       result = Math.max(result, property.min);
