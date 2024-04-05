@@ -63,27 +63,30 @@ function useEffects({
   const noiseEffect = useRef(new NoiseFilter(noise.amount.default));
   const asciiEffect = useRef(new AsciiFilter(ascii.size.default));
 
+  const filters = useRef<Filter[]>([]);
+
   useTick(() => {
     if (!containerRef.current) return;
 
     noiseEffect.current.noise = computedValue(noise.amount);
     asciiEffect.current.size = computedValue(ascii.size);
 
-    const filters: Filter[] = [];
     if (noise.enabled) {
-      filters.push(noiseEffect.current);
+      if (!filters.current.includes(noiseEffect.current))
+        filters.current.push(noiseEffect.current);
     } else {
-      const index = filters.indexOf(noiseEffect.current);
-      if (index !== -1) filters.splice(index, 1);
+      const index = filters.current.indexOf(noiseEffect.current);
+      if (index !== -1) filters.current.splice(index, 1);
     }
     if (ascii.enabled) {
-      filters.push(asciiEffect.current);
+      if (!filters.current.includes(asciiEffect.current))
+        filters.current.push(asciiEffect.current);
     } else {
-      const index = filters.indexOf(asciiEffect.current);
-      if (index !== -1) filters.splice(index, 1);
+      const index = filters.current.indexOf(asciiEffect.current);
+      if (index !== -1) filters.current.splice(index, 1);
     }
 
-    containerRef.current.filters = filters;
+    containerRef.current.filters = filters.current;
   });
 }
 
