@@ -38,6 +38,11 @@ export function getRandomNumber(min: number, max: number) {
   return Math.random() * (max - min) + min;
 }
 
-export function lerp(start: number, stop: number, amt: number) {
-  return amt * (stop - start) + start;
+/**
+ * Linear interpolation
+ * @param t number between 0 and 1
+ * @returns value linearly interpolated from two known points based on the given interval — t = 0 will return x and t = 1 will return y.
+ */
+export function lerp(x: number, y: number, t: number) {
+  return (1 - t) * x + t * y;
 }
