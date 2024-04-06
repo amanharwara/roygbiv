@@ -26,7 +26,7 @@ type GraphicsDrawCallback = NonNullable<
   ComponentProps<typeof Graphics>["draw"]
 >;
 
-function computedValue(property: ComputedProperty, prev?: number) {
+function computedValue(property: ComputedProperty, prevValue?: number) {
   try {
     // Declaring variables so they can be used in eval
     const volume = audioStore.getState().level;
@@ -34,14 +34,11 @@ function computedValue(property: ComputedProperty, prev?: number) {
     const map = mapNumber;
     const random = isAudioPaused() ? () => 0 : getRandomNumber;
     const fRange = getRangeValue;
-    const lerp = (number: number, amount: number) => {
-      let number2 = prev;
-      if (number2 === undefined || isNaN(number2)) {
-        number2 = property.min ?? 0;
-      }
-      const value = lerpUtil(number, number2, amount);
-      return value;
-    };
+    let prev = prevValue;
+    if (prev === undefined || isNaN(prev)) {
+      prev = 0;
+    }
+    const lerp = lerpUtil;
     let result = eval(property.value);
     if (property.min !== undefined) {
       result = Math.max(result, property.min);
