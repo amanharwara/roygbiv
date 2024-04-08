@@ -15,7 +15,7 @@ import { SelectedAudio } from "./components/audio/SelectedAudio";
 import Tooltip from "./components/ui/Tooltip";
 import LayersList from "./components/layers/LayersList";
 import SelectedLayerProperties from "./components/layers/SelectedLayerProperties";
-import { audioStore } from "./audio/store";
+import { audioStore } from "./stores/audio";
 import { useState } from "react";
 import FrequencyRangesList from "./components/frequencyRanges/FrequencyRangesList";
 import SelectedFrequencyRangeOptions from "./components/frequencyRanges/SelectedFrequencyRangeOptions";

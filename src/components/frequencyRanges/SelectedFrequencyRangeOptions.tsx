@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { audioStore } from "../../audio/store";
+import { audioStore } from "../../stores/audio";
 import NumberField from "../ui/NumberField";
 import AudioMotionAnalyzer from "audiomotion-analyzer";
 import { audioContext, analyserNode, sourceNode } from "../../audio/context";

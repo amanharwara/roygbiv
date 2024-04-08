@@ -1,7 +1,7 @@
 import { audioElement } from "../../audio/context";
 import { Button } from "react-aria-components";
 import { useCallback } from "react";
-import { audioStore } from "../../audio/store";
+import { audioStore } from "../../stores/audio";
 
 export function SelectedAudio() {
   const file = audioStore((state) => state.audioFile);

@@ -22,7 +22,6 @@ import {
 } from "react-aria-components";
 import { useCallback, useRef, useState } from "react";
 import { Select, SelectItem } from "../ui/Select";
-import { GradientType } from "@react-three/drei";
 import { Edit2 as EditIcon } from "lucide-react";
 import { Trash as DeleteIcon } from "lucide-react";
 import { Plus as AddIcon } from "lucide-react";
@@ -36,6 +35,7 @@ import Switch from "../ui/Switch";
 import { Link, Unlink } from "lucide-react";
 import { twMerge } from "tailwind-merge";
 import TextField from "../ui/TextField";
+import { GradientType } from "../../textures/GradientTexture";
 
 // TODO: All the components here re-render when any property of the layer changes.
 

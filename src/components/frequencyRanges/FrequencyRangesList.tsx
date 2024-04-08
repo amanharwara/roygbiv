@@ -16,7 +16,7 @@ import {
   FrequencyRange,
   PresetFrequencyRanges,
   audioStore,
-} from "../../audio/store";
+} from "../../stores/audio";
 import Tooltip from "../ui/Tooltip";
 
 function RangeListItem({ range }: { range: FrequencyRange }) {

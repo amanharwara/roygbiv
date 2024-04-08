@@ -17,7 +17,7 @@ import {
   PlaneLayer,
 } from "../stores/layers";
 import { audioElement, isAudioPaused } from "../audio/context";
-import { audioStore, getRangeValue } from "../audio/store";
+import { audioStore, getRangeValue } from "../stores/audio";
 import { mapNumber, getRandomNumber, lerp as lerpUtil } from "../utils/numbers";
 import { ComponentProps, RefObject, useCallback, useRef } from "react";
 import { GradientTexture } from "../textures/GradientTexture";

@@ -3,11 +3,11 @@ import { nanoid } from "nanoid";
 import { DropPosition, Key } from "react-aria-components";
 import { create } from "zustand";
 import { useCanvasStore } from "./canvas";
-import { GradientType } from "@react-three/drei";
 import {
   getRandomColors,
   getStopsForGradientColors,
 } from "../utils/gradientUtils";
+import { GradientType } from "../textures/GradientTexture";
 
 export type ComputedProperty = {
   default: number;

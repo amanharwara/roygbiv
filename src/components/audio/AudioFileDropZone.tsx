@@ -1,6 +1,6 @@
 import { twJoin } from "tailwind-merge";
 import { Button, DropZone, FileTrigger, Text } from "react-aria-components";
-import { audioStore } from "../../audio/store";
+import { audioStore } from "../../stores/audio";
 
 function AudioFileDropZone() {
   return (
