@@ -1,6 +1,8 @@
 import { app, BrowserWindow, Menu, MenuItemConstructorOptions } from "electron";
 import * as path from "path";
 
+app.commandLine.appendSwitch("enable-experimental-web-platform-features");
+
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
 
