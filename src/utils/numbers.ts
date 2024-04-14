@@ -46,3 +46,12 @@ export function getRandomNumber(min: number, max: number) {
 export function lerp(x: number, y: number, t: number) {
   return (1 - t) * x + t * y;
 }
+
+/**
+ * Normalizes a value between a minimum and maximum value.
+ */
+export function normalize(val: number, min: number, max: number) {
+  const n = (val - min) / (max - min);
+
+  return constrainNumber(n, 0, 1);
+}

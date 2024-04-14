@@ -192,6 +192,9 @@ export function Canvas() {
       options={{
         background: 0x000000,
       }}
+      onMount={(app) => {
+        app.ticker.maxFPS = 60;
+      }}
     >
       {layers.toReversed().map((layer, index) => {
         if (layer.type === "image")

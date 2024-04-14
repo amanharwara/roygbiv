@@ -49,6 +49,7 @@
     "audiomotion-analyzer": "^4.4.0",
     "dayjs": "^1.11.10",
     "electron-squirrel-startup": "^1.0.0",
+    "fourier-transform": "^1.1.2",
     "immer": "^10.0.4",
     "lucide-react": "^0.364.0",
     "nanoid": "^5.0.6",
@@ -59,6 +60,7 @@
     "react-aria-components": "^1.1.1",
     "react-dom": "^18.2.0",
     "tailwind-merge": "^2.2.2",
+    "window-function": "^2.1.0",
     "zustand": "^4.5.2"
   }
 }

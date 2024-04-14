@@ -1,8 +1,9 @@
 import { create } from "zustand";
 import { nanoid } from "nanoid";
 import { isAudioPaused, setAudioSrc } from "../audio/context";
-import { analyze, getEnergyForFreqs } from "../audio/analyzer";
+import { analyze, frequencyData, getEnergyForFreqs } from "../audio/analyzer";
 import { getAudioLevel } from "../audio/amplitude";
+import { analyzeTrackData } from "../audio/preprocessing";
 
 export const PresetFrequencyRanges = {
   bass: {
@@ -59,6 +60,9 @@ export const audioStore = create<{
   setAudioFile: (audioFile) => {
     set({ audioFile });
     setAudioSrc(audioFile ? URL.createObjectURL(audioFile) : "");
+    if (audioFile) {
+      analyzeTrackData(audioFile);
+    }
   },
 
   selectedRange: null,
@@ -117,7 +121,8 @@ export function getRangeValue(name: string) {
 function update() {
   requestAnimationFrame(update);
 
-  const ranges = audioStore.getState().ranges;
+  const state = audioStore.getState();
+  const ranges = state.ranges;
 
   if (isAudioPaused()) {
     return;
@@ -126,11 +131,11 @@ function update() {
   analyze();
 
   const audioLevel = getAudioLevel();
-  audioStore.getState().setLevel(audioLevel);
+  state.setLevel(audioLevel);
 
   for (const range of ranges) {
-    const value = getEnergyForFreqs(range.min, range.max);
-    audioStore.getState().updateRange(range.name, { value });
+    const value = getEnergyForFreqs(frequencyData, range.min, range.max);
+    state.updateRange(range.name, { value });
   }
 }
 
