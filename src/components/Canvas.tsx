@@ -30,7 +30,6 @@ function computedValue(property: ComputedProperty, prevValue?: number) {
   try {
     // Declaring variables so they can be used in eval
     const volume = audioStore.getState().level;
-    const time = audioElement.currentTime;
     const map = mapNumber;
     const random = isAudioPaused() ? () => 0 : getRandomNumber;
     const fRange = getRangeValue;

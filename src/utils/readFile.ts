@@ -4,13 +4,23 @@ export const readFileAsImage = (file: File) => {
       reject();
       return;
     }
+    const reader = new FileReader();
     const image = new Image();
-    image.src = URL.createObjectURL(file);
     image.onload = () => {
       resolve(image);
     };
     image.onerror = () => {
       reject();
     };
+    let url: string;
+    reader.onload = () => {
+      if (reader.result && typeof reader.result === "string") {
+        url = reader.result;
+        image.src = url;
+      } else {
+        reject();
+      }
+    };
+    reader.readAsDataURL(file);
   });
 };

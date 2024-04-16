@@ -3,7 +3,7 @@ import { nanoid } from "nanoid";
 import { isAudioPaused, setAudioSrc } from "../audio/context";
 import { analyze, frequencyData, getEnergyForFreqs } from "../audio/analyzer";
 import { getAudioLevel } from "../audio/amplitude";
-import { analyzeTrackData } from "../audio/preprocessing";
+import { preprocessTrackData } from "../audio/preprocessing";
 
 export const PresetFrequencyRanges = {
   bass: {
@@ -50,9 +50,6 @@ export const audioStore = create<{
   updateRange: (name: string, range: Partial<FrequencyRange>) => void;
   removeRange: (name: string) => void;
 
-  value: number;
-  setValue: (value: number) => void;
-
   level: number;
   setLevel: (level: number) => void;
 }>((set, get) => ({
@@ -60,9 +57,6 @@ export const audioStore = create<{
   setAudioFile: (audioFile) => {
     set({ audioFile });
     setAudioSrc(audioFile ? URL.createObjectURL(audioFile) : "");
-    if (audioFile) {
-      analyzeTrackData(audioFile);
-    }
   },
 
   selectedRange: null,
@@ -103,9 +97,6 @@ export const audioStore = create<{
     }));
   },
 
-  value: 0,
-  setValue: (value) => set({ value }),
-
   level: 0,
   setLevel: (level: number) => {
     if (get().level !== level) {
@@ -123,10 +114,6 @@ function update() {
 
   const state = audioStore.getState();
   const ranges = state.ranges;
-
-  if (isAudioPaused()) {
-    return;
-  }
 
   analyze();
 

@@ -1,6 +1,5 @@
 import AudioFileDropZone from "./components/audio/AudioFileDropZone";
 import {
-  Button,
   DialogTrigger,
   Key,
   Tab,
@@ -20,6 +19,7 @@ import { useState } from "react";
 import FrequencyRangesList from "./components/frequencyRanges/FrequencyRangesList";
 import SelectedFrequencyRangeOptions from "./components/frequencyRanges/SelectedFrequencyRangeOptions";
 import { Canvas } from "./components/Canvas";
+import Button from "./components/ui/Button";
 
 export default function App() {
   const file = audioStore((state) => state.audioFile);
@@ -35,7 +35,7 @@ export default function App() {
           </div>
           <DialogTrigger>
             <TooltipTrigger delay={150} closeDelay={0}>
-              <Button className="absolute right-6 top-6 rounded bg-neutral-700 p-1.5 hover:bg-neutral-800">
+              <Button className="absolute right-6 top-6 p-1.5">
                 <SettingsIcon className="h-4 w-4" />
               </Button>
               <Tooltip offset={4}>Change canvas settings</Tooltip>

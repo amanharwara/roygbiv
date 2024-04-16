@@ -1,6 +1,7 @@
 import { twJoin } from "tailwind-merge";
-import { Button, DropZone, FileTrigger, Text } from "react-aria-components";
+import { DropZone, FileTrigger, Text } from "react-aria-components";
 import { audioStore } from "../../stores/audio";
+import Button from "../ui/Button";
 
 function AudioFileDropZone() {
   return (
@@ -40,9 +41,7 @@ function AudioFileDropZone() {
             audioStore.getState().setAudioFile(file);
           }}
         >
-          <Button className="rounded border border-neutral-600 px-2 py-1 hover:bg-white hover:text-black">
-            Click here to select file
-          </Button>
+          <Button>Click here to select file</Button>
         </FileTrigger>
       </DropZone>
     </div>

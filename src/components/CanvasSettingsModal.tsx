@@ -1,7 +1,8 @@
 import { useCallback } from "react";
-import { Dialog, Button, Popover } from "react-aria-components";
+import { Dialog, Popover } from "react-aria-components";
 import { useCanvasStore } from "../stores/canvas";
 import NumberField from "./ui/NumberField";
+import Button from "./ui/Button";
 
 export function CanvasSettingsModal() {
   const { width, height, setSize } = useCanvasStore();
@@ -48,10 +49,7 @@ export function CanvasSettingsModal() {
                 defaultValue={height}
                 name="height"
               />
-              <Button
-                className="mt-1 rounded border border-neutral-600 bg-neutral-700 px-2 py-1.5 text-sm hover:bg-neutral-600"
-                type="submit"
-              >
+              <Button className="mt-1" type="submit">
                 Save
               </Button>
             </div>
