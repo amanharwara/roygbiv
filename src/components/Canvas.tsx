@@ -10,50 +10,27 @@ import {
 import { AsciiFilter } from "pixi-filters";
 import { useCanvasStore } from "../stores/canvas";
 import {
-  ComputedProperty,
   useLayerStore,
   ImageLayer as TImageLayer,
   GradientLayer as TGradientLayer,
   PlaneLayer,
 } from "../stores/layers";
-import { audioElement, isAudioPaused } from "../audio/context";
 import { audioStore, getRangeValue } from "../stores/audio";
-import { mapNumber, getRandomNumber, lerp as lerpUtil } from "../utils/numbers";
 import { ComponentProps, RefObject, useCallback, useRef } from "react";
 import { GradientTexture } from "../textures/GradientTexture";
+import { ValueComputer } from "../utils/computedValue";
 
 type GraphicsDrawCallback = NonNullable<
   ComponentProps<typeof Graphics>["draw"]
 >;
 
-function computedValue(property: ComputedProperty, prevValue?: number) {
-  try {
-    // Declaring variables so they can be used in eval
-    const volume = audioStore.getState().level;
-    const map = mapNumber;
-    const random = isAudioPaused() ? () => 0 : getRandomNumber;
-    const fRange = getRangeValue;
-    let prev = prevValue;
-    if (prev === undefined || isNaN(prev)) {
-      prev = 0;
-    }
-    const lerp = lerpUtil;
-    let result = eval(property.value);
-    if (property.min !== undefined) {
-      result = Math.max(result, property.min);
-    }
-    if (property.max !== undefined) {
-      result = Math.min(result, property.max);
-    }
-    return result;
-  } catch {
-    /* empty */
-  }
-  return property.default;
-}
-
 // TODO REFACTOR: make property setting and effects more composable
 // so that the logic can be defined once and reused for both layers
+
+const valueComputer = new ValueComputer(
+  () => audioStore.getState().level,
+  getRangeValue,
+);
 
 function useEffects({
   containerRef,
@@ -72,8 +49,14 @@ function useEffects({
   useTick(() => {
     if (!containerRef.current) return;
 
-    noiseEffect.current.noise = computedValue(noise.amount);
-    asciiEffect.current.size = computedValue(ascii.size);
+    noiseEffect.current.noise = valueComputer.compute(
+      noise.amount,
+      noiseEffect.current.noise,
+    );
+    asciiEffect.current.size = valueComputer.compute(
+      ascii.size,
+      asciiEffect.current.size,
+    );
 
     if (noise.enabled) {
       if (!filters.current.includes(noiseEffect.current))
@@ -111,14 +94,14 @@ function ImageLayer({ layer }: { layer: TImageLayer }) {
     const wScale = width / image.width;
     const hScale = height / image.height;
 
-    const computedScale = computedValue(scale, sprite.scale.x);
+    const computedScale = valueComputer.compute(scale, sprite.scale.x);
     sprite.scale.set(computedScale * wScale, computedScale * hScale);
 
     const finalX = centered ? screen.width / 2 - sprite.width / 2 : 0;
     const finalY = centered ? screen.height / 2 - sprite.height / 2 : 0;
     sprite.position.set(finalX + x, finalY + y);
 
-    const computedOpacity = computedValue(opacity);
+    const computedOpacity = valueComputer.compute(opacity);
     sprite.alpha = computedOpacity;
   });
 
@@ -140,14 +123,14 @@ function GradientLayer({ layer }: { layer: TGradientLayer }) {
     const graphics = graphicsRef.current;
     if (!graphics) return;
 
-    const computedScale = computedValue(scale);
+    const computedScale = valueComputer.compute(scale);
     graphics.scale.set(computedScale, computedScale);
 
     const finalX = centered ? screen.width / 2 - graphics.width / 2 : 0;
     const finalY = centered ? screen.height / 2 - graphics.height / 2 : 0;
     graphics.position.set(finalX, finalY);
 
-    const opacity = computedValue(layer.opacity);
+    const opacity = valueComputer.compute(layer.opacity);
     graphics.alpha = opacity;
   });
 

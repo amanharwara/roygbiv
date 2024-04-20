@@ -34,10 +34,6 @@ export function mapNumber(
   }
 }
 
-export function getRandomNumber(min: number, max: number) {
-  return Math.random() * (max - min) + min;
-}
-
 /**
  * Linear interpolation
  * @param t number between 0 and 1

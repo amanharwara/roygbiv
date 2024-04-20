@@ -3,21 +3,14 @@ import { Modal, ModalOverlay } from "react-aria-components";
 import Button from "./ui/Button";
 import { X as CloseIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import {
-  Application,
-  Assets,
-  Container,
-  NoiseFilter,
-  Sprite,
-  Ticker,
-} from "pixi.js";
+import { Application, Assets, Container, NoiseFilter, Sprite } from "pixi.js";
 import { useCanvasStore } from "../stores/canvas";
 import { audioStore } from "../stores/audio";
 import { preprocessTrackData } from "../audio/preprocessing";
-import { ComputedProperty, Layer, useLayerStore } from "../stores/layers";
-import { getRandomNumber, mapNumber, lerp as lerpUtil } from "../utils/numbers";
+import { Layer, useLayerStore } from "../stores/layers";
 import { getEnergyForFreqs } from "../audio/analyzer";
 import { AsciiFilter } from "pixi-filters";
+import { ValueComputer } from "../utils/computedValue";
 
 const VideoRenderModal = ({ closeModal }: { closeModal: () => void }) => {
   const [canvasContainer, setCanvasContainer] = useState<HTMLDivElement | null>(
@@ -25,10 +18,12 @@ const VideoRenderModal = ({ closeModal }: { closeModal: () => void }) => {
   );
 
   const pixiAppRef = useRef<Application>();
-  const lastRaf = useRef<number>();
+  const callbackRef = useRef<() => void>();
 
   useEffect(() => {
     async function init() {
+      if (pixiAppRef.current) return;
+
       if (!canvasContainer) return;
       const canvasStore = useCanvasStore.getState();
 
@@ -40,57 +35,39 @@ const VideoRenderModal = ({ closeModal }: { closeModal: () => void }) => {
         width: canvasStore.width,
         height: canvasStore.height,
         autoStart: false,
+        sharedTicker: true,
       });
+      app.ticker.autoStart = false;
+      app.ticker.stop();
       pixiAppRef.current = app;
-      canvasContainer.appendChild(app.view);
+      canvasContainer.appendChild(app.view as HTMLCanvasElement);
 
       const { screen } = app;
 
       const ranges = structuredClone(audio.ranges);
 
-      const { numberOfFrames, fft, amp } = await preprocessTrackData(
+      const { numberOfFrames, fps, fft, amp } = await preprocessTrackData(
         audioFile!,
       );
+      app.ticker.minFPS = fps - 1;
+      app.ticker.maxFPS = fps;
 
       for (const range of ranges) {
         const value = getEnergyForFreqs(fft[0]!, range.min, range.max);
         range.value = value;
       }
 
-      function computedValue(
-        property: ComputedProperty,
-        frame: number,
-        prevValue?: number,
-      ) {
-        try {
-          // Declaring variables so they can be used in eval
-          const volume = amp[frame];
-          const map = mapNumber;
-          const random = getRandomNumber;
-          const fRange = (name: string) => {
-            const range = ranges.find((r) => r.name === name);
-            return range
-              ? getEnergyForFreqs(fft[frame]!, range.min, range.max)
-              : 0;
-          };
-          let prev = prevValue;
-          if (prev === undefined || isNaN(prev)) {
-            prev = 0;
-          }
-          const lerp = lerpUtil;
-          let result = eval(property.value);
-          if (property.min !== undefined) {
-            result = Math.max(result, property.min);
-          }
-          if (property.max !== undefined) {
-            result = Math.min(result, property.max);
-          }
-          return result;
-        } catch {
-          /* empty */
-        }
-        return property.default;
-      }
+      let frame = 0;
+
+      const valueComputer = new ValueComputer(
+        () => amp[frame]!,
+        (name: string) => {
+          const range = ranges.find((r) => r.name === name);
+          return range
+            ? getEnergyForFreqs(fft[frame]!, range.min, range.max)
+            : 0;
+        },
+      );
 
       const layerMap = new Map<Layer, Container>();
 
@@ -104,7 +81,10 @@ const VideoRenderModal = ({ closeModal }: { closeModal: () => void }) => {
           const wScale = layer.width / layer.image.width;
           const hScale = layer.height / layer.image.height;
 
-          const computedScale = computedValue(layer.scale, 0, sprite.scale.x);
+          const computedScale = valueComputer.compute(
+            layer.scale,
+            sprite.scale.x,
+          );
           sprite.scale.set(computedScale * wScale, computedScale * hScale);
 
           const finalX = layer.centered
@@ -115,21 +95,21 @@ const VideoRenderModal = ({ closeModal }: { closeModal: () => void }) => {
             : 0;
           sprite.position.set(finalX + layer.x, finalY + layer.y);
 
-          const computedOpacity = computedValue(layer.opacity, 0);
+          const computedOpacity = valueComputer.compute(layer.opacity);
           sprite.alpha = computedOpacity;
 
           sprite.filters = [];
 
           if (layer.effects.ascii.enabled) {
             const asciiEffect = new AsciiFilter(
-              computedValue(layer.effects.ascii.size, 0),
+              valueComputer.compute(layer.effects.ascii.size, 0),
             );
             sprite.filters.push(asciiEffect);
           }
 
           if (layer.effects.noise.enabled) {
             const noiseEffect = new NoiseFilter(
-              computedValue(layer.effects.noise.amount, 0),
+              valueComputer.compute(layer.effects.noise.amount, 0),
             );
             sprite.filters.push(noiseEffect);
           }
@@ -142,16 +122,19 @@ const VideoRenderModal = ({ closeModal }: { closeModal: () => void }) => {
 
       app.renderer.render(app.stage);
 
-      let frame = 0;
-      const rafCallback = () => {
+      callbackRef.current = () => {
+        if (frame >= numberOfFrames) {
+          app.ticker.remove(callbackRef.current!);
+          app.ticker.stop();
+          return;
+        }
         for (const [layer, sprite] of layerMap) {
           if (layer.type === "image") {
             const wScale = layer.width / layer.image.width;
             const hScale = layer.height / layer.image.height;
 
-            const computedScale = computedValue(
+            const computedScale = valueComputer.compute(
               layer.scale,
-              frame,
               sprite.scale.x,
             );
             sprite.scale.set(computedScale * wScale, computedScale * hScale);
@@ -164,34 +147,34 @@ const VideoRenderModal = ({ closeModal }: { closeModal: () => void }) => {
               : 0;
             sprite.position.set(finalX + layer.x, finalY + layer.y);
 
-            const computedOpacity = computedValue(layer.opacity, frame);
+            const computedOpacity = valueComputer.compute(layer.opacity);
             sprite.alpha = computedOpacity;
 
             const asciiEffect = sprite.filters?.find(
               (filter) => filter instanceof AsciiFilter,
             ) as AsciiFilter | undefined;
             if (asciiEffect) {
-              asciiEffect.size = computedValue(layer.effects.ascii.size, frame);
+              asciiEffect.size = valueComputer.compute(
+                layer.effects.ascii.size,
+              );
             }
 
             const noiseEffect = sprite.filters?.find(
               (filter) => filter instanceof NoiseFilter,
             ) as NoiseFilter | undefined;
             if (noiseEffect) {
-              noiseEffect.noise = computedValue(
+              noiseEffect.noise = valueComputer.compute(
                 layer.effects.noise.amount,
-                frame,
               );
             }
           }
         }
         app.renderer.render(app.stage);
         frame++;
-        if (frame < numberOfFrames) {
-          lastRaf.current = requestAnimationFrame(rafCallback);
-        }
       };
-      lastRaf.current = requestAnimationFrame(rafCallback);
+
+      app.ticker.add(callbackRef.current);
+      app.ticker.start();
     }
 
     void init();
@@ -199,8 +182,8 @@ const VideoRenderModal = ({ closeModal }: { closeModal: () => void }) => {
 
   useEffect(() => {
     return () => {
-      if (lastRaf.current) {
-        cancelAnimationFrame(lastRaf.current);
+      if (callbackRef.current) {
+        pixiAppRef.current?.ticker.remove(callbackRef.current);
       }
       if (pixiAppRef.current) {
         pixiAppRef.current.destroy();

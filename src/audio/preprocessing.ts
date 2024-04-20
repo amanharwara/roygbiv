@@ -112,7 +112,7 @@ function getNormalizedVolumeForBuffer(buffer: AudioBuffer): number {
 export async function preprocessTrackData(file: File) {
   const fileBuffer = await file.arrayBuffer();
   const buffer = await audioContext.decodeAudioData(fileBuffer);
-  const numberOfFrames = Math.floor(buffer.duration * fps);
+  const numberOfFrames = Math.round(buffer.duration * fps);
 
   const fft: Float32Array[] = [];
   const amp: number[] = [];
@@ -147,5 +147,5 @@ export async function preprocessTrackData(file: File) {
     fft.push(fftArray);
   }
 
-  return { numberOfFrames, fft, amp };
+  return { numberOfFrames, fps, fft, amp };
 }
