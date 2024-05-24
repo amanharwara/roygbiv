@@ -1,12 +1,12 @@
 import { analyserNode, audioContext } from "./context";
 import fft from "fourier-transform";
 import blackman from "window-function/blackman";
+import { fps } from "../constants";
 
 function magnitudeToDB(magnitude: number) {
   return 20 * Math.log10(magnitude);
 }
 
-const fps = 60;
 const fftSize = analyserNode.fftSize;
 const frequencyBinCount = analyserNode.frequencyBinCount;
 
@@ -95,6 +95,7 @@ function getNormalizedVolumeForBuffer(buffer: AudioBuffer): number {
     }
     const rms = Math.sqrt(sum / length);
     stereoVolume[channel] = rms;
+    // add check for NaN
     maxVolume = Math.max(rms, maxVolume);
   }
 
@@ -123,8 +124,8 @@ export async function preprocessTrackData(file: File) {
   for (let frame = 0; frame < numberOfFrames; frame++) {
     const time = frame / fps;
     const position = Math.floor((time / buffer.duration) * buffer.length);
-    const start = Math.max(position - frequencyBinCount, 0);
-    const end = Math.max(position + frequencyBinCount, 4096);
+    const start = position - frequencyBinCount;
+    const end = position + frequencyBinCount;
     const slice = getAudioSlice(buffer, start, end);
 
     const volume = getNormalizedVolumeForBuffer(slice);

@@ -8,6 +8,7 @@ export const resetAudio = () => {
   audioElement.currentTime = 0;
 };
 export const isAudioPaused = () => audioElement.paused;
+export const didAudioEnd = () => audioElement.ended;
 export const setAudioSrc = (src: string) => (audioElement.src = src);
 
 document.addEventListener("keydown", (event) => {

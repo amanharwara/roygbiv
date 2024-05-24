@@ -1,12 +1,10 @@
 import { audioElement } from "../../audio/context";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { audioStore } from "../../stores/audio";
 import Button from "../ui/Button";
-import VideoRenderModal from "../VideoRenderModal";
+import { startRendering } from "../../video/render";
 
 export function SelectedAudio() {
-  const [showRenderModal, setShowRenderModal] = useState(false);
-
   const file = audioStore((state) => state.audioFile);
 
   const appendAudioElement = useCallback((containerRef: HTMLElement | null) => {
@@ -25,7 +23,11 @@ export function SelectedAudio() {
         <div className="flex flex-shrink-0 flex-col items-start gap-2">
           <div>{file.name}</div>
           <div className="flex items-center gap-2.5">
-            <Button onPress={() => setShowRenderModal((f) => !f)}>
+            <Button
+              onPress={() => {
+                startRendering();
+              }}
+            >
               Render video
             </Button>
             <Button
@@ -40,9 +42,6 @@ export function SelectedAudio() {
         </div>
         <div className="flex-grow" ref={appendAudioElement} />
       </div>
-      {showRenderModal && (
-        <VideoRenderModal closeModal={() => setShowRenderModal(false)} />
-      )}
     </>
   );
 }
