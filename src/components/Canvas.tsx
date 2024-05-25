@@ -164,7 +164,7 @@ function GradientLayer({ layer }: { layer: TGradientLayer }) {
 }
 
 export function Canvas() {
-  const { width, height, setPixiApp } = useCanvasStore();
+  const { width, height, setPixiApp, isRendering } = useCanvasStore();
   const layers = useLayerStore((state) => state.layers);
 
   return (
@@ -175,6 +175,8 @@ export function Canvas() {
         background: 0x000000,
       }}
       onMount={setPixiApp}
+      raf={!isRendering}
+      renderOnComponentChange={isRendering}
     >
       {layers.toReversed().map((layer, index) => {
         if (layer.type === "image")

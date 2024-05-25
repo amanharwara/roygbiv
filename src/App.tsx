@@ -21,6 +21,7 @@ import SelectedFrequencyRangeOptions from "./components/frequencyRanges/Selected
 import { Canvas } from "./components/Canvas";
 import Button from "./components/ui/Button";
 import { useCanvasStore } from "./stores/canvas";
+import { twMerge } from "tailwind-merge";
 
 export default function App() {
   const file = audioStore((state) => state.audioFile);
@@ -29,7 +30,12 @@ export default function App() {
   const [selectedTab, setSelectedTab] = useState<Key>("layers");
 
   return (
-    <div className="grid h-full grid-cols-[5fr,1.5fr] overflow-hidden">
+    <div
+      className={twMerge(
+        "grid h-full overflow-hidden",
+        isRendering ? "grid-cols-1" : "grid-cols-[5fr,1.5fr]",
+      )}
+    >
       <div className="flex flex-grow flex-col overflow-hidden">
         <div className="relative flex min-h-0 flex-grow items-center justify-center overflow-hidden">
           <div className="h-full w-full overflow-auto p-8">

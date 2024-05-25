@@ -14,8 +14,8 @@ type CanvasStore = {
   setPixiApp: (pixiApp: Application) => void;
 };
 export const useCanvasStore = create<CanvasStore>()((set) => ({
-  width: Math.round(window.innerWidth / 1.6),
-  height: Math.round(window.innerHeight / 1.6),
+  width: getDefaultWidth(),
+  height: getDefaultHeight(),
   setSize: (width: number, height: number) => {
     set({ width, height });
   },
@@ -33,3 +33,13 @@ export const useCanvasStore = create<CanvasStore>()((set) => ({
     set({ pixiApp });
   },
 }));
+
+function getDefaultWidth() {
+  const width = Math.round(window.innerWidth / 1.6);
+  return width % 2 === 0 ? width : width - 1;
+}
+
+function getDefaultHeight() {
+  const height = Math.round(window.innerHeight / 1.6);
+  return height % 2 === 0 ? height : height - 1;
+}
