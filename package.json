@@ -9,7 +9,8 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "echo \"No linting configured\""
+    "lint": "echo \"No linting configured\"",
+    "run-web": "vite -c ./vite.web.config.mjs"
   },
   "keywords": [],
   "author": {
@@ -52,6 +53,7 @@
     "fourier-transform": "^1.1.2",
     "immer": "^10.0.4",
     "lucide-react": "^0.371.0",
+    "mp4-muxer": "^4.2.0",
     "nanoid": "^5.0.6",
     "pixi-filters": "^5.0.0",
     "pixi.js": "^7.0.0",
