@@ -1,137 +1,141 @@
-import { ArrayBufferTarget, Muxer } from "mp4-muxer";
-import { useCanvasStore } from "../stores/canvas";
+import { FFmpeg } from "@ffmpeg/ffmpeg";
+import ffMpegCoreWorker from "../ffmpeg-js/ffmpeg-core.worker?url";
 import { didAudioEnd, playAudio, resetAudio } from "../audio/context";
+import { useCanvasStore } from "../stores/canvas";
+import { concatenateUint8Arrays } from "../utils/concatenateUint8Arrays";
+import { fps } from "../constants";
 
-let muxer: Muxer<ArrayBufferTarget> | null = null;
-let videoEncoder: VideoEncoder | null = null;
 let isRendering = false;
-let framesGenerated = 0;
+let canvas: HTMLCanvasElement | null = null;
 let encodeInterval: number | null = null;
-let fileHandle: FileSystemFileHandle | null = null;
+
+let videoEncoder: VideoEncoder | null = null;
+const chunks: Uint8Array[] = [];
+function handleChunk(chunk: EncodedVideoChunk) {
+  let chunkData: Uint8Array | null = new Uint8Array(chunk.byteLength);
+  chunk.copyTo(chunkData);
+  chunks.push(chunkData);
+  chunkData = null;
+}
+
+let framesGenerated = 0;
 let startTime: number | null = null;
 let lastKeyFrame: number | null = null;
 
-export async function startRendering() {
-  fileHandle = await window.showSaveFilePicker({
-    types: [
-      {
-        description: "MP4 file",
-        accept: {
-          "video/mp4": [".mp4"],
-        },
-      },
-    ],
-  });
+const ffmpeg = new FFmpeg();
+const ffmpegBaseUrl = new URL("../ffmpeg-js", import.meta.url).href;
+ffmpeg.on("log", ({ type, message }) => {
+  console.log(type, message);
+});
+ffmpeg.on("progress", ({ progress, time }) => {
+  console.log(progress, time);
+});
+if (!ffmpeg.loaded) {
+  ffmpeg
+    .load({
+      coreURL: `${ffmpegBaseUrl}/ffmpeg-core.js`,
+      wasmURL: `${ffmpegBaseUrl}/ffmpeg-core.wasm`,
+      workerURL: ffMpegCoreWorker,
+    })
+    .then((loaded) => {
+      useCanvasStore.getState().setIsFFmpegReady(loaded);
+    });
+}
 
-  useCanvasStore.getState().setIsRendering(true);
-  resetAudio();
-
+export function startRendering() {
   const pixiApp = useCanvasStore.getState().pixiApp;
+  if (!pixiApp) return;
 
-  const canvas = pixiApp!.view;
+  canvas = pixiApp.view as HTMLCanvasElement;
+
   const evenedWidth = canvas.width % 2 === 0 ? canvas.width : canvas.width + 1;
   const evenedHeight =
     canvas.height % 2 === 0 ? canvas.height : canvas.height + 1;
 
+  videoEncoder = new VideoEncoder({
+    output: handleChunk,
+    error: (e) => console.error(e),
+  });
+  videoEncoder.configure({
+    codec: "avc1.640034", // avc1.42001E / avc1.4d002a / avc1.640034
+    avc: { format: "annexb" },
+    width: evenedWidth,
+    height: evenedHeight,
+    bitrate: 9_000_000, // 9 Mbps
+    framerate: fps,
+    bitrateMode: "constant",
+  });
+
   isRendering = true;
+  useCanvasStore.getState().setIsRendering(true);
   framesGenerated = 0;
   startTime = document.timeline.currentTime as number;
   lastKeyFrame = -Infinity;
 
-  muxer = new Muxer({
-    target: new ArrayBufferTarget(),
-    video: {
-      codec: "avc",
-      width: evenedWidth,
-      height: evenedHeight,
-    },
-    fastStart: "in-memory",
-  });
-
-  videoEncoder = new VideoEncoder({
-    output: (chunk, meta) => {
-      muxer!.addVideoChunk(chunk, meta);
-    },
-    error: (e) => console.error(e),
-  });
-  videoEncoder.configure({
-    codec: "avc1.42001f",
-    width: evenedWidth,
-    height: evenedHeight,
-    bitrate: 1e7,
-  });
-
+  resetAudio();
   playAudio();
-  encodeVideoFrame();
-  encodeInterval = window.setInterval(encodeVideoFrame, 1000 / 60);
+  encodeInterval = window.setInterval(renderFrame, 1000 / 60);
 }
 
-function stopAndResetRendering() {
-  clearInterval(encodeInterval!);
-  useCanvasStore.getState().setIsRendering(false);
-  resetAudio();
-  muxer = null;
-  videoEncoder = null;
+async function finishRendering(finalFrames: Uint8Array) {
+  const containerName = "composed.h264";
+  const outputName = "output.mp4";
+  await ffmpeg.writeFile(containerName, finalFrames);
+  await ffmpeg.exec([
+    "-i",
+    `${containerName}`,
+    "-map",
+    "0:v:0",
+    "-c:v",
+    "copy",
+    "-y",
+    `${outputName}`,
+  ]);
+  const muxedBytes = await ffmpeg.readFile(outputName);
+  console.log(muxedBytes);
+}
+
+export function stopRendering() {
   isRendering = false;
-}
-
-export async function finishRendering() {
-  if (!muxer || !videoEncoder) {
-    throw new Error("Muxer or video encoder is not initialized");
+  useCanvasStore.getState().setIsRendering(false);
+  if (encodeInterval) {
+    window.clearInterval(encodeInterval);
+    encodeInterval = null;
   }
 
-  clearInterval(encodeInterval!);
-
-  await videoEncoder.flush();
-  muxer.finalize();
-
-  const buffer = muxer.target.buffer;
-
-  if (fileHandle) {
-    const writable = await fileHandle.createWritable();
-    await writable.write(buffer);
-    await writable.close();
+  if (videoEncoder) {
+    videoEncoder.flush();
+    videoEncoder = null;
   }
 
-  useCanvasStore.getState().setIsRendering(false);
-
-  muxer = null;
-  videoEncoder = null;
-  isRendering = false;
-
-  resetAudio();
+  const final = concatenateUint8Arrays(chunks);
+  finishRendering(final).catch(console.error);
 }
 
-function encodeVideoFrame() {
+const renderFrame = () => {
   if (!isRendering) return;
 
-  if (videoEncoder?.state === "closed") {
-    stopAndResetRendering();
-    return;
-  }
-
   if (didAudioEnd()) {
-    finishRendering();
+    stopRendering();
     return;
   }
 
   const pixiApp = useCanvasStore.getState().pixiApp;
   if (!pixiApp) {
-    stopAndResetRendering();
+    stopRendering();
     throw new Error("Pixi app is not initialized");
   }
   const canvas = pixiApp.view as HTMLCanvasElement;
   pixiApp.ticker.update();
   pixiApp.renderer.render(pixiApp.stage);
 
-  let elapsedTime = (document.timeline.currentTime as number) - startTime!;
-
   const frame = new VideoFrame(canvas, {
-    timestamp: framesGenerated * (1e6 / 60),
+    timestamp: framesGenerated * (1 / 60),
     duration: 1e6 / 60,
   });
-
   framesGenerated++;
+
+  let elapsedTime = (document.timeline.currentTime as number) - startTime!;
 
   let needsKeyFrame = elapsedTime - lastKeyFrame! >= 5000;
   if (needsKeyFrame) {
@@ -142,4 +146,4 @@ function encodeVideoFrame() {
     keyFrame: needsKeyFrame,
   });
   frame.close();
-}
+};

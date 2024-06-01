@@ -10,6 +10,9 @@ type CanvasStore = {
   isRendering: boolean;
   setIsRendering: (isRendering: boolean) => void;
 
+  isFFmpegReady: boolean;
+  setIsFFmpegReady: (isFFmpegReady: boolean) => void;
+
   pixiApp: Application | null;
   setPixiApp: (pixiApp: Application) => void;
 };
@@ -24,6 +27,13 @@ export const useCanvasStore = create<CanvasStore>()((set) => ({
   setIsRendering: (isRendering: boolean) => {
     set({
       isRendering,
+    });
+  },
+
+  isFFmpegReady: false,
+  setIsFFmpegReady: (isFFmpegReady: boolean) => {
+    set({
+      isFFmpegReady,
     });
   },
 

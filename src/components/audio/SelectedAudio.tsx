@@ -2,11 +2,14 @@ import { audioElement } from "../../audio/context";
 import { useCallback } from "react";
 import { audioStore } from "../../stores/audio";
 import Button from "../ui/Button";
-import { finishRendering, startRendering } from "../../video/render";
+import { startRendering, stopRendering } from "../../video/render";
 import { useCanvasStore } from "../../stores/canvas";
 
 export function SelectedAudio() {
-  const isRendering = useCanvasStore((state) => state.isRendering);
+  const { isRendering, isFFmpegReady } = useCanvasStore((state) => ({
+    isRendering: state.isRendering,
+    isFFmpegReady: state.isFFmpegReady,
+  }));
   const file = audioStore((state) => state.audioFile);
 
   const appendAudioElement = useCallback((containerRef: HTMLElement | null) => {
@@ -29,12 +32,12 @@ export function SelectedAudio() {
               <Button
                 className="hover:border-red-700 hover:bg-red-700 focus:border-red-700 focus:bg-red-700"
                 onPress={() => {
-                  finishRendering();
+                  stopRendering();
                 }}
               >
                 Finish rendering
               </Button>
-            ) : (
+            ) : isFFmpegReady ? (
               <Button
                 onPress={() => {
                   startRendering();
@@ -42,7 +45,7 @@ export function SelectedAudio() {
               >
                 Render video
               </Button>
-            )}
+            ) : null}
             <Button
               className="hover:border-red-700 hover:bg-red-700 focus:border-red-700 focus:bg-red-700"
               onPress={() => {
