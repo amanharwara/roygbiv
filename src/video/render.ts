@@ -1,7 +1,7 @@
 import { didAudioEnd, playAudio, resetAudio } from "../audio/context";
 import { useCanvasStore } from "../stores/canvas";
 import { concatenateUint8Arrays } from "../utils/concatenateUint8Arrays";
-import { fps } from "../constants";
+import { bitrate, fps, renderInterval } from "../constants";
 import { ffmpeg, loadFFmpeg } from "./ffmpeg";
 
 let isRendering = false;
@@ -45,7 +45,7 @@ export async function startRendering() {
     avc: { format: "annexb" },
     width: evenedWidth,
     height: evenedHeight,
-    bitrate: 9_000_000, // 9 Mbps
+    bitrate: bitrate,
     framerate: fps,
     bitrateMode: "constant",
   });
@@ -61,7 +61,7 @@ export async function startRendering() {
   playAudio();
 
   renderFrame();
-  encodeInterval = window.setInterval(renderFrame, 1000 / fps);
+  encodeInterval = window.setInterval(renderFrame, renderInterval);
 }
 
 async function finishRendering(finalFrames: Uint8Array) {
@@ -145,8 +145,8 @@ const renderFrame = () => {
   pixiApp.renderer.render(pixiApp.stage);
 
   const frame = new VideoFrame(canvas, {
-    timestamp: framesGenerated * (1e6 / fps),
-    duration: 1e6 / fps,
+    timestamp: framesGenerated * (bitrate / fps),
+    duration: bitrate / fps,
   });
   framesGenerated++;
 
