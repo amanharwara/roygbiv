@@ -1,8 +1,15 @@
-import { didAudioEnd, playAudio, resetAudio } from "../audio/context";
+import {
+  audioElement,
+  didAudioEnd,
+  playAudio,
+  resetAudio,
+} from "../audio/context";
 import { useCanvasStore } from "../stores/canvas";
 import { concatenateUint8Arrays } from "../utils/concatenateUint8Arrays";
 import { bitrate, fps, renderInterval } from "../constants";
 import { ffmpeg, loadFFmpeg } from "./ffmpeg";
+import { fetchFile } from "@ffmpeg/util";
+import { audioStore } from "../stores/audio";
 
 let isRendering = false;
 let canvas: HTMLCanvasElement | null = null;
@@ -18,9 +25,9 @@ function handleChunk(chunk: EncodedVideoChunk) {
 }
 
 let framesGenerated = 0;
-let timestamp = 0;
 let startTime: number | null = null;
 let lastKeyFrame: number | null = null;
+let lastTimestamp = 0;
 
 export async function startRendering() {
   if (!ffmpeg.loaded) {
@@ -55,7 +62,7 @@ export async function startRendering() {
   framesGenerated = 0;
   startTime = document.timeline.currentTime as number;
   lastKeyFrame = -Infinity;
-  timestamp = 0;
+  lastTimestamp = 0;
 
   resetAudio();
   playAudio();
@@ -67,20 +74,40 @@ export async function startRendering() {
 async function finishRendering(finalFrames: Uint8Array) {
   const containerName = "composed.h264";
   const outputName = "output.mp4";
+
   await ffmpeg.writeFile(containerName, finalFrames);
+
+  const audioFile = audioStore.getState().audioFile;
+  if (!audioFile) {
+    throw new Error("Audio file is not set");
+  }
+
+  const audioName = "audio";
+  await ffmpeg.writeFile(audioName, await fetchFile(audioFile));
+
+  const duration = lastTimestamp / bitrate;
+
   await ffmpeg.exec([
     "-r",
     `${fps}`,
     "-i",
     `${containerName}`,
+    "-i",
+    `${audioName}`,
     "-map",
     "0:v:0",
+    "-map",
+    "1:a:0",
     "-c:v",
     "copy",
+    "-c:a",
+    "aac",
+    "-t",
+    `${duration}`,
     "-y",
     `${outputName}`,
   ]);
-  await ffmpeg.deleteFile(containerName);
+
   const muxedBytes = await ffmpeg.readFile(outputName);
 
   const downloadButton = document.createElement("button");
@@ -113,6 +140,8 @@ async function finishRendering(finalFrames: Uint8Array) {
 export function stopRendering() {
   isRendering = false;
   useCanvasStore.getState().setIsRendering(false);
+  resetAudio();
+
   if (encodeInterval) {
     window.clearInterval(encodeInterval);
     encodeInterval = null;
@@ -144,11 +173,15 @@ const renderFrame = () => {
   pixiApp.ticker.update();
   pixiApp.renderer.render(pixiApp.stage);
 
+  const timestamp = framesGenerated * (bitrate / fps);
+
   const frame = new VideoFrame(canvas, {
-    timestamp: framesGenerated * (bitrate / fps),
+    timestamp,
     duration: bitrate / fps,
   });
+
   framesGenerated++;
+  lastTimestamp = timestamp;
 
   let elapsedTime = (document.timeline.currentTime as number) - startTime!;
 
