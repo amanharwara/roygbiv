@@ -376,7 +376,7 @@ const createGradientLayer = (): GradientLayer => {
     centered: true,
     scale: {
       default: 1,
-      value: "1",
+      value: "map(volume, 0, 1, 0.5, 1)",
       min: 0,
       max: 1,
     },

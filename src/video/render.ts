@@ -1,16 +1,15 @@
-import { FFmpeg } from "@ffmpeg/ffmpeg";
-import ffMpegCoreWorker from "../ffmpeg-js/ffmpeg-core.worker?url";
 import { didAudioEnd, playAudio, resetAudio } from "../audio/context";
 import { useCanvasStore } from "../stores/canvas";
 import { concatenateUint8Arrays } from "../utils/concatenateUint8Arrays";
 import { fps } from "../constants";
+import { ffmpeg, loadFFmpeg } from "./ffmpeg";
 
 let isRendering = false;
 let canvas: HTMLCanvasElement | null = null;
 let encodeInterval: number | null = null;
 
 let videoEncoder: VideoEncoder | null = null;
-const chunks: Uint8Array[] = [];
+let chunks: Uint8Array[] = [];
 function handleChunk(chunk: EncodedVideoChunk) {
   let chunkData: Uint8Array | null = new Uint8Array(chunk.byteLength);
   chunk.copyTo(chunkData);
@@ -19,30 +18,15 @@ function handleChunk(chunk: EncodedVideoChunk) {
 }
 
 let framesGenerated = 0;
+let timestamp = 0;
 let startTime: number | null = null;
 let lastKeyFrame: number | null = null;
 
-const ffmpeg = new FFmpeg();
-const ffmpegBaseUrl = new URL("../ffmpeg-js", import.meta.url).href;
-ffmpeg.on("log", ({ type, message }) => {
-  console.log(type, message);
-});
-ffmpeg.on("progress", ({ progress, time }) => {
-  console.log(progress, time);
-});
-if (!ffmpeg.loaded) {
-  ffmpeg
-    .load({
-      coreURL: `${ffmpegBaseUrl}/ffmpeg-core.js`,
-      wasmURL: `${ffmpegBaseUrl}/ffmpeg-core.wasm`,
-      workerURL: ffMpegCoreWorker,
-    })
-    .then((loaded) => {
-      useCanvasStore.getState().setIsFFmpegReady(loaded);
-    });
-}
+export async function startRendering() {
+  if (!ffmpeg.loaded) {
+    await loadFFmpeg();
+  }
 
-export function startRendering() {
   const pixiApp = useCanvasStore.getState().pixiApp;
   if (!pixiApp) return;
 
@@ -71,10 +55,13 @@ export function startRendering() {
   framesGenerated = 0;
   startTime = document.timeline.currentTime as number;
   lastKeyFrame = -Infinity;
+  timestamp = 0;
 
   resetAudio();
   playAudio();
-  encodeInterval = window.setInterval(renderFrame, 1000 / 60);
+
+  renderFrame();
+  encodeInterval = window.setInterval(renderFrame, 1000 / fps);
 }
 
 async function finishRendering(finalFrames: Uint8Array) {
@@ -82,6 +69,8 @@ async function finishRendering(finalFrames: Uint8Array) {
   const outputName = "output.mp4";
   await ffmpeg.writeFile(containerName, finalFrames);
   await ffmpeg.exec([
+    "-r",
+    `${fps}`,
     "-i",
     `${containerName}`,
     "-map",
@@ -91,8 +80,34 @@ async function finishRendering(finalFrames: Uint8Array) {
     "-y",
     `${outputName}`,
   ]);
+  await ffmpeg.deleteFile(containerName);
   const muxedBytes = await ffmpeg.readFile(outputName);
-  console.log(muxedBytes);
+
+  const downloadButton = document.createElement("button");
+  downloadButton.innerText = "Download";
+  downloadButton.className =
+    "rounded border border-neutral-600 bg-neutral-700 px-2.5 py-1.5 text-sm hover:bg-neutral-600 focus:shadow-none focus:outline-none focus-visible:border-slate-400";
+  downloadButton.onclick = async () => {
+    const fileHandle = await window.showSaveFilePicker({
+      types: [
+        {
+          description: "MP4 file",
+          accept: {
+            "video/mp4": [".mp4"],
+          },
+        },
+      ],
+    });
+
+    const writable = await fileHandle.createWritable();
+    await writable.write(muxedBytes);
+    await writable.close();
+
+    downloadButton.remove();
+  };
+
+  document.body.appendChild(downloadButton);
+  chunks = [];
 }
 
 export function stopRendering() {
@@ -130,8 +145,8 @@ const renderFrame = () => {
   pixiApp.renderer.render(pixiApp.stage);
 
   const frame = new VideoFrame(canvas, {
-    timestamp: framesGenerated * (1 / 60),
-    duration: 1e6 / 60,
+    timestamp: framesGenerated * (1e6 / fps),
+    duration: 1e6 / fps,
   });
   framesGenerated++;
 

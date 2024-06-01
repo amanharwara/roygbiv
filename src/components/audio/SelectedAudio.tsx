@@ -37,7 +37,7 @@ export function SelectedAudio() {
               >
                 Finish rendering
               </Button>
-            ) : isFFmpegReady ? (
+            ) : (
               <Button
                 onPress={() => {
                   startRendering();
@@ -45,7 +45,7 @@ export function SelectedAudio() {
               >
                 Render video
               </Button>
-            ) : null}
+            )}
             <Button
               className="hover:border-red-700 hover:bg-red-700 focus:border-red-700 focus:bg-red-700"
               onPress={() => {
