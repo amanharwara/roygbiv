@@ -10,11 +10,12 @@ ffmpeg.on("log", ({ type, message }) => {
 ffmpeg.on("progress", ({ progress, time }) => {
   console.log(progress, time);
 });
-
-export async function loadFFmpeg() {
-  return ffmpeg.load({
+ffmpeg
+  .load({
     coreURL: `${ffmpegBaseUrl}/ffmpeg-core.js`,
     wasmURL: `${ffmpegBaseUrl}/ffmpeg-core.wasm`,
     workerURL: ffMpegCoreWorker,
+  })
+  .then((loaded) => {
+    useCanvasStore.getState().setIsFFmpegReady(loaded);
   });
-}

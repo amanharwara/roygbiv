@@ -1,16 +1,16 @@
 import { audioElement } from "../../audio/context";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { audioStore } from "../../stores/audio";
 import Button from "../ui/Button";
-import { startRendering, stopRendering } from "../../video/render";
 import { useCanvasStore } from "../../stores/canvas";
+import { VideoExport } from "../../video/VideoExport";
 
 export function SelectedAudio() {
-  const { isRendering, isFFmpegReady } = useCanvasStore((state) => ({
-    isRendering: state.isRendering,
-    isFFmpegReady: state.isFFmpegReady,
-  }));
   const file = audioStore((state) => state.audioFile);
+
+  const { isFFmpegReady, pixiApp, isRendering } = useCanvasStore();
+
+  const [videoExport, setVideoExport] = useState<VideoExport | null>(null);
 
   const appendAudioElement = useCallback((containerRef: HTMLElement | null) => {
     if (!containerRef) return;
@@ -28,24 +28,52 @@ export function SelectedAudio() {
         <div className="flex flex-shrink-0 flex-col items-start gap-2">
           <div>{file.name}</div>
           <div className="flex items-center gap-2.5">
-            {isRendering ? (
+            {!!videoExport && videoExport.finalBytes ? (
               <Button
-                className="hover:border-red-700 hover:bg-red-700 focus:border-red-700 focus:bg-red-700"
-                onPress={() => {
-                  stopRendering();
+                onPress={async () => {
+                  const fileHandle = await window.showSaveFilePicker({
+                    types: [
+                      {
+                        description: "MP4 file",
+                        accept: {
+                          "video/mp4": [".mp4"],
+                        },
+                      },
+                    ],
+                  });
+
+                  const writable = await fileHandle.createWritable();
+                  await writable.write(videoExport.finalBytes!);
+                  await writable.close();
                 }}
               >
-                Finish rendering
+                Download video
               </Button>
-            ) : (
+            ) : null}
+            {!!pixiApp && !isRendering && isFFmpegReady && (
               <Button
-                onPress={() => {
-                  startRendering();
+                onPress={async () => {
+                  const canvas = pixiApp.view as HTMLCanvasElement;
+
+                  const videoExport = new VideoExport(canvas);
+                  setVideoExport(videoExport);
+
+                  videoExport.startRendering();
                 }}
               >
                 Render video
               </Button>
             )}
+            {!!videoExport && isRendering ? (
+              <Button
+                className="hover:border-red-700 hover:bg-red-700 focus:border-red-700 focus:bg-red-700"
+                onPress={() => {
+                  videoExport.stopRendering();
+                }}
+              >
+                Finish rendering
+              </Button>
+            ) : null}
             <Button
               className="hover:border-red-700 hover:bg-red-700 focus:border-red-700 focus:bg-red-700"
               onPress={() => {

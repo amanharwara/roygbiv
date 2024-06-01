@@ -1,5 +1,5 @@
 import { concatenateUint8Arrays } from "../utils/concatenateUint8Arrays";
-import { fps } from "../constants";
+import { DefaultFPS } from "../constants";
 
 export enum EncodeWorkerMessageType {
   UpdateConfig = "update-config",
@@ -33,7 +33,7 @@ const config: VideoEncoderConfig = {
   width: 1280,
   height: 720,
   bitrate: 1e9,
-  framerate: fps,
+  framerate: DefaultFPS,
   bitrateMode: "constant",
 };
 

@@ -1,6 +1,6 @@
 import { Application } from "pixi.js";
 import { create } from "zustand";
-import { fps } from "../constants";
+import { DefaultFPS } from "../constants";
 
 type CanvasStore = {
   width: number;
@@ -39,7 +39,7 @@ export const useCanvasStore = create<CanvasStore>()((set) => ({
 
   pixiApp: null,
   setPixiApp: (pixiApp: Application) => {
-    pixiApp.ticker.maxFPS = fps;
+    pixiApp.ticker.maxFPS = DefaultFPS;
     set({ pixiApp });
   },
 }));

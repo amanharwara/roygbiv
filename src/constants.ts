@@ -1,4 +1,2 @@
-export const fps = 60;
-export const bitrate = 1e6;
-const millisecondsInSecond = 1000;
-export const renderInterval = millisecondsInSecond / fps;
+export const DefaultFPS = 60;
+export const DefaultBitrate = 1e6;
