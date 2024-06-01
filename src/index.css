@@ -9,7 +9,6 @@ body,
   height: 100%;
   @apply bg-neutral-900 text-white;
   color-scheme: dark;
-  overflow: hidden;
 }
 
 body {

@@ -12,7 +12,9 @@ export function CanvasSettingsModal() {
       const formData = new FormData(event.currentTarget);
       const width = Number(formData.get("width"));
       const height = Number(formData.get("height"));
-      setSize(width, height);
+      const evenedWidth = width % 2 === 0 ? width : width + 1;
+      const evenedHeight = height % 2 === 0 ? height : height + 1;
+      setSize(evenedWidth, evenedHeight);
       close();
     },
     [setSize],

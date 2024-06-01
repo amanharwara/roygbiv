@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ESNext",
     "allowJs": true,
-    "module": "commonjs",
+    "module": "ESNext",
     "skipLibCheck": true,
     "esModuleInterop": true,
     "noImplicitAny": true,
@@ -18,7 +18,11 @@
       "*": [
         "node_modules/*"
       ]
-    }
+    },
+    "types": [
+      "./vite.d.ts",
+      "@types/wicg-file-system-access",
+    ]
   },
   "include": [
     "src/**/*"
