@@ -45,6 +45,7 @@ export class VideoExport {
       bitrate: bitrate,
       framerate: fps,
       bitrateMode: "constant",
+      latencyMode: "quality",
     });
   }
 
