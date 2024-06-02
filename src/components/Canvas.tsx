@@ -123,7 +123,7 @@ function GradientLayer({ layer }: { layer: TGradientLayer }) {
     const graphics = graphicsRef.current;
     if (!graphics) return;
 
-    const computedScale = valueComputer.compute(scale);
+    const computedScale = valueComputer.compute(scale, graphics.scale.x);
     graphics.scale.set(computedScale, computedScale);
 
     const finalX = centered ? screen.width / 2 - graphics.width / 2 : 0;

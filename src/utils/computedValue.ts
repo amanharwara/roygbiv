@@ -71,8 +71,9 @@ export class ValueComputer {
       if (prev === undefined || isNaN(prev)) {
         prev = 0;
       }
+      const replace = property.value.replace(/\bprev\b/g, prev.toString());
       const evaluated = this.context.unwrapResult(
-        this.context.evalCode(property.value, undefined, {
+        this.context.evalCode(replace, undefined, {
           type: "global",
         }),
       );
