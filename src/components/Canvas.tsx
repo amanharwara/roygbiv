@@ -14,6 +14,7 @@ import {
   ImageLayer as TImageLayer,
   GradientLayer as TGradientLayer,
   PlaneLayer,
+  ComputedProperty,
 } from "../stores/layers";
 import { audioStore, getRangeValue } from "../stores/audio";
 import { ComponentProps, RefObject, useCallback, useRef } from "react";
@@ -31,6 +32,36 @@ const valueComputer = new ValueComputer(
   () => audioStore.getState().level,
   getRangeValue,
 );
+
+function scaleContainer(
+  container: Container,
+  width: number,
+  height: number,
+  scale: ComputedProperty,
+  base: { width: number; height: number },
+) {
+  const wScale = width / base.width;
+  const hScale = height / base.height;
+  const computedScale = valueComputer.compute(scale, container.scale.x);
+  container.scale.set(computedScale * wScale, computedScale * hScale);
+}
+
+function positionContainer(
+  container: Container,
+  x: number,
+  y: number,
+  centered: boolean,
+  base: { width: number; height: number },
+) {
+  const finalX = centered ? base.width / 2 - container.width / 2 : 0;
+  const finalY = centered ? base.height / 2 - container.height / 2 : 0;
+  container.position.set(finalX + x, finalY + y);
+}
+
+function setContainerOpacity(container: Container, opacity: ComputedProperty) {
+  const computedOpacity = valueComputer.compute(opacity);
+  container.alpha = computedOpacity;
+}
 
 function useEffects({
   containerRef,
@@ -77,7 +108,7 @@ function useEffects({
   });
 }
 
-// TODO: effects + maybe zoom
+// TODO: maybe zoom
 function ImageLayer({ layer }: { layer: TImageLayer }) {
   const pixiApp = useApp();
   const { screen } = pixiApp;
@@ -91,18 +122,9 @@ function ImageLayer({ layer }: { layer: TImageLayer }) {
     const sprite = spriteRef.current;
     if (!sprite) return;
 
-    const wScale = width / image.width;
-    const hScale = height / image.height;
-
-    const computedScale = valueComputer.compute(scale, sprite.scale.x);
-    sprite.scale.set(computedScale * wScale, computedScale * hScale);
-
-    const finalX = centered ? screen.width / 2 - sprite.width / 2 : 0;
-    const finalY = centered ? screen.height / 2 - sprite.height / 2 : 0;
-    sprite.position.set(finalX + x, finalY + y);
-
-    const computedOpacity = valueComputer.compute(opacity);
-    sprite.alpha = computedOpacity;
+    scaleContainer(sprite, width, height, scale, image);
+    positionContainer(sprite, x, y, centered, screen);
+    setContainerOpacity(sprite, opacity);
   });
 
   useEffects({ containerRef: spriteRef, effects });
@@ -110,7 +132,7 @@ function ImageLayer({ layer }: { layer: TImageLayer }) {
   return <Sprite image={image.src} ref={spriteRef} />;
 }
 
-// TODO: zoom, effects
+// TODO: zoom
 function GradientLayer({ layer }: { layer: TGradientLayer }) {
   const pixiApp = useApp();
   const { screen } = pixiApp;
@@ -134,18 +156,9 @@ function GradientLayer({ layer }: { layer: TGradientLayer }) {
     const graphics = graphicsRef.current;
     if (!graphics) return;
 
-    const wScale = width / screen.width;
-    const hScale = height / screen.height;
-
-    const computedScale = valueComputer.compute(scale, graphics.scale.x);
-    graphics.scale.set(computedScale * wScale, computedScale * hScale);
-
-    const finalX = centered ? screen.width / 2 - graphics.width / 2 : 0;
-    const finalY = centered ? screen.height / 2 - graphics.height / 2 : 0;
-    graphics.position.set(finalX + x, finalY + y);
-
-    const opacity = valueComputer.compute(layer.opacity);
-    graphics.alpha = opacity;
+    scaleContainer(graphics, width, height, scale, screen);
+    positionContainer(graphics, x, y, centered, screen);
+    setContainerOpacity(graphics, layer.opacity);
   });
 
   useEffects({ containerRef: graphicsRef, effects });
