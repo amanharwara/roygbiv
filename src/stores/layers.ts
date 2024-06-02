@@ -378,7 +378,6 @@ const createGradientLayer = (): GradientLayer => {
       default: 1,
       value: "1",
       min: 0,
-      max: 1,
     },
     opacity: {
       default: 1,

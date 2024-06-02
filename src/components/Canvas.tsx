@@ -115,7 +115,18 @@ function GradientLayer({ layer }: { layer: TGradientLayer }) {
   const pixiApp = useApp();
   const { screen } = pixiApp;
 
-  const { gradientType, scale, stops, colors, centered, effects } = layer;
+  const {
+    gradientType,
+    width,
+    height,
+    x,
+    y,
+    scale,
+    stops,
+    colors,
+    centered,
+    effects,
+  } = layer;
 
   const graphicsRef = useRef<PGraphics>(null);
 
@@ -123,12 +134,15 @@ function GradientLayer({ layer }: { layer: TGradientLayer }) {
     const graphics = graphicsRef.current;
     if (!graphics) return;
 
+    const wScale = width / screen.width;
+    const hScale = height / screen.height;
+
     const computedScale = valueComputer.compute(scale, graphics.scale.x);
-    graphics.scale.set(computedScale, computedScale);
+    graphics.scale.set(computedScale * wScale, computedScale * hScale);
 
     const finalX = centered ? screen.width / 2 - graphics.width / 2 : 0;
     const finalY = centered ? screen.height / 2 - graphics.height / 2 : 0;
-    graphics.position.set(finalX, finalY);
+    graphics.position.set(finalX + x, finalY + y);
 
     const opacity = valueComputer.compute(layer.opacity);
     graphics.alpha = opacity;
