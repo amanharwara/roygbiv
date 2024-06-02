@@ -19,6 +19,7 @@ import { audioStore, getRangeValue } from "../stores/audio";
 import { ComponentProps, RefObject, useCallback, useRef } from "react";
 import { GradientTexture } from "../textures/GradientTexture";
 import { ValueComputer } from "../utils/computedValue";
+import { isAudioPaused } from "../audio/context";
 
 type GraphicsDrawCallback = NonNullable<
   ComponentProps<typeof Graphics>["draw"]
@@ -31,6 +32,18 @@ const valueComputer = new ValueComputer(
   () => audioStore.getState().level,
   getRangeValue,
 );
+
+/**
+ * This hooks into the default Pixi Ticker using the `useTick` hook
+ * but makes sure to only call the callback when the audio is playing.
+ */
+function useControlledTick(callback: () => void) {
+  useTick(() => {
+    if (!isAudioPaused()) {
+      callback();
+    }
+  });
+}
 
 function useEffects({
   containerRef,
@@ -46,7 +59,7 @@ function useEffects({
 
   const filters = useRef<Filter[]>([]);
 
-  useTick(() => {
+  useControlledTick(() => {
     if (!containerRef.current) return;
 
     noiseEffect.current.noise = valueComputer.compute(
@@ -87,7 +100,7 @@ function ImageLayer({ layer }: { layer: TImageLayer }) {
 
   const spriteRef = useRef<PSprite>(null);
 
-  useTick(() => {
+  useControlledTick(() => {
     const sprite = spriteRef.current;
     if (!sprite) return;
 
@@ -119,7 +132,7 @@ function GradientLayer({ layer }: { layer: TGradientLayer }) {
 
   const graphicsRef = useRef<PGraphics>(null);
 
-  useTick(() => {
+  useControlledTick(() => {
     const graphics = graphicsRef.current;
     if (!graphics) return;
 
