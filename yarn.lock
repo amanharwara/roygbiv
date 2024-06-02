@@ -1261,6 +1261,49 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@jitl/quickjs-ffi-types@npm:0.29.1":
+  version: 0.29.1
+  resolution: "@jitl/quickjs-ffi-types@npm:0.29.1"
+  checksum: 10c0/6d3f49e6d550450463156cd3e70b25a702e7e49a20b58bd4aeda6c7dfdc9e3668a26758f5f488dfad6bdfabd6a69134fc0905d25c20ba88aa11b78805817b524
+  languageName: node
+  linkType: hard
+
+"@jitl/quickjs-wasmfile-debug-asyncify@npm:0.29.1":
+  version: 0.29.1
+  resolution: "@jitl/quickjs-wasmfile-debug-asyncify@npm:0.29.1"
+  dependencies:
+    "@jitl/quickjs-ffi-types": "npm:0.29.1"
+  checksum: 10c0/82fab3013962885f0900faceab3fafaacf166b2923ab9fe61768c24f8afcfe96a89e72c8fbbb3c7668e658a1034419fd714d854f7904c29240300888995713f1
+  languageName: node
+  linkType: hard
+
+"@jitl/quickjs-wasmfile-debug-sync@npm:0.29.1":
+  version: 0.29.1
+  resolution: "@jitl/quickjs-wasmfile-debug-sync@npm:0.29.1"
+  dependencies:
+    "@jitl/quickjs-ffi-types": "npm:0.29.1"
+  checksum: 10c0/f6f28871467127b5a9552a634a17479108e6e762740feac19f71b0859bb5422c442434dd1cbcfb112da72c18d95dba572da3694764ccd9a4983a5cda907157a4
+  languageName: node
+  linkType: hard
+
+"@jitl/quickjs-wasmfile-release-asyncify@npm:0.29.1":
+  version: 0.29.1
+  resolution: "@jitl/quickjs-wasmfile-release-asyncify@npm:0.29.1"
+  dependencies:
+    "@jitl/quickjs-ffi-types": "npm:0.29.1"
+  checksum: 10c0/ee5e905ab3e485494c161fb68c7acdcfc33b97f58bef874bf20afe284b53fe5aec160cd19a1402d9b132568fcc51c9a525e970bb3ef1dfed13f85ade49448c0c
+  languageName: node
+  linkType: hard
+
+"@jitl/quickjs-wasmfile-release-sync@npm:0.29.1":
+  version: 0.29.1
+  resolution: "@jitl/quickjs-wasmfile-release-sync@npm:0.29.1"
+  dependencies:
+    "@jitl/quickjs-ffi-types": "npm:0.29.1"
+  checksum: 10c0/b58a904232f01b26fd5886a610be09814bbc30e89db6f923b100dcf5f77ed35254d5f397e787d62f5f414fb14fd3b83670681d51a907dbdb40d40b19d3a6c12f
+  languageName: node
+  linkType: hard
+
 "@jridgewell/gen-mapping@npm:^0.3.0, @jridgewell/gen-mapping@npm:^0.3.2":
   version: 0.3.3
   resolution: "@jridgewell/gen-mapping@npm:0.3.3"
@@ -9257,6 +9300,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"quickjs-emscripten-core@npm:0.29.1":
+  version: 0.29.1
+  resolution: "quickjs-emscripten-core@npm:0.29.1"
+  dependencies:
+    "@jitl/quickjs-ffi-types": "npm:0.29.1"
+  checksum: 10c0/b073f60376b6fbc885b39e9081878ec64eaa5bf54d888cb050d086fb1b95924e8b44dfdf80fcd7c7cff5f6379ef790881562cd54fc75c05b734d446ed2ced32c
+  languageName: node
+  linkType: hard
+
+"quickjs-emscripten@npm:^0.29.1":
+  version: 0.29.1
+  resolution: "quickjs-emscripten@npm:0.29.1"
+  dependencies:
+    "@jitl/quickjs-wasmfile-debug-asyncify": "npm:0.29.1"
+    "@jitl/quickjs-wasmfile-debug-sync": "npm:0.29.1"
+    "@jitl/quickjs-wasmfile-release-asyncify": "npm:0.29.1"
+    "@jitl/quickjs-wasmfile-release-sync": "npm:0.29.1"
+    quickjs-emscripten-core: "npm:0.29.1"
+  checksum: 10c0/afee126dc56d0603a537f44e7e99ca8adbfaaf2bf0fc1efd9c88138f00758b63bbc924e246ae34e16f085d4c1163b8a19be9d4574e68b53a86ea261ea8d596a5
+  languageName: node
+  linkType: hard
+
 "range-parser@npm:~1.2.1":
   version: 1.2.1
   resolution: "range-parser@npm:1.2.1"
@@ -9766,6 +9831,7 @@ __metadata:
     postcss: "npm:^8.4.31"
     prettier: "npm:^3.2.5"
     prettier-plugin-tailwindcss: "npm:^0.5.12"
+    quickjs-emscripten: "npm:^0.29.1"
     react: "npm:^18.2.0"
     react-aria-components: "npm:^1.1.1"
     react-dom: "npm:^18.2.0"

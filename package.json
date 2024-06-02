@@ -59,6 +59,7 @@
     "nanoid": "^5.0.6",
     "pixi-filters": "^5.0.0",
     "pixi.js": "^7.0.0",
+    "quickjs-emscripten": "^0.29.1",
     "react": "^18.2.0",
     "react-aria-components": "^1.1.1",
     "react-dom": "^18.2.0",
