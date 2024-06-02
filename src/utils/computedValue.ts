@@ -2,6 +2,7 @@ import { QuickJSContext } from "quickjs-emscripten";
 import { ComputedProperty } from "../stores/layers";
 import { lerp as lerpUtil, mapNumber } from "./numbers";
 import { loadQuickJS } from "./quickjs";
+import { audioElement } from "../audio/context";
 
 export class ValueComputer {
   context: QuickJSContext | undefined;
@@ -19,9 +20,9 @@ export class ValueComputer {
     const module = await loadQuickJS();
     const context = module.newContext();
 
-    const getVolumeFnHandle = context.newFunction("volume", () =>
-      context.newNumber(this.getVolume()),
-    );
+    const getVolumeFnHandle = context.newFunction("volume", () => {
+      return context.newNumber(this.getVolume());
+    });
     context.setProp(context.global, "volume", getVolumeFnHandle);
     getVolumeFnHandle.dispose();
 
@@ -58,6 +59,18 @@ export class ValueComputer {
     });
     context.setProp(context.global, "lerp", lerpFnHandle);
     lerpFnHandle.dispose();
+
+    const timeFnHandle = context.newFunction("time", () => {
+      return context.newNumber(audioElement.currentTime);
+    });
+    context.setProp(context.global, "time", timeFnHandle);
+    timeFnHandle.dispose();
+
+    const durationFnHandle = context.newFunction("duration", () => {
+      return context.newNumber(audioElement.duration);
+    });
+    context.setProp(context.global, "duration", durationFnHandle);
+    durationFnHandle.dispose();
 
     this.context = context;
   }
