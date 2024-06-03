@@ -153,6 +153,8 @@ function GradientLayer({ layer }: { layer: TGradientLayer }) {
 
   const graphicsRef = useRef<PGraphics>(null);
 
+  const previouslyCalculatedDynamicStops = useRef<number[]>([]);
+
   useTick(() => {
     const graphics = graphicsRef.current;
     if (!graphics) return;
@@ -162,7 +164,13 @@ function GradientLayer({ layer }: { layer: TGradientLayer }) {
     setContainerOpacity(graphics, layer.opacity);
 
     if (useDynamicStops) {
-      const newStops = dynamicStops.map((stop) => valueComputer.compute(stop));
+      const newStops = dynamicStops.map((stop, index) =>
+        valueComputer.compute(
+          stop,
+          previouslyCalculatedDynamicStops.current[index],
+        ),
+      );
+      previouslyCalculatedDynamicStops.current = newStops;
       graphics.clear();
       let texture = GradientTexture({
         stops: newStops,
