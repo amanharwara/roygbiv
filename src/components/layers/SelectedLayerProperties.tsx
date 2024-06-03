@@ -352,7 +352,7 @@ function ColorDialog({
 }
 
 function GradientLayerProperties({ layer }: { layer: GradientLayer }) {
-  const { colors, stops, gradientType } = layer;
+  const { colors, gradientType } = layer;
   const updateLayer = useLayerStore(
     (state) => state.updateLayer<GradientLayer>,
   );
@@ -410,48 +410,90 @@ function GradientLayerProperties({ layer }: { layer: GradientLayer }) {
         </div>
       </div>
       <div className="px-3 text-sm">
-        <Slider
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr auto",
-            gridTemplateAreas: `"label output" "track track"`,
-          }}
-          minValue={0}
-          maxValue={1}
-          step={0.01}
-          value={stops}
-          onChange={(stops) => {
+        <Switch
+          isSelected={layer.useDynamicStops}
+          onChange={(useDynamicStops) => {
             updateLayer(layer.id, {
-              stops,
+              useDynamicStops,
             });
           }}
-          key={stops.length}
+          className="flex-row-reverse justify-end"
         >
-          <Label>Color stops:</Label>
-          <SliderOutput
-            style={{
-              gridArea: "output",
-            }}
-          >
-            {({ state }) =>
-              state.values
-                .map((_, i) => state.getThumbValueLabel(i))
-                .join(" – ")
-            }
-          </SliderOutput>
-          <SliderTrack className="relative h-[25px] w-full [grid-area:track] before:absolute before:top-1/2 before:block before:h-1 before:w-full before:-translate-y-1/2 before:bg-neutral-700">
-            {({ state }) =>
-              state.values.map((_, i) => (
-                <SliderThumb
-                  className="top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-white"
-                  key={i}
-                  index={i}
-                />
-              ))
-            }
-          </SliderTrack>
-        </Slider>
+          Use dynamic stops:
+        </Switch>
       </div>
+      {layer.useDynamicStops && (
+        <div className="flex flex-col gap-3 px-3 text-sm">
+          {layer.dynamicStops.map((stop, index) => (
+            <div className="flex items-center gap-3" key={index}>
+              <div
+                className="h-8 w-8 rounded border border-neutral-600"
+                style={{
+                  backgroundColor: colors[index],
+                }}
+              />
+              <TextField
+                className="flex-grow"
+                label={<>`Stop ${index + 1}:`</>}
+                srOnlyLabel={true}
+                value={stop.value}
+                onChange={(value) => {
+                  updateLayer(layer.id, {
+                    dynamicStops: layer.dynamicStops.map((s, i) =>
+                      i === index ? { ...s, value } : s,
+                    ),
+                  });
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+      {!layer.useDynamicStops && (
+        <div className="px-3 text-sm">
+          <Slider
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr auto",
+              gridTemplateAreas: `"label output" "track track"`,
+            }}
+            minValue={0}
+            maxValue={1}
+            step={0.01}
+            value={layer.stops}
+            onChange={(stops) => {
+              updateLayer(layer.id, {
+                stops,
+              });
+            }}
+            key={layer.stops.length}
+          >
+            <Label>Color stops:</Label>
+            <SliderOutput
+              style={{
+                gridArea: "output",
+              }}
+            >
+              {({ state }) =>
+                state.values
+                  .map((_, i) => state.getThumbValueLabel(i))
+                  .join(" – ")
+              }
+            </SliderOutput>
+            <SliderTrack className="relative h-[25px] w-full [grid-area:track] before:absolute before:top-1/2 before:block before:h-1 before:w-full before:-translate-y-1/2 before:bg-neutral-700">
+              {({ state }) =>
+                state.values.map((_, i) => (
+                  <SliderThumb
+                    className="top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-white"
+                    key={i}
+                    index={i}
+                  />
+                ))
+              }
+            </SliderTrack>
+          </Slider>
+        </div>
+      )}
       <div className="px-3 text-sm">
         <Select
           label="Gradient type:"
@@ -507,7 +549,7 @@ function SelectedLayerProperties() {
       <div className="overflow-hidden text-ellipsis whitespace-nowrap border-b border-neutral-600 px-3 py-2 text-sm font-semibold">
         {layer.name}
       </div>
-      <div className="flex flex-col gap-4 overflow-y-auto overflow-x-hidden py-3">
+      <div className="relative flex flex-col gap-4 overflow-y-auto overflow-x-hidden py-3">
         {layer.type === "image" && <ImageLayerProperties layer={layer} />}
         {layer.type === "gradient" && <GradientLayerProperties layer={layer} />}
       </div>

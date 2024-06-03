@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Stage, Sprite, useTick, useApp, Graphics } from "@pixi/react";
 import {
   Sprite as PSprite,
@@ -144,7 +143,9 @@ function GradientLayer({ layer }: { layer: TGradientLayer }) {
     x,
     y,
     scale,
+    useDynamicStops,
     stops,
+    dynamicStops,
     colors,
     centered,
     effects,
@@ -159,6 +160,23 @@ function GradientLayer({ layer }: { layer: TGradientLayer }) {
     scaleContainer(graphics, width, height, scale, screen);
     positionContainer(graphics, x, y, centered, screen);
     setContainerOpacity(graphics, layer.opacity);
+
+    if (useDynamicStops) {
+      const newStops = dynamicStops.map((stop) => valueComputer.compute(stop));
+      graphics.clear();
+      let texture = GradientTexture({
+        stops: newStops,
+        colors,
+        type: gradientType,
+        width: screen.width,
+        height: screen.height,
+      });
+      graphics.beginTextureFill({
+        texture,
+      });
+      (texture as unknown) = undefined;
+      graphics.drawRect(0, 0, screen.width, screen.height);
+    }
   });
 
   useEffects({ containerRef: graphicsRef, effects });
@@ -166,18 +184,30 @@ function GradientLayer({ layer }: { layer: TGradientLayer }) {
   const draw = useCallback<GraphicsDrawCallback>(
     (g) => {
       g.clear();
-      g.beginTextureFill({
-        texture: GradientTexture({
-          stops,
-          colors,
-          type: gradientType,
-          width: screen.width,
-          height: screen.height,
-        }),
+      let texture = GradientTexture({
+        stops: useDynamicStops
+          ? dynamicStops.map((stop) => valueComputer.compute(stop))
+          : stops,
+        colors,
+        type: gradientType,
+        width: screen.width,
+        height: screen.height,
       });
+      g.beginTextureFill({
+        texture,
+      });
+      (texture as unknown) = undefined;
       g.drawRect(0, 0, screen.width, screen.height);
     },
-    [colors, gradientType, screen.height, screen.width, stops],
+    [
+      colors,
+      dynamicStops,
+      gradientType,
+      screen.height,
+      screen.width,
+      stops,
+      useDynamicStops,
+    ],
   );
 
   return (

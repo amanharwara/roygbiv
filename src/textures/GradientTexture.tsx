@@ -16,6 +16,8 @@ type Props = {
   outerCircleRadius?: string | number;
 };
 
+const canvasElement = document.createElement("canvas");
+
 export function GradientTexture({
   stops,
   colors,
@@ -25,7 +27,6 @@ export function GradientTexture({
   innerCircleRadius = 0,
   outerCircleRadius = "auto",
 }: Props) {
-  const canvasElement = document.createElement("canvas");
   canvasElement.width = width;
   canvasElement.height = height;
 
@@ -61,5 +62,8 @@ export function GradientTexture({
   context.fillRect(0, 0, width, height);
   context.restore();
 
-  return Texture.from(canvasElement);
+  const texture = Texture.from(canvasElement);
+  texture.update();
+
+  return texture;
 }

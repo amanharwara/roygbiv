@@ -4,6 +4,7 @@ import { DropPosition, Key } from "react-aria-components";
 import { create } from "zustand";
 import { useCanvasStore } from "./canvas";
 import {
+  getDynamicStopsForGradientColors,
   getRandomColors,
   getStopsForGradientColors,
 } from "../utils/gradientUtils";
@@ -67,7 +68,9 @@ export type GradientLayer = CommonLayerProps &
   CommonPlaneObjectProps & {
     type: "gradient";
     gradientType: GradientType;
+    useDynamicStops: boolean;
     stops: number[];
+    dynamicStops: ComputedProperty[];
     colors: string[];
   };
 
@@ -365,6 +368,10 @@ const createImageLayer = (
 };
 
 const createGradientLayer = (): GradientLayer => {
+  const colors = getRandomColors(2);
+  const stops = getStopsForGradientColors(colors);
+  const dynamicStops = getDynamicStopsForGradientColors(colors);
+
   return {
     type: "gradient",
     gradientType: GradientType.Linear,
@@ -385,8 +392,10 @@ const createGradientLayer = (): GradientLayer => {
       min: 0,
       max: 1,
     },
-    stops: [0, 1],
-    colors: getRandomColors(2),
+    colors,
+    useDynamicStops: false,
+    stops,
+    dynamicStops,
     name: "Gradient",
     id: nanoid(),
     effects: {
