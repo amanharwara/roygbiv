@@ -1,4 +1,3 @@
-// @ts-ignore
 import amplitudeProcessor from "./amplitudeProcessor.ts?url";
 import { audioContext, sourceNode } from "./context";
 

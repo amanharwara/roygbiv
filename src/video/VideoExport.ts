@@ -152,10 +152,10 @@ export class VideoExport {
     this.framesGenerated++;
     this.lastTimestamp = timestamp;
 
-    let elapsedTime =
+    const elapsedTime =
       (document.timeline.currentTime as number) - this.startTime!;
 
-    let needsKeyFrame = elapsedTime - this.lastKeyFrame! >= 5000;
+    const needsKeyFrame = elapsedTime - this.lastKeyFrame! >= 5000;
     if (needsKeyFrame) {
       this.lastKeyFrame = elapsedTime;
     }

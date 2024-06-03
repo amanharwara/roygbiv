@@ -1,9 +1,8 @@
 import { create } from "zustand";
 import { nanoid } from "nanoid";
-import { isAudioPaused, setAudioSrc } from "../audio/context";
+import { setAudioSrc } from "../audio/context";
 import { analyze, frequencyData, getEnergyForFreqs } from "../audio/analyzer";
 import { getAudioLevel } from "../audio/amplitude";
-import { preprocessTrackData } from "../audio/preprocessing";
 
 export const PresetFrequencyRanges = {
   bass: {

@@ -74,7 +74,7 @@ export function debounce<Args extends any[], F extends (...args: Args) => any>(
     this: ThisParameterType<F>,
     ...args: Parameters<F>
   ) {
-    // eslint-disable-next-line no-invalid-this, @typescript-eslint/no-this-alias
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const context = this;
     return new Promise<ReturnType<F>>((resolve, reject) => {
       const invokeFunction = function () {
