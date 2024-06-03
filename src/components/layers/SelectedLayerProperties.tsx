@@ -308,7 +308,7 @@ function ColorDialog({
   onChangeEnd: (color: Color) => void;
 }) {
   const [parsedColor, setParsedColor] = useState(() =>
-    parseColor(color).toFormat("hsb"),
+    parseColor(color).toFormat("hsl"),
   );
 
   const onChange = useCallback((color: Color) => {
@@ -340,7 +340,7 @@ function ColorDialog({
             onChangeEnd={onChangeEnd}
           />
           <ColorSlider
-            channel="brightness"
+            channel="lightness"
             value={parsedColor}
             onChange={onChange}
             onChangeEnd={onChangeEnd}
