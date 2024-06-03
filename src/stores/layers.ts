@@ -248,6 +248,10 @@ export const useLayerStore = create<LayerStore>()((set) => ({
           ...currentLayer,
           colors,
           stops: getStopsForGradientColors(colors),
+          dynamicStops: getDynamicStopsForGradientColors(
+            colors,
+            currentLayer.dynamicStops,
+          ),
         };
       }),
     );
@@ -275,6 +279,10 @@ export const useLayerStore = create<LayerStore>()((set) => ({
           ...layer,
           colors,
           stops: getStopsForGradientColors(colors),
+          dynamicStops: getDynamicStopsForGradientColors(
+            colors,
+            layer.dynamicStops,
+          ),
         };
       }),
     );
@@ -302,6 +310,10 @@ export const useLayerStore = create<LayerStore>()((set) => ({
           ...layer,
           colors,
           stops: getStopsForGradientColors(colors),
+          dynamicStops: getDynamicStopsForGradientColors(
+            colors,
+            layer.dynamicStops,
+          ),
         };
       }),
     );

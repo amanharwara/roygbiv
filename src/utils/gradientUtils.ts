@@ -23,14 +23,28 @@ export function getStopsForGradientColors(colors: string[]): number[] {
   });
 }
 
+function isStringNumber(value: string): boolean {
+  try {
+    return !isNaN(parseFloat(value));
+  } catch {
+    return false;
+  }
+}
+
 export function getDynamicStopsForGradientColors(
   colors: string[],
+  currentStops?: ComputedProperty[],
 ): ComputedProperty[] {
   const multiplier = 1 / (colors.length - 1);
   return new Array(colors.length).fill(0).map((_, i) => {
+    const existingValue = currentStops?.[i]?.value;
+    const numberValue = i * multiplier;
+    const isExistingValueNumber = existingValue
+      ? isStringNumber(existingValue)
+      : false;
     return {
-      default: i * multiplier,
-      value: `${i * multiplier}`,
+      default: numberValue,
+      value: `${existingValue && !isExistingValueNumber ? existingValue : numberValue}`,
       min: 0,
       max: 1,
     };
