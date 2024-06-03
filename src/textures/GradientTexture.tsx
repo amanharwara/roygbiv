@@ -6,6 +6,7 @@ export enum GradientType {
 }
 
 type Props = {
+  id: string;
   stops: Array<number>;
   colors: Array<string>;
   attach?: string;
@@ -16,9 +17,14 @@ type Props = {
   outerCircleRadius?: string | number;
 };
 
-const canvasElement = document.createElement("canvas");
+const canvasCache = new Map<string, HTMLCanvasElement>();
+
+export function removeCanvasFromCache(id: string) {
+  canvasCache.delete(id);
+}
 
 export function GradientTexture({
+  id,
   stops,
   colors,
   height,
@@ -27,6 +33,13 @@ export function GradientTexture({
   innerCircleRadius = 0,
   outerCircleRadius = "auto",
 }: Props) {
+  let canvasElement = canvasCache.get(id);
+
+  if (!canvasElement) {
+    canvasElement = document.createElement("canvas");
+    canvasCache.set(id, canvasElement);
+  }
+
   canvasElement.width = width;
   canvasElement.height = height;
 

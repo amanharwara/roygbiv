@@ -16,8 +16,18 @@ import {
   ComputedProperty,
 } from "../stores/layers";
 import { audioStore, getRangeValue } from "../stores/audio";
-import { ComponentProps, RefObject, useCallback, useRef } from "react";
-import { GradientTexture } from "../textures/GradientTexture";
+import {
+  ComponentProps,
+  RefObject,
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+} from "react";
+import {
+  GradientTexture,
+  removeCanvasFromCache,
+} from "../textures/GradientTexture";
 import { ValueComputer } from "../utils/computedValue";
 
 type GraphicsDrawCallback = NonNullable<
@@ -151,6 +161,11 @@ function GradientLayer({ layer }: { layer: TGradientLayer }) {
     effects,
   } = layer;
 
+  const id = useId();
+  useEffect(() => {
+    return () => removeCanvasFromCache(id);
+  }, [id]);
+
   const graphicsRef = useRef<PGraphics>(null);
 
   const previouslyCalculatedDynamicStops = useRef<number[]>([]);
@@ -173,6 +188,7 @@ function GradientLayer({ layer }: { layer: TGradientLayer }) {
       previouslyCalculatedDynamicStops.current = newStops;
       graphics.clear();
       let texture = GradientTexture({
+        id,
         stops: newStops,
         colors,
         type: gradientType,
@@ -193,6 +209,7 @@ function GradientLayer({ layer }: { layer: TGradientLayer }) {
     (g) => {
       g.clear();
       let texture = GradientTexture({
+        id,
         stops: useDynamicStops
           ? dynamicStops.map((stop) => valueComputer.compute(stop))
           : stops,
@@ -211,6 +228,7 @@ function GradientLayer({ layer }: { layer: TGradientLayer }) {
       colors,
       dynamicStops,
       gradientType,
+      id,
       screen.height,
       screen.width,
       stops,
