@@ -1,11 +1,5 @@
-import { Stage, Sprite, useTick, useApp, Graphics } from "@pixi/react";
-import {
-  Sprite as PSprite,
-  Graphics as PGraphics,
-  NoiseFilter,
-  Filter,
-  Container,
-} from "pixi.js";
+import { Stage, Sprite, useTick, useApp } from "@pixi/react";
+import { Sprite as PSprite, NoiseFilter, Filter, Container } from "pixi.js";
 import { AsciiFilter } from "pixi-filters";
 import { useCanvasStore } from "../stores/canvas";
 import {
@@ -16,26 +10,9 @@ import {
   ComputedProperty,
 } from "../stores/layers";
 import { audioStore, getRangeValue } from "../stores/audio";
-import {
-  ComponentProps,
-  RefObject,
-  useCallback,
-  useEffect,
-  useId,
-  useRef,
-} from "react";
-import {
-  GradientTexture,
-  removeCanvasFromCache,
-} from "../textures/GradientTexture";
+import { RefObject, useEffect, useId, useRef } from "react";
+import { createGradientTexture } from "../textures/GradientTexture";
 import { ValueComputer } from "../utils/computedValue";
-
-type GraphicsDrawCallback = NonNullable<
-  ComponentProps<typeof Graphics>["draw"]
->;
-
-// TODO REFACTOR: make property setting and effects more composable
-// so that the logic can be defined once and reused for both layers
 
 const valueComputer = new ValueComputer(
   () => audioStore.getState().level,
@@ -162,21 +139,37 @@ function GradientLayer({ layer }: { layer: TGradientLayer }) {
   } = layer;
 
   const id = useId();
-  useEffect(() => {
-    return () => removeCanvasFromCache(id);
-  }, [id]);
 
-  const graphicsRef = useRef<PGraphics>(null);
+  const textureRef = useRef(
+    createGradientTexture({
+      id,
+      stops: useDynamicStops
+        ? dynamicStops.map((stop) => valueComputer.compute(stop))
+        : stops,
+      colors,
+      type: gradientType,
+      width: screen.width,
+      height: screen.height,
+    }),
+  );
+  useEffect(() => {
+    const texture = textureRef.current;
+    return () => {
+      texture.destroy();
+    };
+  }, []);
+
+  const spriteRef = useRef<PSprite>(null);
 
   const previouslyCalculatedDynamicStops = useRef<number[]>([]);
 
   useTick(() => {
-    const graphics = graphicsRef.current;
-    if (!graphics) return;
+    const sprite = spriteRef.current;
+    if (!sprite) return;
 
-    scaleContainer(graphics, width, height, scale, screen);
-    positionContainer(graphics, x, y, centered, screen);
-    setContainerOpacity(graphics, layer.opacity);
+    scaleContainer(sprite, width, height, scale, screen);
+    positionContainer(sprite, x, y, centered, screen);
+    setContainerOpacity(sprite, layer.opacity);
 
     if (useDynamicStops) {
       const newStops = dynamicStops.map((stop, index) =>
@@ -186,64 +179,17 @@ function GradientLayer({ layer }: { layer: TGradientLayer }) {
         ),
       );
       previouslyCalculatedDynamicStops.current = newStops;
-      graphics.clear();
-      let texture = GradientTexture({
-        id,
+      textureRef.current.update({
         stops: newStops,
         colors,
         type: gradientType,
-        width: screen.width,
-        height: screen.height,
       });
-      graphics.beginTextureFill({
-        texture,
-      });
-      (texture as unknown) = undefined;
-      graphics.drawRect(0, 0, screen.width, screen.height);
     }
   });
 
-  useEffects({ containerRef: graphicsRef, effects });
+  useEffects({ containerRef: spriteRef, effects });
 
-  const draw = useCallback<GraphicsDrawCallback>(
-    (g) => {
-      g.clear();
-      let texture = GradientTexture({
-        id,
-        stops: useDynamicStops
-          ? dynamicStops.map((stop) => valueComputer.compute(stop))
-          : stops,
-        colors,
-        type: gradientType,
-        width: screen.width,
-        height: screen.height,
-      });
-      g.beginTextureFill({
-        texture,
-      });
-      (texture as unknown) = undefined;
-      g.drawRect(0, 0, screen.width, screen.height);
-    },
-    [
-      colors,
-      dynamicStops,
-      gradientType,
-      id,
-      screen.height,
-      screen.width,
-      stops,
-      useDynamicStops,
-    ],
-  );
-
-  return (
-    <Graphics
-      ref={graphicsRef}
-      width={screen.width}
-      height={screen.height}
-      draw={draw}
-    />
-  );
+  return <Sprite ref={spriteRef} texture={textureRef.current.texture} />;
 }
 
 export function Canvas() {
