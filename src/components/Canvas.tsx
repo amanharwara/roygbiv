@@ -94,7 +94,6 @@ function useEffects({
   });
 }
 
-// TODO: maybe zoom
 function ImageLayer({ layer }: { layer: TImageLayer }) {
   const pixiApp = useApp();
   const { screen } = pixiApp;
@@ -118,7 +117,6 @@ function ImageLayer({ layer }: { layer: TImageLayer }) {
   return <Sprite image={image.src} ref={spriteRef} />;
 }
 
-// TODO: zoom
 function GradientLayer({ layer }: { layer: TGradientLayer }) {
   const pixiApp = useApp();
   const { screen } = pixiApp;

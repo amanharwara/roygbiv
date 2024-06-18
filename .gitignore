@@ -90,3 +90,7 @@ typings/
 
 # Electron-Forge
 out/
+
+# React DevTools
+src/devtools/
+public/devtools/

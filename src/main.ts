@@ -1,4 +1,10 @@
-import { app, BrowserWindow, Menu, MenuItemConstructorOptions } from "electron";
+import {
+  app,
+  BrowserWindow,
+  Menu,
+  MenuItemConstructorOptions,
+  session,
+} from "electron";
 import * as path from "path";
 
 app.commandLine.appendSwitch("enable-experimental-web-platform-features");
@@ -12,6 +18,19 @@ if (require("electron-squirrel-startup")) {
 }
 
 const isMac = process.platform === "darwin";
+
+const reactDevToolsPath = path.resolve(
+  path.join(__dirname, "devtools", "react"),
+);
+
+app
+  .whenReady()
+  .then(() => {
+    if (import.meta.env.DEV) {
+      session.defaultSession.loadExtension(reactDevToolsPath);
+    }
+  })
+  .catch(console.error);
 
 const menu = Menu.buildFromTemplate([
   ...(isMac ? ([{ role: "appMenu" }] as MenuItemConstructorOptions[]) : []),
