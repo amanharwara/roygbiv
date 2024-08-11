@@ -43,6 +43,20 @@ type AsciiEffect = {
   replaceColor: boolean;
 };
 
+type CRTEffect = {
+  enabled: boolean;
+  curvature: ComputedProperty;
+  lineWidth: ComputedProperty;
+  lineContrast: ComputedProperty;
+  noise: ComputedProperty;
+  noiseSize: ComputedProperty;
+  vignetting: ComputedProperty;
+  vignettingAlpha: ComputedProperty;
+  vignettingBlur: ComputedProperty;
+  seed: ComputedProperty;
+  time: ComputedProperty;
+};
+
 export type CommonPlaneObjectProps = {
   x: ComputedProperty;
   y: ComputedProperty;
@@ -55,6 +69,7 @@ export type CommonPlaneObjectProps = {
   effects: {
     noise: NoiseEffect;
     ascii: AsciiEffect;
+    crt: CRTEffect;
   };
 };
 
@@ -320,29 +335,46 @@ export const useLayerStore = create<LayerStore>()((set) => ({
   },
 }));
 
+const createComputedProperty = (
+  defaultValue: number,
+  min?: number,
+  max?: number,
+): ComputedProperty => ({
+  default: defaultValue,
+  value: defaultValue.toString(),
+  min,
+  max,
+});
+
 const createNoiseEffect = (): NoiseEffect => {
   return {
     enabled: false,
-    amount: {
-      default: 0.5,
-      value: "0.5",
-      min: 0,
-      max: 1,
-    },
+    amount: createComputedProperty(0.5, 0, 1),
   };
 };
 
 const createAsciiEffect = (): AsciiEffect => {
   return {
     enabled: false,
-    size: {
-      default: 10,
-      value: "10",
-      min: 2,
-      max: 20,
-    },
+    size: createComputedProperty(10, 2, 20),
     color: "#ffffff",
     replaceColor: false,
+  };
+};
+
+const createCRTEffect = (): CRTEffect => {
+  return {
+    enabled: false,
+    curvature: createComputedProperty(1, 0, 10),
+    lineWidth: createComputedProperty(3, 0, 5),
+    lineContrast: createComputedProperty(0.3, 0, 1),
+    noise: createComputedProperty(0.2, 0, 1),
+    noiseSize: createComputedProperty(1, 1, 10),
+    vignetting: createComputedProperty(0.3, 0, 1),
+    vignettingAlpha: createComputedProperty(1, 0, 1),
+    vignettingBlur: createComputedProperty(0.3, 0, 1),
+    seed: createComputedProperty(0),
+    time: createComputedProperty(0.5),
   };
 };
 
@@ -353,34 +385,20 @@ const createImageLayer = (
   return {
     type: "image",
     image,
-    x: {
-      default: 0,
-      value: "0",
-    },
-    y: {
-      default: 0,
-      value: "0",
-    },
+    x: createComputedProperty(0),
+    y: createComputedProperty(0),
     width: image.naturalWidth,
     height: image.naturalHeight,
     maintainAspect: true,
     centered: true,
-    scale: {
-      default: 1,
-      value: "1",
-      min: 0,
-    },
-    opacity: {
-      default: 1,
-      value: "1",
-      min: 0,
-      max: 1,
-    },
+    scale: createComputedProperty(1, 0),
+    opacity: createComputedProperty(1, 0, 1),
     name,
     id: nanoid(),
     effects: {
       noise: createNoiseEffect(),
       ascii: createAsciiEffect(),
+      crt: createCRTEffect(),
     },
   };
 };
@@ -393,29 +411,14 @@ const createGradientLayer = (): GradientLayer => {
   return {
     type: "gradient",
     gradientType: GradientType.Linear,
-    x: {
-      default: 0,
-      value: "0",
-    },
-    y: {
-      default: 0,
-      value: "0",
-    },
+    x: createComputedProperty(0),
+    y: createComputedProperty(0),
     width: useCanvasStore.getState().width,
     height: useCanvasStore.getState().height,
     maintainAspect: true,
     centered: true,
-    scale: {
-      default: 1,
-      value: "1",
-      min: 0,
-    },
-    opacity: {
-      default: 1,
-      value: "1",
-      min: 0,
-      max: 1,
-    },
+    scale: createComputedProperty(1, 0),
+    opacity: createComputedProperty(1, 0, 1),
     colors,
     useDynamicStops: false,
     stops,
@@ -425,6 +428,7 @@ const createGradientLayer = (): GradientLayer => {
     effects: {
       noise: createNoiseEffect(),
       ascii: createAsciiEffect(),
+      crt: createCRTEffect(),
     },
   };
 };

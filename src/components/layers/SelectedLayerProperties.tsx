@@ -45,7 +45,7 @@ function CommonPlaneLayerProperties({
   layer: CommonPlaneObjectProps & { id: string };
 }) {
   const { width, height, maintainAspect, effects } = layer;
-  const { noise, ascii } = effects;
+  const { noise, ascii, crt } = effects;
   const defaultWidth = useRef(width);
   const defaultHeight = useRef(height);
   const updateLayer = useLayerStore((state) => state.updateLayer<PlaneLayer>);
@@ -221,6 +221,240 @@ function CommonPlaneLayerProperties({
           </div>
         )}
       </div>
+      <div className="flex flex-col gap-3 border-t border-neutral-600 px-3 pt-3 text-sm">
+        <div className="font-medium">CRT (effect)</div>
+        <Switch
+          isSelected={crt.enabled}
+          onChange={(enabled) => {
+            updateLayer(layer.id, {
+              effects: {
+                ...effects,
+                crt: {
+                  ...crt,
+                  enabled,
+                },
+              },
+            });
+          }}
+          className="flex-row-reverse justify-end"
+        >
+          Enabled:
+        </Switch>
+        {crt.enabled && (
+          <>
+            <div className="flex flex-col items-start gap-3">
+              <TextField
+                label="Curvature:"
+                className="w-full"
+                value={crt.curvature.value}
+                onChange={(value) => {
+                  updateLayer(layer.id, {
+                    effects: {
+                      ...effects,
+                      crt: {
+                        ...crt,
+                        curvature: {
+                          ...crt.curvature,
+                          value,
+                        },
+                      },
+                    },
+                  });
+                }}
+              />
+            </div>
+            <div className="flex flex-col items-start gap-3">
+              <TextField
+                label="Line width:"
+                className="w-full"
+                value={crt.lineWidth.value}
+                onChange={(value) => {
+                  updateLayer(layer.id, {
+                    effects: {
+                      ...effects,
+                      crt: {
+                        ...crt,
+                        lineWidth: {
+                          ...crt.lineWidth,
+                          value,
+                        },
+                      },
+                    },
+                  });
+                }}
+              />
+            </div>
+            <div className="flex flex-col items-start gap-3">
+              <TextField
+                label="Line contrast:"
+                className="w-full"
+                value={crt.lineContrast.value}
+                onChange={(value) => {
+                  updateLayer(layer.id, {
+                    effects: {
+                      ...effects,
+                      crt: {
+                        ...crt,
+                        lineContrast: {
+                          ...crt.lineContrast,
+                          value,
+                        },
+                      },
+                    },
+                  });
+                }}
+              />
+            </div>
+            <div className="flex flex-col items-start gap-3">
+              <TextField
+                label="Noise:"
+                className="w-full"
+                value={crt.noise.value}
+                onChange={(value) => {
+                  updateLayer(layer.id, {
+                    effects: {
+                      ...effects,
+                      crt: {
+                        ...crt,
+                        noise: {
+                          ...crt.noise,
+                          value,
+                        },
+                      },
+                    },
+                  });
+                }}
+              />
+            </div>
+            <div className="flex flex-col items-start gap-3">
+              <TextField
+                label="Noise size:"
+                className="w-full"
+                value={crt.noiseSize.value}
+                onChange={(value) => {
+                  updateLayer(layer.id, {
+                    effects: {
+                      ...effects,
+                      crt: {
+                        ...crt,
+                        noiseSize: {
+                          ...crt.noiseSize,
+                          value,
+                        },
+                      },
+                    },
+                  });
+                }}
+              />
+            </div>
+            <div className="flex flex-col items-start gap-3">
+              <TextField
+                label="Vignetting:"
+                className="w-full"
+                value={crt.vignetting.value}
+                onChange={(value) => {
+                  updateLayer(layer.id, {
+                    effects: {
+                      ...effects,
+                      crt: {
+                        ...crt,
+                        vignetting: {
+                          ...crt.vignetting,
+                          value,
+                        },
+                      },
+                    },
+                  });
+                }}
+              />
+            </div>
+            <div className="flex flex-col items-start gap-3">
+              <TextField
+                label="Vignetting alpha:"
+                className="w-full"
+                value={crt.vignettingAlpha.value}
+                onChange={(value) => {
+                  updateLayer(layer.id, {
+                    effects: {
+                      ...effects,
+                      crt: {
+                        ...crt,
+                        vignettingAlpha: {
+                          ...crt.vignettingAlpha,
+                          value,
+                        },
+                      },
+                    },
+                  });
+                }}
+              />
+            </div>
+            <div className="flex flex-col items-start gap-3">
+              <TextField
+                label="Vignetting blur:"
+                className="w-full"
+                value={crt.vignettingBlur.value}
+                onChange={(value) => {
+                  updateLayer(layer.id, {
+                    effects: {
+                      ...effects,
+                      crt: {
+                        ...crt,
+                        vignettingBlur: {
+                          ...crt.vignettingBlur,
+                          value,
+                        },
+                      },
+                    },
+                  });
+                }}
+              />
+            </div>
+            <div className="flex flex-col items-start gap-3">
+              <TextField
+                label="Seed:"
+                className="w-full"
+                value={crt.seed.value}
+                onChange={(value) => {
+                  updateLayer(layer.id, {
+                    effects: {
+                      ...effects,
+                      crt: {
+                        ...crt,
+                        seed: {
+                          ...crt.seed,
+                          value,
+                        },
+                      },
+                    },
+                  });
+                }}
+              />
+            </div>
+            <div className="flex flex-col items-start gap-3">
+              <TextField
+                label="Time:"
+                className="w-full"
+                value={crt.time.value}
+                onChange={(value) => {
+                  updateLayer(layer.id, {
+                    effects: {
+                      ...effects,
+                      crt: {
+                        ...crt,
+                        time: {
+                          ...crt.time,
+                          value,
+                        },
+                      },
+                    },
+                  });
+                }}
+              />
+            </div>
+          </>
+        )}
+      </div>
     </>
   );
 }
@@ -317,6 +551,12 @@ function ColorDialog({
           />
           <ColorSlider
             channel="lightness"
+            value={parsedColor}
+            onChange={onChange}
+            onChangeEnd={onChangeEnd}
+          />
+          <ColorSlider
+            channel="alpha"
             value={parsedColor}
             onChange={onChange}
             onChangeEnd={onChangeEnd}

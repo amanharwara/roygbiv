@@ -1,6 +1,6 @@
 import { Stage, Sprite, useTick, useApp } from "@pixi/react";
 import { Sprite as PSprite, NoiseFilter, Filter, Container } from "pixi.js";
-import { AsciiFilter } from "pixi-filters";
+import { AsciiFilter, CRTFilter } from "pixi-filters";
 import { useCanvasStore } from "../stores/canvas";
 import {
   useLayerStore,
@@ -58,10 +58,24 @@ function useEffects({
   containerRef: RefObject<Container>;
   effects: PlaneLayer["effects"];
 }) {
-  const { noise, ascii } = effects;
+  const { noise, ascii, crt } = effects;
 
   const noiseEffect = useRef(new NoiseFilter(noise.amount.default));
   const asciiEffect = useRef(new AsciiFilter(ascii.size.default));
+  const crtEffect = useRef(
+    new CRTFilter({
+      curvature: 1,
+      lineWidth: 3,
+      lineContrast: 0.3,
+      noise: 0.2,
+      noiseSize: 1,
+      vignetting: 0.3,
+      vignettingAlpha: 1,
+      vignettingBlur: 0.3,
+      seed: 0,
+      time: 0.5,
+    }),
+  );
 
   const filters = useRef<Filter[]>([]);
 
@@ -72,9 +86,51 @@ function useEffects({
       noise.amount,
       noiseEffect.current.noise,
     );
+
     asciiEffect.current.size = valueComputer.compute(
       ascii.size,
       asciiEffect.current.size,
+    );
+
+    crtEffect.current.curvature = valueComputer.compute(
+      crt.curvature,
+      crtEffect.current.curvature,
+    );
+    crtEffect.current.lineWidth = valueComputer.compute(
+      crt.lineWidth,
+      crtEffect.current.lineWidth,
+    );
+    crtEffect.current.lineContrast = valueComputer.compute(
+      crt.lineContrast,
+      crtEffect.current.lineContrast,
+    );
+    crtEffect.current.noise = valueComputer.compute(
+      crt.noise,
+      crtEffect.current.noise,
+    );
+    crtEffect.current.noiseSize = valueComputer.compute(
+      crt.noiseSize,
+      crtEffect.current.noiseSize,
+    );
+    crtEffect.current.vignetting = valueComputer.compute(
+      crt.vignetting,
+      crtEffect.current.vignetting,
+    );
+    crtEffect.current.vignettingAlpha = valueComputer.compute(
+      crt.vignettingAlpha,
+      crtEffect.current.vignettingAlpha,
+    );
+    crtEffect.current.vignettingBlur = valueComputer.compute(
+      crt.vignettingBlur,
+      crtEffect.current.vignettingBlur,
+    );
+    crtEffect.current.seed = valueComputer.compute(
+      crt.seed,
+      crtEffect.current.seed,
+    );
+    crtEffect.current.time = valueComputer.compute(
+      crt.time,
+      crtEffect.current.time,
     );
 
     if (noise.enabled) {
@@ -84,11 +140,20 @@ function useEffects({
       const index = filters.current.indexOf(noiseEffect.current);
       if (index !== -1) filters.current.splice(index, 1);
     }
+
     if (ascii.enabled) {
       if (!filters.current.includes(asciiEffect.current))
         filters.current.push(asciiEffect.current);
     } else {
       const index = filters.current.indexOf(asciiEffect.current);
+      if (index !== -1) filters.current.splice(index, 1);
+    }
+
+    if (crt.enabled) {
+      if (!filters.current.includes(crtEffect.current))
+        filters.current.push(crtEffect.current);
+    } else {
+      const index = filters.current.indexOf(crtEffect.current);
       if (index !== -1) filters.current.splice(index, 1);
     }
 
