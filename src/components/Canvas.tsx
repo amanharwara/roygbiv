@@ -34,14 +34,16 @@ function scaleContainer(
 
 function positionContainer(
   container: Container,
-  x: number,
-  y: number,
+  x: ComputedProperty,
+  y: ComputedProperty,
   centered: boolean,
   base: { width: number; height: number },
 ) {
   const finalX = centered ? base.width / 2 - container.width / 2 : 0;
   const finalY = centered ? base.height / 2 - container.height / 2 : 0;
-  container.position.set(finalX + x, finalY + y);
+  const computedX = valueComputer.compute(x);
+  const computedY = valueComputer.compute(y);
+  container.position.set(finalX + computedX, finalY + computedY);
 }
 
 function setContainerOpacity(container: Container, opacity: ComputedProperty) {

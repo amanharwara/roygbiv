@@ -44,7 +44,7 @@ function CommonPlaneLayerProperties({
 }: {
   layer: CommonPlaneObjectProps & { id: string };
 }) {
-  const { width, height, x, y, maintainAspect, effects } = layer;
+  const { width, height, maintainAspect, effects } = layer;
   const { noise, ascii } = effects;
   const defaultWidth = useRef(width);
   const defaultHeight = useRef(height);
@@ -130,34 +130,10 @@ function CommonPlaneLayerProperties({
         </Switch>
       </div>
       <div className="px-3 text-sm">
-        <NumberField
-          label="x-offset:"
-          minValue={undefined}
-          defaultValue={0}
-          value={x}
-          name="x"
-          groupClassName="w-full"
-          onChange={(x) => {
-            updateLayer(layer.id, {
-              x,
-            });
-          }}
-        />
+        <ComputedProperty id="x" name="x-offset" layer={layer as Layer} />
       </div>
       <div className="px-3 text-sm">
-        <NumberField
-          label="y-offset:"
-          minValue={undefined}
-          defaultValue={0}
-          value={y}
-          name="y"
-          groupClassName="w-full"
-          onChange={(y) => {
-            updateLayer(layer.id, {
-              y,
-            });
-          }}
-        />
+        <ComputedProperty id="y" name="y-offset" layer={layer as Layer} />
       </div>
       <div className="flex flex-col gap-3 border-t border-neutral-600 px-3 pt-3 text-sm">
         <div className="font-medium">ASCII (effect)</div>
@@ -291,7 +267,7 @@ function ColorButton({
         </Button>
         <Popover
           placement="bottom end"
-          className="rounded border border-neutral-700 bg-neutral-800 p-3 data-[entering]:animate-fade-in data-[exiting]:animate-fade-out "
+          className="rounded border border-neutral-700 bg-neutral-800 p-3 data-[entering]:animate-fade-in data-[exiting]:animate-fade-out"
         >
           <ColorDialog color={color} onChangeEnd={onChangeEnd} />
         </Popover>

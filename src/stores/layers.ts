@@ -44,8 +44,8 @@ type AsciiEffect = {
 };
 
 export type CommonPlaneObjectProps = {
-  x: number;
-  y: number;
+  x: ComputedProperty;
+  y: ComputedProperty;
   width: number;
   height: number;
   maintainAspect: boolean;
@@ -353,8 +353,14 @@ const createImageLayer = (
   return {
     type: "image",
     image,
-    x: 0,
-    y: 0,
+    x: {
+      default: 0,
+      value: "0",
+    },
+    y: {
+      default: 0,
+      value: "0",
+    },
     width: image.naturalWidth,
     height: image.naturalHeight,
     maintainAspect: true,
@@ -387,8 +393,14 @@ const createGradientLayer = (): GradientLayer => {
   return {
     type: "gradient",
     gradientType: GradientType.Linear,
-    x: 0,
-    y: 0,
+    x: {
+      default: 0,
+      value: "0",
+    },
+    y: {
+      default: 0,
+      value: "0",
+    },
     width: useCanvasStore.getState().width,
     height: useCanvasStore.getState().height,
     maintainAspect: true,
