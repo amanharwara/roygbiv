@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import { AsciiFilter, CRTFilter } from "pixi-filters";
+import { AsciiFilter, CRTFilter, PixelateFilter } from "pixi-filters";
 import { Filter, NoiseFilter } from "pixi.js";
 import { ComputedProperty } from "./layers";
 import { createComputedProperty } from "../utils/computedValue";
@@ -177,6 +177,20 @@ EffectsRegistry.registerEffect("crt", {
     },
     { key: "seed", label: "Seed", type: "computed", default: 0 },
     { key: "time", label: "Time", type: "computed", default: 0.5 },
+  ],
+});
+EffectsRegistry.registerEffect("pixelate", {
+  name: "Pixelate",
+  filter: PixelateFilter,
+  properties: [
+    {
+      key: "size",
+      label: "Pixel size",
+      type: "computed",
+      default: 10,
+      min: 4,
+      max: 40,
+    },
   ],
 });
 

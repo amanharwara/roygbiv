@@ -297,7 +297,7 @@ function CommonLayerProperties({
               >
                 <Section>
                   <Header className="px-1.5 pb-1 text-sm font-semibold">
-                    Effects
+                    Add effect
                   </Header>
                   {possibleEffects.map((effect) => (
                     <MenuItem
