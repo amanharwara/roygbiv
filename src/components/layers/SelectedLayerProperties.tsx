@@ -4,6 +4,7 @@ import {
   GradientLayer,
   ImageLayer,
   Layer,
+  isComputedProperty,
   useLayerStore,
 } from "../../stores/layers";
 import {
@@ -25,6 +26,7 @@ import {
   Section,
   GridList,
   GridListItem,
+  Heading,
 } from "react-aria-components";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Select, SelectItem } from "../ui/Select";
@@ -42,9 +44,121 @@ import { Link, Unlink } from "lucide-react";
 import { twMerge } from "tailwind-merge";
 import TextField from "../ui/TextField";
 import { GradientType } from "../../textures/GradientTexture";
-import { EffectsRegistry } from "../../stores/effects";
+import { EffectsRegistry, LayerEffect } from "../../stores/effects";
 
 // TODO: All the components here re-render when any property of the layer changes.
+
+function LayerEffectItem({
+  layer,
+  effect,
+}: {
+  layer: CommonLayerProps & { id: string };
+  effect: LayerEffect;
+}) {
+  const updateLayerEffect = useLayerStore((state) => state.updateLayerEffect);
+  const removeEffectFromLayer = useLayerStore(
+    (state) => state.removeEffectFromLayer,
+  );
+
+  const registeredEffect = useMemo(
+    () => EffectsRegistry.getEffectForType(effect.type),
+    [effect.type],
+  );
+
+  return (
+    <GridListItem className="flex items-center gap-2 px-3 py-1.5 text-sm outline-none data-[focused]:bg-neutral-900">
+      {registeredEffect.name}
+      <div className="ml-auto" />
+      <DialogTrigger>
+        <TooltipTrigger delay={150} closeDelay={0}>
+          <Button className="mr-1.5 flex items-center justify-center rounded p-1 hover:bg-neutral-600 data-[pressed]:bg-neutral-800">
+            <EditIcon className="h-4 w-4" />
+          </Button>
+          <Tooltip offset={4}>Configure</Tooltip>
+        </TooltipTrigger>
+        <Popover
+          placement="top"
+          className="max-h-[30vh] min-w-[15vw] overflow-auto rounded border border-neutral-700 bg-neutral-800 px-3 py-3 data-[entering]:animate-fade-in data-[exiting]:animate-fade-out"
+        >
+          <Dialog>
+            <Heading slot="title" className="mb-2 text-sm font-medium">
+              Configure effect
+            </Heading>
+            <div className="flex flex-col gap-3">
+              <Switch
+                isSelected={effect.enabled}
+                onChange={(enabled) => {
+                  updateLayerEffect(layer.id, effect.id, "enabled", enabled);
+                }}
+                className="w-full flex-row-reverse justify-between text-sm"
+              >
+                Enabled:
+              </Switch>
+              {registeredEffect.properties.map((property) => {
+                const label = `${property.label}:`;
+                if (property.type === "boolean") {
+                  const value = effect[property.key];
+                  if (typeof value !== "boolean") {
+                    return null;
+                  }
+                  return (
+                    <Switch
+                      isSelected={value}
+                      onChange={(newValue) => {
+                        updateLayerEffect(
+                          layer.id,
+                          effect.id,
+                          property.key,
+                          newValue,
+                        );
+                      }}
+                      className="flex-row-reverse justify-end text-sm"
+                      key={property.key}
+                    >
+                      {label}
+                    </Switch>
+                  );
+                }
+                if (property.type === "computed") {
+                  const computedProperty = effect[property.key];
+                  if (!isComputedProperty(computedProperty)) {
+                    return null;
+                  }
+                  return (
+                    <TextField
+                      label={label}
+                      key={property.key}
+                      className="w-full text-sm"
+                      value={computedProperty.value}
+                      onChange={(newValue) => {
+                        updateLayerEffect(layer.id, effect.id, property.key, {
+                          ...computedProperty,
+                          value: newValue,
+                        });
+                      }}
+                    />
+                  );
+                }
+                return null;
+              })}
+            </div>
+          </Dialog>
+        </Popover>
+      </DialogTrigger>
+      <TooltipTrigger delay={150} closeDelay={0}>
+        <Button
+          className="flex items-center justify-center rounded p-1 hover:bg-neutral-600 data-[pressed]:bg-neutral-800"
+          onPress={() => {
+            removeEffectFromLayer(layer.id, effect.id);
+          }}
+        >
+          <DeleteIcon className="h-4 w-4 text-red-500" />
+        </Button>
+        <Tooltip offset={4}>Remove effect</Tooltip>
+      </TooltipTrigger>
+    </GridListItem>
+  );
+}
 
 function CommonLayerProperties({
   layer,
@@ -56,9 +170,6 @@ function CommonLayerProperties({
   const defaultHeight = useRef(height);
   const updateLayer = useLayerStore((state) => state.updateLayer<Layer>);
   const addEffectToLayer = useLayerStore((state) => state.addEffectToLayer);
-  const removeEffectFromLayer = useLayerStore(
-    (state) => state.removeEffectFromLayer,
-  );
 
   const possibleEffects = useMemo(() => {
     return Array.from(EffectsRegistry.registeredEffects).map(
@@ -214,22 +325,8 @@ function CommonLayerProperties({
           aria-label="Layer effects"
           className="-mt-2 flex flex-col gap-0.5"
         >
-          {effects.map((effect) => (
-            <GridListItem
-              key={effect.id}
-              className="flex items-center gap-2 px-3 py-1.5 text-sm outline-none data-[focused]:bg-neutral-900"
-            >
-              {EffectsRegistry.getNameForType(effect.type)}
-              <div className="ml-auto" />
-              <Button
-                className="flex items-center justify-center rounded p-1 hover:bg-neutral-600 data-[pressed]:bg-neutral-800"
-                onPress={() => {
-                  removeEffectFromLayer(layer.id, effect.id);
-                }}
-              >
-                <DeleteIcon className="h-4 w-4 text-red-500" />
-              </Button>
-            </GridListItem>
+          {layer.effects.map((effect) => (
+            <LayerEffectItem layer={layer} effect={effect} key={effect.id} />
           ))}
         </GridList>
       )}

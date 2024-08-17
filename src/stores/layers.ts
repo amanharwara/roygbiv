@@ -84,6 +84,12 @@ type LayerStore = {
 
   addEffectToLayer: (layerId: string, effect: LayerEffect) => void;
   removeEffectFromLayer: (layerId: string, effectId: string) => void;
+  updateLayerEffect: (
+    layerId: string,
+    effectId: string,
+    key: string,
+    value: string | boolean | ComputedProperty,
+  ) => void;
 
   removeSelectedLayers: () => void;
 
@@ -224,6 +230,32 @@ export const useLayerStore = create<LayerStore>()((set) => ({
         }
         const currentLayer = state.layers[index]!;
         currentLayer.effects.push(effect);
+      }),
+    );
+  },
+  updateLayerEffect: (
+    layerId: string,
+    effectId: string,
+    key: string,
+    value: string | boolean | ComputedProperty,
+  ) => {
+    if (key === "id" || key === "type") {
+      return;
+    }
+    set(
+      produce((state: LayerStore) => {
+        const index = state.layers.findIndex((layer) => layer.id === layerId);
+        if (index === -1) {
+          return;
+        }
+        const currentLayer = state.layers[index]!;
+        const effect = currentLayer.effects.find(
+          (effect) => effect.id === effectId,
+        );
+        if (!effect) {
+          return;
+        }
+        effect[key] = value;
       }),
     );
   },

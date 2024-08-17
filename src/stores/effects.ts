@@ -5,6 +5,7 @@ import { ComputedProperty } from "./layers";
 import { createComputedProperty } from "../utils/computedValue";
 
 type EffectProperty = {
+  key: string;
   label: string;
 } & (
   | {
@@ -22,25 +23,20 @@ type EffectProperty = {
 type RegisteredEffect = {
   name: string;
   filter: new () => Filter;
-  properties: Record<string, EffectProperty>;
+  properties: EffectProperty[];
 };
 
 export const EffectsRegistry = {
   registeredEffects: new Map<string, RegisteredEffect>(),
-  getNameForType(type: string) {
-    const effect = this.registeredEffects.get(type);
-    if (!effect) throw new Error("Effect not registered");
-    return effect.name;
-  },
   getFilterForType(type: string) {
     const effect = this.registeredEffects.get(type);
     if (!effect) throw new Error("Effect not registered");
     return effect.filter;
   },
-  getPropertiesForType(type: string) {
+  getEffectForType(type: string) {
     const effect = this.registeredEffects.get(type);
     if (!effect) throw new Error("Effect not registered");
-    return effect.properties;
+    return effect;
   },
   createLayerEffect(type: string) {
     const effect = this.registeredEffects.get(type);
@@ -52,12 +48,12 @@ export const EffectsRegistry = {
       enabled: true,
       id: nanoid(),
     };
-    for (const [key, property] of Object.entries(effect.properties)) {
+    for (const property of effect.properties) {
       if (property.type === "boolean") {
-        layerEffect[key] = property.default;
+        layerEffect[property.key] = property.default;
       }
       if (property.type === "computed") {
-        layerEffect[key] = createComputedProperty(
+        layerEffect[property.key] = createComputedProperty(
           property.default,
           property.min,
           property.max,
@@ -74,87 +70,108 @@ export const EffectsRegistry = {
 EffectsRegistry.registerEffect("noise", {
   name: "Noise",
   filter: NoiseFilter,
-  properties: {
-    amount: {
+  properties: [
+    {
+      key: "amount",
       label: "Amount",
       type: "computed",
       default: 0.5,
       min: 0,
       max: 1,
     },
-    seed: { label: "Seed", type: "computed", default: Math.random() },
-  },
+    {
+      key: "seed",
+      label: "Seed",
+      type: "computed",
+      default: Math.random(),
+    },
+  ],
 });
 EffectsRegistry.registerEffect("ascii", {
   name: "ASCII",
   filter: AsciiFilter,
-  properties: {
-    size: {
+  properties: [
+    {
+      key: "size",
       label: "Size",
       type: "computed",
       default: 10,
       min: 2,
       max: 20,
     },
-  },
+  ],
 });
 EffectsRegistry.registerEffect("crt", {
   name: "CRT",
   filter: CRTFilter,
-  properties: {
-    curvature: {
+  properties: [
+    {
+      key: "curvature",
       label: "Curvature",
       type: "computed",
       default: 1,
       min: 0,
       max: 10,
     },
-    lineWidth: {
+    {
+      key: "lineWidth",
       label: "Line width",
       type: "computed",
       default: 3,
       min: 0,
       max: 5,
     },
-    lineContrast: {
+    {
+      key: "lineContrast",
       label: "Line contrast",
       type: "computed",
       default: 0.3,
       min: 0,
       max: 1,
     },
-    noise: { label: "Noise", type: "computed", default: 0.2, min: 0, max: 1 },
-    noiseSize: {
+    {
+      key: "noise",
+      label: "Noise",
+      type: "computed",
+      default: 0.2,
+      min: 0,
+      max: 1,
+    },
+    {
+      key: "noiseSize",
       label: "Noise size",
       type: "computed",
       default: 1,
       min: 1,
       max: 10,
     },
-    vignetting: {
+    {
+      key: "vignetting",
       label: "Vignetting",
       type: "computed",
       default: 0.3,
       min: 0,
       max: 1,
     },
-    vignettingAlpha: {
+    {
+      key: "vignettingAlpha",
       label: "Vignetting alpha",
       type: "computed",
       default: 1,
       min: 0,
       max: 1,
     },
-    vignettingBlur: {
+    {
+      key: "vignettingBlur",
       label: "Vignetting blur",
       type: "computed",
       default: 0.3,
       min: 0,
       max: 1,
     },
-    seed: { label: "Seed", type: "computed", default: 0 },
-    time: { label: "Time", type: "computed", default: 0.5 },
-  },
+    { key: "seed", label: "Seed", type: "computed", default: 0 },
+    { key: "time", label: "Time", type: "computed", default: 0.5 },
+  ],
 });
 
 export type LayerEffect = {
