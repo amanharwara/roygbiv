@@ -1,10 +1,9 @@
 import NumberField from "../ui/NumberField";
 import {
-  CommonPlaneObjectProps,
+  CommonLayerProps,
   GradientLayer,
   ImageLayer,
   Layer,
-  PlaneLayer,
   useLayerStore,
 } from "../../stores/layers";
 import {
@@ -19,8 +18,15 @@ import {
   Dialog,
   Popover,
   ToggleButton,
+  Header,
+  Menu,
+  MenuItem,
+  MenuTrigger,
+  Section,
+  GridList,
+  GridListItem,
 } from "react-aria-components";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { Select, SelectItem } from "../ui/Select";
 import { Edit2 as EditIcon } from "lucide-react";
 import { Trash as DeleteIcon } from "lucide-react";
@@ -36,19 +42,34 @@ import { Link, Unlink } from "lucide-react";
 import { twMerge } from "tailwind-merge";
 import TextField from "../ui/TextField";
 import { GradientType } from "../../textures/GradientTexture";
+import { EffectsRegistry } from "../../stores/effects";
 
 // TODO: All the components here re-render when any property of the layer changes.
 
-function CommonPlaneLayerProperties({
+function CommonLayerProperties({
   layer,
 }: {
-  layer: CommonPlaneObjectProps & { id: string };
+  layer: CommonLayerProps & { id: string };
 }) {
   const { width, height, maintainAspect, effects } = layer;
-  const { noise, ascii, crt } = effects;
   const defaultWidth = useRef(width);
   const defaultHeight = useRef(height);
-  const updateLayer = useLayerStore((state) => state.updateLayer<PlaneLayer>);
+  const updateLayer = useLayerStore((state) => state.updateLayer<Layer>);
+  const addEffectToLayer = useLayerStore((state) => state.addEffectToLayer);
+  const removeEffectFromLayer = useLayerStore(
+    (state) => state.removeEffectFromLayer,
+  );
+
+  const possibleEffects = useMemo(() => {
+    return Array.from(EffectsRegistry.registeredEffects).map(
+      ([type, effect]) => {
+        return {
+          type,
+          label: effect.name,
+        };
+      },
+    );
+  }, []);
 
   return (
     <>
@@ -135,326 +156,83 @@ function CommonPlaneLayerProperties({
       <div className="px-3 text-sm">
         <ComputedProperty id="y" name="y-offset" layer={layer as Layer} />
       </div>
-      <div className="flex flex-col gap-3 border-t border-neutral-600 px-3 pt-3 text-sm">
-        <div className="font-medium">ASCII (effect)</div>
-        <Switch
-          isSelected={ascii.enabled}
-          onChange={(enabled) => {
-            updateLayer(layer.id, {
-              effects: {
-                ...effects,
-                ascii: {
-                  ...ascii,
-                  enabled,
-                },
-              },
-            });
-          }}
-          className="flex-row-reverse justify-end"
-        >
-          Enabled:
-        </Switch>
-        {ascii.enabled && (
-          <div className="flex flex-col items-start gap-3">
-            <TextField
-              label="Amount:"
-              className="w-full"
-              value={ascii.size.value}
-              onChange={(value) => {
-                updateLayer(layer.id, {
-                  effects: {
-                    ...effects,
-                    ascii: {
-                      ...ascii,
-                      size: {
-                        ...ascii.size,
-                        value,
-                      },
-                    },
-                  },
-                });
-              }}
-            />
-          </div>
-        )}
+      <div className="flex items-center border-y border-neutral-600 px-3 py-1.5 text-sm font-medium">
+        <span className="mr-auto">Effects</span>
+        <TooltipTrigger delay={150} closeDelay={0}>
+          <MenuTrigger>
+            <TooltipTrigger delay={150} closeDelay={0}>
+              <Button className="flex items-center justify-center rounded p-1 hover:bg-neutral-600 data-[pressed]:bg-neutral-800">
+                <AddIcon className="h-4 w-4" />
+              </Button>
+              <Tooltip offset={4}>Add a new effect</Tooltip>
+            </TooltipTrigger>
+            <Popover
+              offset={2}
+              className="rounded border border-neutral-700 bg-neutral-800 data-[entering]:animate-fade-in data-[exiting]:animate-fade-out"
+            >
+              <Menu
+                autoFocus="first"
+                shouldFocusWrap
+                className="max-h-[inherit] min-w-[12rem] select-none space-y-2 overflow-auto px-1.5 pb-1.5 pt-2 outline-none"
+                onAction={(key) => {
+                  if (typeof key !== "string") {
+                    return;
+                  }
+                  addEffectToLayer(
+                    layer.id,
+                    EffectsRegistry.createLayerEffect(key),
+                  );
+                }}
+              >
+                <Section>
+                  <Header className="px-1.5 pb-1 text-sm font-semibold">
+                    Effects
+                  </Header>
+                  {possibleEffects.map((effect) => (
+                    <MenuItem
+                      className="flex items-center gap-2 rounded px-2.5 py-1.5 text-sm outline-none data-[focused]:bg-neutral-900"
+                      id={effect.type}
+                      key={effect.type}
+                    >
+                      {effect.label}
+                    </MenuItem>
+                  ))}
+                </Section>
+              </Menu>
+            </Popover>
+          </MenuTrigger>
+          <Tooltip offset={4}>Add a new effect</Tooltip>
+        </TooltipTrigger>
       </div>
-      <div className="flex flex-col gap-3 border-t border-neutral-600 px-3 pt-3 text-sm">
-        <div className="font-medium">Noise (effect)</div>
-        <Switch
-          isSelected={noise.enabled}
-          onChange={(enabled) => {
-            updateLayer(layer.id, {
-              effects: {
-                ...effects,
-                noise: {
-                  ...noise,
-                  enabled,
-                },
-              },
-            });
-          }}
-          className="flex-row-reverse justify-end"
+      {effects.length === 0 && (
+        <div className="py-1.5 text-center text-sm text-neutral-400">
+          No effects applied.
+        </div>
+      )}
+      {effects.length > 0 && (
+        <GridList
+          aria-label="Layer effects"
+          className="-mt-2 flex flex-col gap-0.5"
         >
-          Enabled:
-        </Switch>
-        {noise.enabled && (
-          <div className="flex flex-col items-start gap-3">
-            <TextField
-              label="Amount:"
-              className="w-full"
-              value={noise.amount.value}
-              onChange={(value) => {
-                updateLayer(layer.id, {
-                  effects: {
-                    ...effects,
-                    noise: {
-                      ...noise,
-                      amount: {
-                        ...noise.amount,
-                        value,
-                      },
-                    },
-                  },
-                });
-              }}
-            />
-          </div>
-        )}
-      </div>
-      <div className="flex flex-col gap-3 border-t border-neutral-600 px-3 pt-3 text-sm">
-        <div className="font-medium">CRT (effect)</div>
-        <Switch
-          isSelected={crt.enabled}
-          onChange={(enabled) => {
-            updateLayer(layer.id, {
-              effects: {
-                ...effects,
-                crt: {
-                  ...crt,
-                  enabled,
-                },
-              },
-            });
-          }}
-          className="flex-row-reverse justify-end"
-        >
-          Enabled:
-        </Switch>
-        {crt.enabled && (
-          <>
-            <div className="flex flex-col items-start gap-3">
-              <TextField
-                label="Curvature:"
-                className="w-full"
-                value={crt.curvature.value}
-                onChange={(value) => {
-                  updateLayer(layer.id, {
-                    effects: {
-                      ...effects,
-                      crt: {
-                        ...crt,
-                        curvature: {
-                          ...crt.curvature,
-                          value,
-                        },
-                      },
-                    },
-                  });
+          {effects.map((effect) => (
+            <GridListItem
+              key={effect.id}
+              className="flex items-center gap-2 px-3 py-1.5 text-sm outline-none data-[focused]:bg-neutral-900"
+            >
+              {EffectsRegistry.getNameForType(effect.type)}
+              <div className="ml-auto" />
+              <Button
+                className="flex items-center justify-center rounded p-1 hover:bg-neutral-600 data-[pressed]:bg-neutral-800"
+                onPress={() => {
+                  removeEffectFromLayer(layer.id, effect.id);
                 }}
-              />
-            </div>
-            <div className="flex flex-col items-start gap-3">
-              <TextField
-                label="Line width:"
-                className="w-full"
-                value={crt.lineWidth.value}
-                onChange={(value) => {
-                  updateLayer(layer.id, {
-                    effects: {
-                      ...effects,
-                      crt: {
-                        ...crt,
-                        lineWidth: {
-                          ...crt.lineWidth,
-                          value,
-                        },
-                      },
-                    },
-                  });
-                }}
-              />
-            </div>
-            <div className="flex flex-col items-start gap-3">
-              <TextField
-                label="Line contrast:"
-                className="w-full"
-                value={crt.lineContrast.value}
-                onChange={(value) => {
-                  updateLayer(layer.id, {
-                    effects: {
-                      ...effects,
-                      crt: {
-                        ...crt,
-                        lineContrast: {
-                          ...crt.lineContrast,
-                          value,
-                        },
-                      },
-                    },
-                  });
-                }}
-              />
-            </div>
-            <div className="flex flex-col items-start gap-3">
-              <TextField
-                label="Noise:"
-                className="w-full"
-                value={crt.noise.value}
-                onChange={(value) => {
-                  updateLayer(layer.id, {
-                    effects: {
-                      ...effects,
-                      crt: {
-                        ...crt,
-                        noise: {
-                          ...crt.noise,
-                          value,
-                        },
-                      },
-                    },
-                  });
-                }}
-              />
-            </div>
-            <div className="flex flex-col items-start gap-3">
-              <TextField
-                label="Noise size:"
-                className="w-full"
-                value={crt.noiseSize.value}
-                onChange={(value) => {
-                  updateLayer(layer.id, {
-                    effects: {
-                      ...effects,
-                      crt: {
-                        ...crt,
-                        noiseSize: {
-                          ...crt.noiseSize,
-                          value,
-                        },
-                      },
-                    },
-                  });
-                }}
-              />
-            </div>
-            <div className="flex flex-col items-start gap-3">
-              <TextField
-                label="Vignetting:"
-                className="w-full"
-                value={crt.vignetting.value}
-                onChange={(value) => {
-                  updateLayer(layer.id, {
-                    effects: {
-                      ...effects,
-                      crt: {
-                        ...crt,
-                        vignetting: {
-                          ...crt.vignetting,
-                          value,
-                        },
-                      },
-                    },
-                  });
-                }}
-              />
-            </div>
-            <div className="flex flex-col items-start gap-3">
-              <TextField
-                label="Vignetting alpha:"
-                className="w-full"
-                value={crt.vignettingAlpha.value}
-                onChange={(value) => {
-                  updateLayer(layer.id, {
-                    effects: {
-                      ...effects,
-                      crt: {
-                        ...crt,
-                        vignettingAlpha: {
-                          ...crt.vignettingAlpha,
-                          value,
-                        },
-                      },
-                    },
-                  });
-                }}
-              />
-            </div>
-            <div className="flex flex-col items-start gap-3">
-              <TextField
-                label="Vignetting blur:"
-                className="w-full"
-                value={crt.vignettingBlur.value}
-                onChange={(value) => {
-                  updateLayer(layer.id, {
-                    effects: {
-                      ...effects,
-                      crt: {
-                        ...crt,
-                        vignettingBlur: {
-                          ...crt.vignettingBlur,
-                          value,
-                        },
-                      },
-                    },
-                  });
-                }}
-              />
-            </div>
-            <div className="flex flex-col items-start gap-3">
-              <TextField
-                label="Seed:"
-                className="w-full"
-                value={crt.seed.value}
-                onChange={(value) => {
-                  updateLayer(layer.id, {
-                    effects: {
-                      ...effects,
-                      crt: {
-                        ...crt,
-                        seed: {
-                          ...crt.seed,
-                          value,
-                        },
-                      },
-                    },
-                  });
-                }}
-              />
-            </div>
-            <div className="flex flex-col items-start gap-3">
-              <TextField
-                label="Time:"
-                className="w-full"
-                value={crt.time.value}
-                onChange={(value) => {
-                  updateLayer(layer.id, {
-                    effects: {
-                      ...effects,
-                      crt: {
-                        ...crt,
-                        time: {
-                          ...crt.time,
-                          value,
-                        },
-                      },
-                    },
-                  });
-                }}
-              />
-            </div>
-          </>
-        )}
-      </div>
+              >
+                <DeleteIcon className="h-4 w-4 text-red-500" />
+              </Button>
+            </GridListItem>
+          ))}
+        </GridList>
+      )}
     </>
   );
 }
@@ -470,7 +248,7 @@ function ImageLayerProperties({ layer }: { layer: ImageLayer }) {
           <img src={image.src} alt={name} className="max-h-32 max-w-full" />
         </div>
       </div>
-      <CommonPlaneLayerProperties layer={layer} />
+      <CommonLayerProperties layer={layer} />
     </>
   );
 }
@@ -733,7 +511,7 @@ function GradientLayerProperties({ layer }: { layer: GradientLayer }) {
           {(item) => <SelectItem>{item.name}</SelectItem>}
         </Select>
       </div>
-      <CommonPlaneLayerProperties layer={layer} />
+      <CommonLayerProperties layer={layer} />
     </>
   );
 }

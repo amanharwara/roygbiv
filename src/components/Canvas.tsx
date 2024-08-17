@@ -1,18 +1,19 @@
 import { Stage, Sprite, useTick, useApp } from "@pixi/react";
-import { Sprite as PSprite, NoiseFilter, Filter, Container } from "pixi.js";
-import { AsciiFilter, CRTFilter } from "pixi-filters";
+import { Sprite as PSprite, Filter, Container } from "pixi.js";
 import { useCanvasStore } from "../stores/canvas";
 import {
   useLayerStore,
   ImageLayer as TImageLayer,
   GradientLayer as TGradientLayer,
-  PlaneLayer,
   ComputedProperty,
+  isComputedProperty,
+  Layer,
 } from "../stores/layers";
 import { audioStore, getRangeValue } from "../stores/audio";
 import { RefObject, useEffect, useId, useRef } from "react";
 import { createGradientTexture } from "../textures/GradientTexture";
 import { ValueComputer } from "../utils/computedValue";
+import { EffectsRegistry } from "../stores/effects";
 
 const valueComputer = new ValueComputer(
   () => audioStore.getState().level,
@@ -56,108 +57,55 @@ function useEffects({
   effects,
 }: {
   containerRef: RefObject<Container>;
-  effects: PlaneLayer["effects"];
+  effects: Layer["effects"];
 }) {
-  const { noise, ascii, crt } = effects;
-
-  const noiseEffect = useRef(new NoiseFilter(noise.amount.default));
-  const asciiEffect = useRef(new AsciiFilter(ascii.size.default));
-  const crtEffect = useRef(
-    new CRTFilter({
-      curvature: 1,
-      lineWidth: 3,
-      lineContrast: 0.3,
-      noise: 0.2,
-      noiseSize: 1,
-      vignetting: 0.3,
-      vignettingAlpha: 1,
-      vignettingBlur: 0.3,
-      seed: 0,
-      time: 0.5,
-    }),
-  );
-
-  const filters = useRef<Filter[]>([]);
+  const filtersMapRef = useRef<Map<string, Filter>>(new Map());
 
   useTick(() => {
     if (!containerRef.current) return;
 
-    noiseEffect.current.noise = valueComputer.compute(
-      noise.amount,
-      noiseEffect.current.noise,
-    );
+    const filtersMap = filtersMapRef.current;
 
-    asciiEffect.current.size = valueComputer.compute(
-      ascii.size,
-      asciiEffect.current.size,
-    );
-
-    crtEffect.current.curvature = valueComputer.compute(
-      crt.curvature,
-      crtEffect.current.curvature,
-    );
-    crtEffect.current.lineWidth = valueComputer.compute(
-      crt.lineWidth,
-      crtEffect.current.lineWidth,
-    );
-    crtEffect.current.lineContrast = valueComputer.compute(
-      crt.lineContrast,
-      crtEffect.current.lineContrast,
-    );
-    crtEffect.current.noise = valueComputer.compute(
-      crt.noise,
-      crtEffect.current.noise,
-    );
-    crtEffect.current.noiseSize = valueComputer.compute(
-      crt.noiseSize,
-      crtEffect.current.noiseSize,
-    );
-    crtEffect.current.vignetting = valueComputer.compute(
-      crt.vignetting,
-      crtEffect.current.vignetting,
-    );
-    crtEffect.current.vignettingAlpha = valueComputer.compute(
-      crt.vignettingAlpha,
-      crtEffect.current.vignettingAlpha,
-    );
-    crtEffect.current.vignettingBlur = valueComputer.compute(
-      crt.vignettingBlur,
-      crtEffect.current.vignettingBlur,
-    );
-    crtEffect.current.seed = valueComputer.compute(
-      crt.seed,
-      crtEffect.current.seed,
-    );
-    crtEffect.current.time = valueComputer.compute(
-      crt.time,
-      crtEffect.current.time,
-    );
-
-    if (noise.enabled) {
-      if (!filters.current.includes(noiseEffect.current))
-        filters.current.push(noiseEffect.current);
-    } else {
-      const index = filters.current.indexOf(noiseEffect.current);
-      if (index !== -1) filters.current.splice(index, 1);
+    for (const filterID of filtersMap.keys()) {
+      if (effects.findIndex((effect) => effect.id === filterID) === -1) {
+        filtersMap.delete(filterID);
+      }
     }
 
-    if (ascii.enabled) {
-      if (!filters.current.includes(asciiEffect.current))
-        filters.current.push(asciiEffect.current);
-    } else {
-      const index = filters.current.indexOf(asciiEffect.current);
-      if (index !== -1) filters.current.splice(index, 1);
+    for (const effect of effects) {
+      const Filter = EffectsRegistry.getFilterForType(effect.type);
+      if (!Filter) {
+        throw new Error("Unregistered effect added");
+      }
+      const effectID = effect.id;
+      const existingFilter = filtersMap.get(effectID);
+      if (existingFilter && !effect.enabled) {
+        filtersMap.delete(effectID);
+      }
+      let filter = existingFilter;
+      if (!filter) {
+        filter = new Filter();
+        filtersMap.set(effectID, filter);
+      }
+      for (const key in effect) {
+        if (key in filter) {
+          const value = effect[key as keyof typeof effect];
+          if (isComputedProperty(value)) {
+            // @ts-expect-error key
+            filter[key] = valueComputer.compute(
+              value,
+              // @ts-expect-error key
+              filter[key],
+            );
+          } else {
+            // @ts-expect-error key
+            filter[key] = value;
+          }
+        }
+      }
     }
 
-    if (crt.enabled) {
-      if (!filters.current.includes(crtEffect.current))
-        filters.current.push(crtEffect.current);
-    } else {
-      const index = filters.current.indexOf(crtEffect.current);
-      if (index !== -1) filters.current.splice(index, 1);
-    }
-
-    containerRef.current.filters = filters.current;
+    containerRef.current.filters = Array.from(filtersMap.values());
   });
 }
 

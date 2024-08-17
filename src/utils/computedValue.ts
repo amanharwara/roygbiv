@@ -108,3 +108,14 @@ export class ValueComputer {
     return property.default;
   }
 }
+
+export const createComputedProperty = (
+  defaultValue: number,
+  min?: number,
+  max?: number,
+): ComputedProperty => ({
+  default: defaultValue,
+  value: defaultValue.toString(),
+  min,
+  max,
+});

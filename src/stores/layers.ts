@@ -9,6 +9,8 @@ import {
   getStopsForGradientColors,
 } from "../utils/gradientUtils";
 import { GradientType } from "../textures/GradientTexture";
+import { createComputedProperty } from "../utils/computedValue";
+import { LayerEffect } from "./effects";
 
 export type ComputedProperty = {
   default: number;
@@ -26,38 +28,9 @@ export function isComputedProperty(value: unknown): value is ComputedProperty {
   );
 }
 
-type CommonLayerProps = {
+export type CommonLayerProps = {
   id: string;
   name: string;
-};
-
-type NoiseEffect = {
-  enabled: boolean;
-  amount: ComputedProperty;
-};
-
-type AsciiEffect = {
-  enabled: boolean;
-  size: ComputedProperty;
-  color: string;
-  replaceColor: boolean;
-};
-
-type CRTEffect = {
-  enabled: boolean;
-  curvature: ComputedProperty;
-  lineWidth: ComputedProperty;
-  lineContrast: ComputedProperty;
-  noise: ComputedProperty;
-  noiseSize: ComputedProperty;
-  vignetting: ComputedProperty;
-  vignettingAlpha: ComputedProperty;
-  vignettingBlur: ComputedProperty;
-  seed: ComputedProperty;
-  time: ComputedProperty;
-};
-
-export type CommonPlaneObjectProps = {
   x: ComputedProperty;
   y: ComputedProperty;
   width: number;
@@ -66,30 +39,22 @@ export type CommonPlaneObjectProps = {
   scale: ComputedProperty;
   opacity: ComputedProperty;
   centered: boolean;
-  effects: {
-    noise: NoiseEffect;
-    ascii: AsciiEffect;
-    crt: CRTEffect;
-  };
+  effects: LayerEffect[];
 };
 
-export type ImageLayer = CommonLayerProps &
-  CommonPlaneObjectProps & {
-    type: "image";
-    image: HTMLImageElement;
-  };
+export type ImageLayer = CommonLayerProps & {
+  type: "image";
+  image: HTMLImageElement;
+};
 
-export type GradientLayer = CommonLayerProps &
-  CommonPlaneObjectProps & {
-    type: "gradient";
-    gradientType: GradientType;
-    useDynamicStops: boolean;
-    stops: number[];
-    dynamicStops: ComputedProperty[];
-    colors: string[];
-  };
-
-export type PlaneLayer = ImageLayer | GradientLayer;
+export type GradientLayer = CommonLayerProps & {
+  type: "gradient";
+  gradientType: GradientType;
+  useDynamicStops: boolean;
+  stops: number[];
+  dynamicStops: ComputedProperty[];
+  colors: string[];
+};
 
 export type Layer = ImageLayer | GradientLayer;
 
@@ -116,6 +81,9 @@ type LayerStore = {
     key: string,
     value: string,
   ) => void;
+
+  addEffectToLayer: (layerId: string, effect: LayerEffect) => void;
+  removeEffectFromLayer: (layerId: string, effectId: string) => void;
 
   removeSelectedLayers: () => void;
 
@@ -247,6 +215,32 @@ export const useLayerStore = create<LayerStore>()((set) => ({
       }),
     );
   },
+  addEffectToLayer: (layerId: string, effect: LayerEffect) => {
+    set(
+      produce((state: LayerStore) => {
+        const index = state.layers.findIndex((layer) => layer.id === layerId);
+        if (index === -1) {
+          return;
+        }
+        const currentLayer = state.layers[index]!;
+        currentLayer.effects.push(effect);
+      }),
+    );
+  },
+  removeEffectFromLayer: (layerId: string, effectId: string) => {
+    set(
+      produce((state: LayerStore) => {
+        const index = state.layers.findIndex((layer) => layer.id === layerId);
+        if (index === -1) {
+          return;
+        }
+        const currentLayer = state.layers[index]!;
+        currentLayer.effects = currentLayer.effects.filter(
+          (effect) => effect.id !== effectId,
+        );
+      }),
+    );
+  },
   addColorToGradientLayer: (layerId: string, color: string) => {
     set(
       produce((state: LayerStore) => {
@@ -335,49 +329,6 @@ export const useLayerStore = create<LayerStore>()((set) => ({
   },
 }));
 
-const createComputedProperty = (
-  defaultValue: number,
-  min?: number,
-  max?: number,
-): ComputedProperty => ({
-  default: defaultValue,
-  value: defaultValue.toString(),
-  min,
-  max,
-});
-
-const createNoiseEffect = (): NoiseEffect => {
-  return {
-    enabled: false,
-    amount: createComputedProperty(0.5, 0, 1),
-  };
-};
-
-const createAsciiEffect = (): AsciiEffect => {
-  return {
-    enabled: false,
-    size: createComputedProperty(10, 2, 20),
-    color: "#ffffff",
-    replaceColor: false,
-  };
-};
-
-const createCRTEffect = (): CRTEffect => {
-  return {
-    enabled: false,
-    curvature: createComputedProperty(1, 0, 10),
-    lineWidth: createComputedProperty(3, 0, 5),
-    lineContrast: createComputedProperty(0.3, 0, 1),
-    noise: createComputedProperty(0.2, 0, 1),
-    noiseSize: createComputedProperty(1, 1, 10),
-    vignetting: createComputedProperty(0.3, 0, 1),
-    vignettingAlpha: createComputedProperty(1, 0, 1),
-    vignettingBlur: createComputedProperty(0.3, 0, 1),
-    seed: createComputedProperty(0),
-    time: createComputedProperty(0.5),
-  };
-};
-
 const createImageLayer = (
   image: HTMLImageElement,
   name: string,
@@ -395,11 +346,7 @@ const createImageLayer = (
     opacity: createComputedProperty(1, 0, 1),
     name,
     id: nanoid(),
-    effects: {
-      noise: createNoiseEffect(),
-      ascii: createAsciiEffect(),
-      crt: createCRTEffect(),
-    },
+    effects: [],
   };
 };
 
@@ -425,10 +372,6 @@ const createGradientLayer = (): GradientLayer => {
     dynamicStops,
     name: "Gradient",
     id: nanoid(),
-    effects: {
-      noise: createNoiseEffect(),
-      ascii: createAsciiEffect(),
-      crt: createCRTEffect(),
-    },
+    effects: [],
   };
 };
