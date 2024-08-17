@@ -130,6 +130,12 @@ EffectsRegistry.registerEffect("crt", {
       max: 1,
     },
     {
+      key: "verticalLine",
+      label: "Vertical lines",
+      type: "boolean",
+      default: false,
+    },
+    {
       key: "noise",
       label: "Noise",
       type: "computed",

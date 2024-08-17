@@ -112,7 +112,7 @@ function LayerEffectItem({
                           newValue,
                         );
                       }}
-                      className="flex-row-reverse justify-end text-sm"
+                      className="w-full flex-row-reverse justify-between text-sm"
                       key={property.key}
                     >
                       {label}
